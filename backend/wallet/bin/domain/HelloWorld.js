@@ -3,7 +3,7 @@
 const Rx = require("rxjs");
 const HelloWorldDA = require("../data/HelloWorldDA");
 const broker = require("../tools/broker/BrokerFactory")();
-const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
+const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 const { take, mergeMap, catchError, map } = require('rxjs/operators');
 const {
   CustomError,
@@ -43,10 +43,10 @@ class HelloWorld {
 
   initHelloWorldEventGenerator(){
     Rx.interval(1000).pipe(
-      take(120)
+      take(1200)
       ,mergeMap(id =>  HelloWorldDA.getHelloWorld$())    
       ,mergeMap(evt => {
-        return broker.send$(MATERIALIZED_VIEW_TOPIC, 'businessWalletHelloWorldEvent',evt);
+        return broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletHelloWorldEvent',evt);
       })
     )
     .subscribe(

@@ -37,7 +37,7 @@ export class walletService {
     .subscribe({
       query: walletHelloWorldSubscription
     })
-    .map(resp => resp.data.EventSourcingMonitorHelloWorldSubscription.sn);
+    .map(resp => resp.data.walletHelloWorldSubscription.sn);
 }
 
 }
