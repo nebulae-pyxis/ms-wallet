@@ -1,4 +1,4 @@
-import { walletService } from './wallet.service';
+import { walletService } from './wallet-spending-rules.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { fuseAnimations } from '../../../core/animations';
 import { Subscription } from 'rxjs/Subscription';
@@ -6,9 +6,9 @@ import * as Rx from 'rxjs/Rx';
 
 @Component({
   // tslint:disable-next-line:component-selector
-  selector: 'wallet',
-  templateUrl: './wallet.component.html',
-  styleUrls: ['./wallet.component.scss'],
+  selector: 'wallet-spending-rules',
+  templateUrl: './wallet-spending-rules.component.html',
+  styleUrls: ['./wallet-spending-rules.component.scss'],
   animations: fuseAnimations
 })
 export class walletComponent implements OnInit, OnDestroy {

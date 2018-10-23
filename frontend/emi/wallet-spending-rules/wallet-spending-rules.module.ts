@@ -4,8 +4,8 @@ import { SharedModule } from '../../../core/modules/shared.module';
 import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
 
-import { walletService } from './wallet.service';
-import { walletComponent } from './wallet.component';
+import { walletService } from './wallet-spending-rules.service';
+import { walletComponent } from './wallet-spending-rules.component';
 
 const routes: Routes = [
   {
@@ -26,4 +26,4 @@ const routes: Routes = [
   providers: [ walletService, DatePipe]
 })
 
-export class walletModule {}
+export class WalletSpengingRulesModule {}

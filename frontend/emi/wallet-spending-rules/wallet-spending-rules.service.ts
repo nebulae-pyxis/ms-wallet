@@ -5,7 +5,7 @@ import { GatewayService } from '../../../api/gateway.service';
 import {
   getHelloWorld,
   walletHelloWorldSubscription
-} from './gql/wallet';
+} from './gql/wallet-spending-rules';
 
 @Injectable()
 export class walletService {
