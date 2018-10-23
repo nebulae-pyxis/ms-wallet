@@ -1,6 +1,7 @@
 "use strict";
 const Rx = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
+const business = require("../../domain/business/");
 const helloWorld = require("../../domain/HelloWorld")();
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
@@ -121,13 +122,19 @@ class EventStoreService {
 
   generateFunctionMap() {
     return {
-
+      BusinessCreated: {
+        fn: business.eventSourcing.handleBusinessCreated$,
+        obj: business.eventSourcing
+      },
+      BusinessGeneralInfoUpdated: {
+        fn: business.eventSourcing.handleBusinessGeneralInfoUpdated$,
+        obj: business.eventSourcing
+      },
       //Sample for handling event-sourcing events, please remove
       HelloWorldEvent: {
         fn: helloWorld.handleHelloWorld$,
         obj: helloWorld
       },
-
     };
   }
 
@@ -137,7 +144,14 @@ class EventStoreService {
   generateAggregateEventsArray() {
     return [
 
-      //Sample for assoc events and aggregates, please remove
+      {
+        aggregateType: "Business",
+        eventType: "BusinessCreated"
+      },
+      {
+        aggregateType: "Business",
+        eventType: "BusinessGeneralInfoUpdated"
+      },
       {
         aggregateType: "HelloWorld",
         eventType: "HelloWorldEvent"
