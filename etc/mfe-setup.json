@@ -4,29 +4,64 @@
         "src": "frontend/emi/wallet",
         "groups": [
             {
-              "id": "GROUP_NAME",
+              "id": "WALLET_TRANSACTION",
               "icon": "location_searching",
               "translate": {
-                "en": "Group Name",
-                "es": "Nombre de Grupo"
+                "en": "Wallet",
+                "es": "Transacciones"
               },
               "priority": 1000
             }
           ],
         "contents": [
             {
-                "groupId": "GROUP_NAME",
-                "id": "wallet",
+                "groupId": "WALLET_TRANSACTION",
+                "id": "transaction-wallet-history",
                 "icon": "dashboard",
                 "translate": {
-                    "en": "wallet_en",
-                    "es": "wallet_es"
+                    "en": "Transaction-history",
+                    "es": "Historial de transacciones"
                 },
                 "navURL": "/wallet",
                 "path": "wallet",
                 "loadChildren": "./main/content/wallet/wallet.module#walletModule",
                 "priority": 1000,
                 "roles" : ["developer"],
+                "default" : false
+            }            
+        ],
+        "preBuildCommands": [],
+        "environmentVars": {
+        }
+    },
+    {
+        "name": "wallet-spending-rules",
+        "src": "frontend/emi/wallet-spending-rules",
+        "groups": [
+            {
+                "id": "SYSTEM",
+                "icon": "location_searching",
+                "translate": {
+                    "en": "System",
+                    "es": "Sistema"
+                },
+                "priority": 100
+            }
+          ],
+        "contents": [
+            {
+                "groupId": "SYSTEM",
+                "id": "wallet-spending-rules",
+                "icon": "dashboard",
+                "translate": {
+                    "en": "Reglas de billetera",
+                    "es": "Wallet spending rules"
+                },
+                "navURL": "/wallet-spending-rules",
+                "path": "wallet-spending-rules",
+                "loadChildren": "./main/content/wallet-spending-rules/wallet.module#walletModule",
+                "priority": 1000,
+                "roles" : ["SYSADMIN"],
                 "default" : false
             }            
         ],
