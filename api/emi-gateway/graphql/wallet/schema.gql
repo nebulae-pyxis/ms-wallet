@@ -1,0 +1,15 @@
+"Hello world sample, please remove"
+type HelloWorldwallet{
+  "text"
+  sn: String!  
+}
+
+type Query {
+  "Hello world sample, please remove"
+  getHelloWorldFromwallet: HelloWorldwallet
+}
+
+type Subscription {
+  "Hello world sample, please remove"
+  walletHelloWorldSubscription: HelloWorldwallet  
+}
