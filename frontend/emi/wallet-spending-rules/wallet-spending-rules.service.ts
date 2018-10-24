@@ -8,7 +8,7 @@ import {
 } from './gql/wallet-spending-rules';
 
 @Injectable()
-export class walletService {
+export class WalletService {
 
 
   constructor(private gateway: GatewayService) {
@@ -22,7 +22,7 @@ export class walletService {
     return this.gateway.apollo
       .watchQuery<any>({
         query: getHelloWorld,
-        fetchPolicy: "network-only"
+        fetchPolicy: 'network-only'
       })
       .valueChanges.map(
         resp => resp.data.getHelloWorldFromwallet.sn

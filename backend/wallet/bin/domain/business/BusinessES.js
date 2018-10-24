@@ -1,5 +1,8 @@
 const Rx = require("rxjs");
 const BusinessDA = require("../../data/BusinessDA");
+const spendingRules = require('../spending-rules');
+const { take, mergeMap, tap, catchError, map } = require('rxjs/operators');
+const  { forkJoin, of, interval } = require('rxjs');
 
 let instance;
 
@@ -12,20 +15,31 @@ class BusinessES {
    * @param {*} businessCreatedEvent business created event
    */
   handleBusinessCreated$(businessCreatedEvent) {
-    const business = businessCreatedEvent.data;
-    return BusinessDA.persistBusiness$(business);
+    return of(businessCreatedEvent)
+    .pipe(
+      mergeMap((business) => forkJoin(
+        BusinessDA.persistBusiness$(business.data),
+        spendingRules.eventSourcing.handleBusinessCreated$(business.data)
+      ))
+    )
   }
 
   /**
    * updates the business general info on the materialized view according to the received data from the event store.
-   * @param {*} businessGeneralInfoUpdatedEvent business general info updated event
+   * @param {*} evt business general info updated event
    */
-  handleBusinessGeneralInfoUpdated$(businessGeneralInfoUpdatedEvent) {
-    const businessGeneralInfo = businessGeneralInfoUpdatedEvent.data;
-    return BusinessDA.updateBusinessGeneralInfo$(
-      businessGeneralInfoUpdatedEvent.aid,
-      businessGeneralInfo
-    );
+  handleBusinessGeneralInfoUpdated$(evt) {
+    return of(evt.data)
+      .pipe(
+        mergeMap(businessUpdated => forkJoin(
+          BusinessDA.updateBusinessGeneralInfo$(
+            evt.aid,
+            businessUpdated.generalInfo
+          ),
+          spendingRules.eventSourcing.handleBusinessGeneralInfoUpdated$(evt.aid, businessUpdated.generalInfo.name )
+        )
+        )
+      );
   }
 
   /**
