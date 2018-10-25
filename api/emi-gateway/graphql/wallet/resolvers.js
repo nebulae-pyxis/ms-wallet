@@ -24,17 +24,48 @@ module.exports = {
   //// QUERY ///////
 
   Query: {
-    getHelloWorldFromwallet(root, args, context) {
-      return broker
-        .forwardAndGetReply$(
-          "HelloWorld",
-          "emigateway.graphql.query.getHelloWorldFromwallet",
-          { root, args, jwt: context.encodedToken },
-          2000
-        )
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
-    },
+      getWalletBusiness(root, args, context) {
+            return RoleValidator.checkPermissions$(
+              context.authToken.realm_access.roles,
+              contextName,
+              "getWalletBusiness",
+              PERMISSION_DENIED_ERROR_CODE,
+              "Permission denied",
+              ["SYSADMIN"]
+            )
+              .mergeMap(response => {
+                return broker.forwardAndGetReply$(
+                  "Business",
+                  "emigateway.graphql.query.getWalletBusiness",
+                  { root, args, jwt: context.encodedToken },
+                  2000
+                );
+              })
+              .catch(err => handleError$(err, "getWalletBusiness"))
+              .mergeMap(response => getResponseFromBackEnd$(response))
+              .toPromise();
+        },
+        getWalletBusinesses(root, args, context) {
+            return RoleValidator.checkPermissions$(
+              context.authToken.realm_access.roles,
+              contextName,
+              "getWalletBusinesses",
+              PERMISSION_DENIED_ERROR_CODE,
+              "Permission denied",
+              ["SYSADMIN"]
+            )
+              .mergeMap(response => {
+                return broker.forwardAndGetReply$(
+                  "Business",
+                  "emigateway.graphql.query.getWalletBusinesses",
+                  { root, args, jwt: context.encodedToken },
+                  2000
+                );
+              })
+              .catch(err => handleError$(err, "getWalletBusinesses"))
+              .mergeMap(response => getResponseFromBackEnd$(response))
+              .toPromise();
+        },
     WalletGetSpendingRule(root, args, context) {
       return broker
         .forwardAndGetReply$(
@@ -60,6 +91,29 @@ module.exports = {
   },
 
   //// MUTATIONS ///////
+  Mutation: {
+    makeManualBalanceAdjustment(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "makeManualBalanceAdjustment",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["SYSADMIN"]
+      )
+        .mergeMap(roles => {
+          return context.broker.forwardAndGetReply$(
+            "ManualBalanceAdjustment",
+            "emigateway.graphql.mutation.makeManualBalanceAdjustment",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "makeManualBalanceAdjustment"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+  },
 
   //// SUBSCRIPTIONS ///////
   Subscription: {
