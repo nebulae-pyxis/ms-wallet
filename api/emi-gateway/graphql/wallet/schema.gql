@@ -155,7 +155,3 @@ type Mutation {
   walletUpdateSpendingRule(input: WalletSpendingRuleInput ): CommandResponse
 }
 
-type Subscription {
-  "Hello world sample, please remove"
-  walletHelloWorldSubscription: HelloWorldwallet
-}
