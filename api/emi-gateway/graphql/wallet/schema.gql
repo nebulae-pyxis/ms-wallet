@@ -1,9 +1,3 @@
-"Hello world sample, please remove"
-type HelloWorldwallet {
-  "text"
-  sn: String!
-}
-
 "Command response"
 type CommandResponse {
   "Response code"
@@ -89,7 +83,7 @@ type WalletPocketSelectionRuleCondition {
 type WalletPocketSelectionRule {
   priority: Int
   toUse: String
-  When: WaletPocketSelectionRuleCondition
+  When: WalletPocketSelectionRuleCondition
 }
 
 type WalletSpendingRule {
@@ -104,8 +98,13 @@ type WalletSpendingRule {
 }
 
 type Query {
-  "Hello world sample, please remove"
-  getHelloWorldFromwallet: HelloWorldwallet
+  "Get business"
+  getWalletBusiness: Business
+  "Get businesses"
+  getWalletBusinesses: [Business]
+  "Get wallet info of the business"
+  getWallet(businessId: String!): Wallet
+
   "Fetch spending of the buiness given as parameter"
   WalletGetSpendingRule(businessId: String): WalletSpendingRule
   "Get all businesses filtered"
@@ -116,12 +115,6 @@ type Query {
     sortColumn: String
     sortOrder: String
   ): [WalletSpendingRule]
-  "Get business"
-  getWalletBusiness: Business
-  "Get businesses"
-  getWalletBusinesses: [Business]
-  "Get wallet info of the business"
-  getWallet(businessId: String!): Wallet
 }
 
 type Mutation {

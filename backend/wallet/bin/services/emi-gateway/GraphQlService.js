@@ -7,6 +7,8 @@ const jsonwebtoken = require("jsonwebtoken");
 const { map, mergeMap, catchError, tap } = require('rxjs/operators');
 const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, "\n");
 const spendingRules = require('../../domain/spending-rules');
+const business = require("../../domain/business/");
+const wallet = require("../../domain/wallet/");
 
 
 let instance;
@@ -145,10 +147,21 @@ class GraphQlService {
   getSubscriptionDescriptors() {
     console.log("GraphQl Service starting ...");
     return [
-      //Sample incoming request, please remove
       {
-        aggregateType: "HelloWorld",
-        messageType: "emi-gateway.graphql.query.getHelloWorldFromwallet"
+        aggregateType: "Business",
+        messageType: "emigateway.graphql.query.getWalletBusiness"
+      },
+      {
+        aggregateType: "Business",
+        messageType: "emigateway.graphql.query.getWalletBusinesses"
+      },
+      {
+        aggregateType: "Wallet",
+        messageType: "emigateway.graphql.query.getWallet"
+      },
+      {
+        aggregateType: "Wallet",
+        messageType: "emigateway.graphql.mutation.makeManualBalanceAdjustment"
       },
       {
         aggregateType: "Wallet",
@@ -167,9 +180,21 @@ class GraphQlService {
    */
   generateFunctionMap() {    
     return {
-      "emi-gateway.graphql.query.getHelloWorldFromwallet": {
-        fn: helloWorld.getHelloWorld$,
-        obj: helloWorld
+      "emigateway.graphql.query.getWalletBusiness": {
+        fn: business.cqrs.getWalletBusiness$,
+        obj: business.cqrs
+      },
+      "emigateway.graphql.query.getWalletBusinesses": {
+        fn: business.cqrs.getWalletBusinesses$,
+        obj: business.cqrs
+      },
+      "emigateway.graphql.query.getWallet": {
+        fn: wallet.cqrs.getWallet$,
+        obj: wallet.cqrs
+      },
+      "emigateway.graphql.mutation.makeManualBalanceAdjustment": {
+        fn: wallet.cqrs.makeManualBalanceAdjustment$,
+        obj: wallet.cqrs
       },
       "emi-gateway.graphql.query.getSpendingRule": {
         fn: spendingRules.cqrs.getSpendingRule$,

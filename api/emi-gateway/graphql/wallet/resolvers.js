@@ -3,6 +3,11 @@ const PubSub = require("graphql-subscriptions").PubSub;
 const pubsub = new PubSub();
 const Rx = require("rxjs");
 const broker = require("../../broker/BrokerFactory")();
+//Every single error code
+// please use the prefix assigned to this microservice
+const INTERNAL_SERVER_ERROR_CODE = 19001;
+const PERMISSION_DENIED_ERROR_CODE = 19002;
+
 
 function getResponseFromBackEnd$(response) {
     return Rx.Observable.of(response)
