@@ -34,8 +34,8 @@ class GraphQlService {
         () => console.log("GraphQlService incoming event subscription completed");
       };
     return Rx.from(this.getSubscriptionDescriptors()).pipe(
-      map(aggregateEvent => ({ ...aggregateEvent, onErrorHandler, onCompleteHandler }))
-      ,map(params => this.subscribeEventHandler(params))
+      map(aggregateEvent => ({ ...aggregateEvent, onErrorHandler, onCompleteHandler })),
+      map(params => this.subscribeEventHandler(params))
     )
   }
 
@@ -52,8 +52,8 @@ class GraphQlService {
     const handler = this.functionMap[messageType];
     const subscription = broker
       .getMessageListener$([aggregateType], [messageType]).pipe(
-        mergeMap(message => this.verifyRequest$(message))
-        ,mergeMap(request => ( request.failedValidations.length > 0)
+        mergeMap(message => this.verifyRequest$(message)),
+        mergeMap(request => ( request.failedValidations.length > 0)
           ? Rx.of(request.errorResponse)
           : Rx.of(request).pipe(
               //ROUTE MESSAGE TO RESOLVER
@@ -95,9 +95,9 @@ class GraphQlService {
       //decode and verify the jwt token
       mergeMap(message =>
         Rx.of(message).pipe(
-          map(message => ({ authToken: jsonwebtoken.verify(message.data.jwt, jwtPublicKey), message, failedValidations: [] }))
-          ,catchError(err =>
-            EventSourcingMonitor.errorHandler$(err).pipe(
+          map(message => ({ authToken: jsonwebtoken.verify(message.data.jwt, jwtPublicKey), message, failedValidations: [] })),
+          catchError(err =>
+            spendingRules.cqrs.errorHandler$(err).pipe(
               map(response => ({
                 errorResponse: { response, correlationId: message.id, replyTo: message.attributes.replyTo },
                 failedValidations: ['JWT']
@@ -118,7 +118,7 @@ class GraphQlService {
    return Rx.of(msg).pipe(mergeMap(
     ({ response, correlationId, replyTo }) =>
       replyTo
-        ? broker.send$(replyTo, "emi-gateway.graphql.Query.response", response, {
+        ? broker.send$(replyTo, "emigateway.graphql.Query.response", response, {
             correlationId
           })
         : Rx.of(undefined)
@@ -148,16 +148,21 @@ class GraphQlService {
       //Sample incoming request, please remove
       {
         aggregateType: "HelloWorld",
-        messageType: "emi-gateway.graphql.query.getHelloWorldFromwallet"
+        messageType: "emigateway.graphql.query.getHelloWorldFromwallet"
       },
       {
-        aggregateType: "Wallet",
-        messageType: "emi-gateway.graphql.query.getSpendingRule"
+        aggregateType: "SpendingRule",
+        messageType: "emigateway.graphql.query.getSpendingRule"
       },
       {
-        aggregateType: "Wallet",
-        messageType: "emi-gateway.graphql.query.getSpendingRules"
-      } 
+        aggregateType: "SpendingRule",
+        messageType: "emigateway.graphql.query.getSpendingRules"
+      },
+      {
+        aggregateType: "SpendingRule",
+        messageType: "emigateway.graphql.mutation.updateSpendingRule"
+      },
+
     ];
   }
 
@@ -167,16 +172,20 @@ class GraphQlService {
    */
   generateFunctionMap() {    
     return {
-      "emi-gateway.graphql.query.getHelloWorldFromwallet": {
+      "emigateway.graphql.query.getHelloWorldFromwallet": {
         fn: helloWorld.getHelloWorld$,
         obj: helloWorld
       },
-      "emi-gateway.graphql.query.getSpendingRule": {
+      "emigateway.graphql.query.getSpendingRule": {
         fn: spendingRules.cqrs.getSpendingRule$,
         obj: spendingRules.cqrs
       },
-      "emi-gateway.graphql.query.getSpendingRules": {
+      "emigateway.graphql.query.getSpendingRules": {
         fn: spendingRules.cqrs.getSpendingRules$,
+        obj: spendingRules.cqrs
+      },
+      "emigateway.graphql.mutation.updateSpendingRule": {
+        fn: spendingRules.cqrs.updateSpendingRule$,
         obj: spendingRules.cqrs
       },
     };

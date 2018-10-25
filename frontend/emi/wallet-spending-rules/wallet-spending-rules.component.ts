@@ -72,7 +72,7 @@ export class WalletComponent implements OnInit, OnDestroy {
           filter(() => this.filter.nativeElement),
           map(() => this.filter.nativeElement.value.trim()),
           tap((filterText => this.filterText = filterText)),
-          mergeMap(() => this.walletSpendingService.getSpendinRules$(this.page, this.count, this.filterText, this.sortColumn, this.sortOrder)),
+          // mergeMap(() => this.walletSpendingService.getSpendinRules$(this.page, this.count, this.filterText, this.sortColumn, this.sortOrder)),
           // map(response => response.data.getTags),
           // mergeMap((responseArray) => this.loadRowDataInDataTable$(responseArray))
         )

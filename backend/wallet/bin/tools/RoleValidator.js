@@ -25,7 +25,6 @@ static checkPermissions$(
     error,
     requiredRoles
   ) {
-    console.log("USERSER_ROLES: ", userRoles);
     return from(requiredRoles)
     .pipe(
       map(requiredRole => {
@@ -47,14 +46,11 @@ static checkPermissions$(
         return acc;
       }, {}),
       mergeMap(validRoles => {
-        console.log(validRoles);
         if (!Object.values(validRoles).includes(true)) {
-          console.log("MISSING ROLES");
           return throwError(
             new CustomError(contextName, method, error.code, error.description)
           );
         } else {
-          console.log("ENOUHT ROLES");
           return of(validRoles);
         }
       })

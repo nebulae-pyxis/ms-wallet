@@ -2,6 +2,7 @@
 const Rx = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
 const business = require("../../domain/business/");
+const spendingRule = require('../../domain/spending-rules');
 const helloWorld = require("../../domain/HelloWorld")();
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
@@ -106,7 +107,7 @@ class EventStoreService {
     const handler = this.functionMap[eventType];
     //MANDATORY:  AVOIDS ACK REGISTRY DUPLICATIONS
     return eventSourcing.eventStore.ensureAcknowledgeRegistry$(aggregateType).pipe(
-      switchMap(() => eventSourcing.eventStore.retrieveUnacknowledgedEvents$(aggregateType, mbeKey)),
+      switchMap(() => eventSourcing.eventStore.retrieveUnacknowledgedEvents$(aggregateType, mbeKey, false)),
       filter(evt => evt.et === eventType),
       concatMap(evt => Rx.concat(
         handler.fn.call(handler.obj, evt),
@@ -135,6 +136,10 @@ class EventStoreService {
         fn: helloWorld.handleHelloWorld$,
         obj: helloWorld
       },
+      SpendingRuleUpdated:{
+        fn: spendingRule.eventSourcing.handleSpendingRuleUpdated$,
+        obj: spendingRule.eventSourcing
+      }
     };
   }
 
@@ -155,6 +160,10 @@ class EventStoreService {
         aggregateType: "HelloWorld",
         eventType: "HelloWorldEvent"
       },
+      {
+        aggregateType: "SpendingRule",
+        eventType: "SpendingRuleUpdated"
+      }
 
     ]
   }

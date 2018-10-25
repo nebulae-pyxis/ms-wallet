@@ -3,6 +3,9 @@ const PubSub = require("graphql-subscriptions").PubSub;
 const pubsub = new PubSub();
 const Rx = require("rxjs");
 const broker = require("../../broker/BrokerFactory")();
+const CONTEXT_NAME = "WALLET";
+const RoleValidator = require('../../tools/RoleValidator');
+const PERMISSION_DENIED_ERROR_CODE = 19000;
 
 function getResponseFromBackEnd$(response) {
     return Rx.Observable.of(response)
@@ -27,7 +30,7 @@ module.exports = {
       getWalletBusiness(root, args, context) {
             return RoleValidator.checkPermissions$(
               context.authToken.realm_access.roles,
-              contextName,
+              CONTEXT_NAME,
               "getWalletBusiness",
               PERMISSION_DENIED_ERROR_CODE,
               "Permission denied",
@@ -48,7 +51,7 @@ module.exports = {
         getWalletBusinesses(root, args, context) {
             return RoleValidator.checkPermissions$(
               context.authToken.realm_access.roles,
-              contextName,
+              CONTEXT_NAME,
               "getWalletBusinesses",
               PERMISSION_DENIED_ERROR_CODE,
               "Permission denied",
@@ -67,17 +70,27 @@ module.exports = {
               .toPromise();
         },
     WalletGetSpendingRule(root, args, context) {
-      return broker
-        .forwardAndGetReply$(
-          "SpendingRule",
-          "emigateway.graphql.query.getSpendingRule",
-          { root, args, jwt: context.encodedToken },
-          2000
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        CONTEXT_NAME,
+        "getWalletSpendingRule",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["SYSADMIN"]
+      )
+        .mergeMap(response => broker
+          .forwardAndGetReply$(
+            "SpendingRule",
+            "emigateway.graphql.query.getSpendingRule",
+            { root, args, jwt: context.encodedToken },
+            2000
+          )
         )
+        .catch(err => handleError$(err, "getWalletSpendingRule"))
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
     },
-    WalletGetSpendingRules(root, args, context) {
+    WalletGetSpendingRules(root, args, context) {      
         return broker
           .forwardAndGetReply$(
             "SpendingRule",
@@ -95,7 +108,7 @@ module.exports = {
     makeManualBalanceAdjustment(root, args, context) {
       return RoleValidator.checkPermissions$(
         context.authToken.realm_access.roles,
-        contextName,
+        CONTEXT_NAME,
         "makeManualBalanceAdjustment",
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
@@ -110,6 +123,19 @@ module.exports = {
           );
         })
         .catch(err => handleError$(err, "makeManualBalanceAdjustment"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    walletUpdateSpendingRule(root, args, context) {
+      console.log("LLEGA LA MUTACION");
+
+      return broker.forwardAndGetReply$(
+        "SpendingRule",
+        "emigateway.graphql.mutation.updateSpendingRule",
+        { root, args, jwt: context.encodedToken },
+        2000
+      )
+        .catch(err => handleError$(err, "updateSpendingRule"))
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
     },
