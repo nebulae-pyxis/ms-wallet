@@ -57,6 +57,26 @@ class SpendingRules {
                 map(result => result && result.value ? result.value : undefined)
             )
     }
+
+
+    static updateWalletSpendingRule$(spendingRule) {
+        console.log(spendingRule);
+        const collection = mongoDB.db.collection(COLLECTION_NAME);
+        return of(spendingRule)
+            .pipe(
+                mergeMap(spendingRuleUpdated => Rx.defer(() => collection.findOneAndUpdate(
+                    { businessId: spendingRuleUpdated.businessId },
+                    {
+                        $set: { spendingRuleUpdated }
+                    }, {
+                        returnOriginal: false
+                    }
+                ))),
+                map(result => result && result.value ? result.value : undefined)
+            )
+    }
+
+
     /**
      * 
      * @param {string} businessId Business unit related

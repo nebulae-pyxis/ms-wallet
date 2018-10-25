@@ -3,11 +3,13 @@ const PubSub = require("graphql-subscriptions").PubSub;
 const pubsub = new PubSub();
 const Rx = require("rxjs");
 const broker = require("../../broker/BrokerFactory")();
+const RoleValidator = require('../../tools/RoleValidator');
 //Every single error code
 // please use the prefix assigned to this microservice
 const INTERNAL_SERVER_ERROR_CODE = 19001;
 const PERMISSION_DENIED_ERROR_CODE = 19002;
 
+const CONTEXT_NAME = "WALLET";
 
 function getResponseFromBackEnd$(response) {
     return Rx.Observable.of(response)
@@ -32,7 +34,7 @@ module.exports = {
       getWalletBusiness(root, args, context) {
             return RoleValidator.checkPermissions$(
               context.authToken.realm_access.roles,
-              contextName,
+              CONTEXT_NAME,
               "getWalletBusiness",
               PERMISSION_DENIED_ERROR_CODE,
               "Permission denied",
@@ -53,7 +55,7 @@ module.exports = {
         getWalletBusinesses(root, args, context) {
             return RoleValidator.checkPermissions$(
               context.authToken.realm_access.roles,
-              contextName,
+              CONTEXT_NAME,
               "getWalletBusinesses",
               PERMISSION_DENIED_ERROR_CODE,
               "Permission denied",
@@ -72,21 +74,31 @@ module.exports = {
               .toPromise();
         },
     WalletGetSpendingRule(root, args, context) {
-      return broker
-        .forwardAndGetReply$(
-          "Wallet",
-          "emi-gateway.graphql.query.getSpendingRule",
-          { root, args, jwt: context.encodedToken },
-          2000
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        CONTEXT_NAME,
+        "getWalletSpendingRule",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["SYSADMIN"]
+      )
+        .mergeMap(response => broker
+          .forwardAndGetReply$(
+            "SpendingRule",
+            "emigateway.graphql.query.getSpendingRule",
+            { root, args, jwt: context.encodedToken },
+            2000
+          )
         )
+        .catch(err => handleError$(err, "getWalletSpendingRule"))
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
     },
-    WalletGetSpendingRules(root, args, context) {
+    WalletGetSpendingRules(root, args, context) {      
         return broker
           .forwardAndGetReply$(
-            "Wallet",
-            "emi-gateway.graphql.query.getSpendingRules",
+            "SpendingRule",
+            "emigateway.graphql.query.getSpendingRules",
             { root, args, jwt: context.encodedToken },
             2000
           )
@@ -100,7 +112,7 @@ module.exports = {
     makeManualBalanceAdjustment(root, args, context) {
       return RoleValidator.checkPermissions$(
         context.authToken.realm_access.roles,
-        contextName,
+        CONTEXT_NAME,
         "makeManualBalanceAdjustment",
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
@@ -115,6 +127,19 @@ module.exports = {
           );
         })
         .catch(err => handleError$(err, "makeManualBalanceAdjustment"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    walletUpdateSpendingRule(root, args, context) {
+      console.log("LLEGA LA MUTACION");
+
+      return broker.forwardAndGetReply$(
+        "SpendingRule",
+        "emigateway.graphql.mutation.updateSpendingRule",
+        { root, args, jwt: context.encodedToken },
+        2000
+      )
+        .catch(err => handleError$(err, "updateSpendingRule"))
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
     },

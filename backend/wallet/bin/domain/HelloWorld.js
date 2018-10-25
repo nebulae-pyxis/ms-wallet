@@ -43,7 +43,7 @@ class HelloWorld {
 
   initHelloWorldEventGenerator(){
     Rx.interval(1000).pipe(
-      take(1200)
+      take(2)
       ,mergeMap(id =>  HelloWorldDA.getHelloWorld$())    
       ,mergeMap(evt => {
         return broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletHelloWorldEvent',evt);

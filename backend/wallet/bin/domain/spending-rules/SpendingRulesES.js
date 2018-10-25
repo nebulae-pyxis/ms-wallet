@@ -28,6 +28,7 @@ class SpendingRulesES {
     return SpendingRulesDA.updateSpendingRuleBusinessName$(buId, buName)
   }
 
+  // esto va para un helper
   createDefaultSpendingRule$(buId, buName){
     return of({
       businessId: buId,
@@ -38,6 +39,14 @@ class SpendingRulesES {
       lastEdition: Date.now(),
       editedBy: "SYSTEM"
     })
+  }
+
+  handleSpendingRuleUpdated$(evt){
+    console.log("############################# commig event ot update the spenbding rule ");
+    return of(evt.data)
+    .pipe(
+      mergeMap(spendingRule => SpendingRulesDA.updateWalletSpendingRule$(spendingRule))
+    )
   }
 
   /**

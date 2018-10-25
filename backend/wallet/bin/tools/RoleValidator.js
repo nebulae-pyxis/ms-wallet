@@ -46,7 +46,6 @@ static checkPermissions$(
         return acc;
       }, {}),
       mergeMap(validRoles => {
-        console.log(validRoles);
         if (!Object.values(validRoles).includes(true)) {
           return throwError(
             new CustomError(contextName, method, error.code, error.description)

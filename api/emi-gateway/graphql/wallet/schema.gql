@@ -43,6 +43,13 @@ type WalletProductUtility {
   percentageByCredit: Float
 }
 
+input WalletProductUtilityInput {
+  type: String
+  concept: String
+  percentageByMain: Float
+  percentageByCredit: Float
+}
+
 input ManualBalanceAdjustmentInput {
   "Business ID"
   businessId: String!
@@ -80,11 +87,24 @@ type WalletPocketSelectionRuleCondition {
   value: Int
 }
 
+input WalletPocketSelectionRuleConditionInput {
+  pocket: String
+  comparator: ComparatorEnum
+  value: Int
+}
+
 type WalletPocketSelectionRule {
   priority: Int
   toUse: String
   When: WalletPocketSelectionRuleCondition
 }
+
+input WalletPocketSelectionRuleInput {
+  priority: Int
+  toUse: String
+  When: WalletPocketSelectionRuleConditionInput
+}
+
 
 type WalletSpendingRule {
   id: BigInt
@@ -96,6 +116,18 @@ type WalletSpendingRule {
   lastEdition: BigInt
   editedBy: String
 }
+
+input WalletSpendingRuleInput {
+  id: BigInt
+  businessId: String
+  businessName: String
+  minOperationAmount: Int
+  productUtilitiesConfig: [WalletProductUtilityInput]
+  autoPocketSelection: [WalletPocketSelectionRuleInput]
+  lastEdition: BigInt
+  editedBy: String
+}
+
 
 type Query {
   "Get business"
@@ -120,6 +152,7 @@ type Query {
 type Mutation {
   "Mutation to create manual balance adjustments"
   makeManualBalanceAdjustment(input: ManualBalanceAdjustmentInput): CommandResponse
+  walletUpdateSpendingRule(input: WalletSpendingRuleInput ): CommandResponse
 }
 
 type Subscription {
