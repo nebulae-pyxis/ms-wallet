@@ -6,9 +6,66 @@ import gql from "graphql-tag";
 export const getHelloWorld = gql`
   query getHelloWorldFromwallet{
     getHelloWorldFromwallet{
-      sn      
+      sn
     }
   }
+`;
+
+export const getSpendingRule = gql`
+query  WalletGetSpendingRule($businessId: String ){
+  WalletGetSpendingRule(businessId: $businessId){
+    id
+    businessId
+    businessName
+    minOperationAmount
+    productUtilitiesConfig{
+      type
+      concept
+      percentageByMain
+      percentageByCredit
+    }
+    autoPocketSelection{
+      priority
+      toUse
+      When{
+        pocket
+        comparator
+        value
+      }
+    }
+    lastEdition
+    editedBy
+
+  }
+}
+`;
+
+export const getSpendingRules= gql`
+query  WalletGetSpendingRules($page: Int!, $count: Int!, $filter: String, $sortColumn: String, $sortOrder: String   ){
+  WalletGetSpendingRules(page: $page, count: $count,filter: $filter,sortColumn: $sortColumn,sortOrder: $sortOrder){
+    id
+    businessId
+    minOperationAmount
+    productUtilitiesConfig{
+      type
+      concept
+      percentageByMain
+      percentageByCredit
+    }
+    autoPocketSelection{
+      priority
+      toUse
+      When{
+        pocket
+        comparator
+        value
+      }
+    }
+    lastEdition
+    editedBy
+
+  }
+}
 `;
 
 

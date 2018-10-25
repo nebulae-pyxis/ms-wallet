@@ -1,0 +1,94 @@
+<div id="spending_rule" class="page-layout carded fullwidth" fusePerfectScrollbar>
+
+  <!-- TOP BACKGROUND -->
+  <div class="top-bg mat-accent-bg"></div>
+  <!-- / TOP BACKGROUND -->
+
+  <!-- CENTER -->
+  <div class="center">
+
+    <!-- HEADER -->
+    <div class="header white-fg" fxLayout="column" fxLayoutAlign="center center" fxLayout.gt-xs="row"
+      fxLayoutAlign.gt-xs="space-between center">
+
+      <!-- APP TITLE -->
+      <div class="logo my-12 m-sm-0" fxLayout="row" fxLayoutAlign="start center">
+        <mat-icon class="logo-icon mr-16" *fuseIfOnDom [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">bookmark</mat-icon>
+        <span class="logo-text h1">{{ 'SPENDING_RULES' | translate }}</span>
+      </div>
+      <!-- / APP TITLE -->
+
+    </div>
+    <!-- / HEADER -->
+
+    <!-- CONTENT CARD -->
+    <div class="content-card mat-white-bg">
+      <!-- BASIC DETAILS -->
+
+      <div [formGroup]="settingsForm" class="widget-group" fxLayout="row" fxFlex="100" fxLayoutWrap fxLayoutAlign="start start"
+        *fuseIfOnDom [@animateStagger]="{value:'50'}">
+
+
+        <div formGroupName="basicAttributes" class="example-container">
+          <mat-form-field>
+            <input matInput placeholder="{{ 'DIALOG.FORM_NAME'  | translate }}" formControlName="buId" required>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput placeholder="{{ 'DIALOG.FORM_TYPE'  | translate }}" formControlName="buName" required>
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput placeholder="{{ 'DIALOG.FORM_TYPE'  | translate }}" formControlName="minOperationAmount"
+              required>
+          </mat-form-field>
+        </div>
+
+        <!-- FARECOLLECTOR -->
+        <mat-card class="marging-b-t-5" fxFlex="100" fxLayout="column">
+          <div fxFlex="100" fxLayout="row" fxLayoutAlign="center center">
+            <span fxLayoutAlign="center center"> {{'SETTINGS.FARE_COLLECTOR_TITTLE' | translate}} </span>
+            <button mat-icon-button>
+              <mat-icon>info</mat-icon>
+            </button>
+          </div>
+          <div fxFlex="100">
+            <div *ngFor="let item of settingsForm.get('utilitiesByProduct')['controls']; let i = index;" fxFlex="100"
+              formArrayName="utilitiesByProduct">
+              <div [formGroupName]="i" fxFlex="100" fxLayoutWrap>
+                <mat-form-field fxFlex="40" fxFlex.xs="100">
+                  <input matInput formControlName="businessUnitFrom" placeholder="{{'FORM.BU_FROM' | translate}}">
+                </mat-form-field>
+                <mat-form-field fxFlex="40" fxFlex.xs="100">
+                  <input matInput formControlName="businessUnitId" placeholder="{{'FORM.BUID_PLACEHOLDER' | translate}}">
+                </mat-form-field>
+                <mat-form-field fxFlex="15" fxFlex.xs="100">
+                  <input type="number" matInput formControlName="percentage" placeholder="{{'FORM.PERCENTAGE_BELONG' | translate}}"
+                    [value]="settingsForm.controls['utilitiesByProduct']['controls'][i].controls.percentage.value">
+                  <!-- value="{{  }}" -->
+                </mat-form-field>
+                <button *ngIf="currentVersion" fxFlex="5" fxFlex.xs="100" mat-icon-button (click)="deleteControl( 'utilitiesByProduct', i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            <button *ngIf="settingsForm.get('utilitiesByProduct').value.length == 0 && currentVersion" mat-icon-button
+              (click)="addActor('utilitiesByProduct')">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </mat-card>
+
+      </div>
+
+
+
+
+
+
+      <!-- BASIC DETAILS -->
+
+
+    </div>
+    <!-- / CONTENT CARD -->
+  </div>
+  <!-- / CENTER -->
+</div>

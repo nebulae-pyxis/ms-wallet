@@ -4,6 +4,8 @@ let mongoDB = undefined;
 const Rx = require("rxjs");
 const CollectionName = "Business";
 const { CustomError } = require("../tools/customError");
+const { defer, of } = require('rxjs');
+const { map, mergeMap } = require('rxjs/operators');
 
 class BusinessDA {
 
@@ -25,12 +27,13 @@ class BusinessDA {
    * @param {*} business business to create
    */
   static persistBusiness$(business) {
-    const collection = mongoDB.db.collection(CollectionName);    
-    const businessData = {
-      _id: business._id,
-      name: business.generalInfo.name
-    };
-    return Rx.Observable.defer(() => collection.insertOne(businessData));
+    console.log("# BUSINES CREATED ==>", business);
+    const collection = mongoDB.db.collection(CollectionName);   
+    return of(business)
+    .pipe(
+      map(bu => ({ _id: bu._id, name: bu.generalInfo.name })),
+      mergeMap(bu => defer(() => collection.insertOne(bu)))      
+    )
   }
 
   /**
@@ -40,16 +43,20 @@ class BusinessDA {
    */
   static updateBusinessGeneralInfo$(id, businessGeneralInfo) {
     const collection = mongoDB.db.collection(CollectionName);
-    return Rx.Observable.defer(()=>
-        collection.findOneAndUpdate(
-          { _id: id },
-          {
-            $set: {name: businessGeneralInfo.name}
-          },{
-            returnOriginal: false
-          }
-        )
-    ).map(result => result && result.value ? result.value : undefined);
+    console.log("####", id, businessGeneralInfo);
+    return Rx.defer(() =>
+      collection.findOneAndUpdate(
+        { _id: id },
+        {
+          $set: { name: businessGeneralInfo.name }
+        }, {
+          returnOriginal: false
+        }
+      )
+    )
+      .pipe(
+        map(result => result && result.value ? result.value : undefined)
+      )
   }
 
     /**

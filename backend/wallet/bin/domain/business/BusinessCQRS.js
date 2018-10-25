@@ -31,6 +31,7 @@ class BusinessCQRS {
   }
 
   buildSuccessResponse$(rawRespponse) {
+    console.log("buildSuccessResponse en business" );
     return Rx.Observable.of(rawRespponse).map(resp => {
       return {
         data: resp,

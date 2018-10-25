@@ -4,13 +4,18 @@ import { SharedModule } from '../../../core/modules/shared.module';
 import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
 
-import { walletService } from './wallet-spending-rules.service';
-import { walletComponent } from './wallet-spending-rules.component';
+import { WalletComponent } from './wallet-spending-rules.component';
+import { SpendingRuleComponent } from './spending-rule/spending-rule.component';
+import { WalletSpendingRuleService } from './wallet-spending-rules.service';
 
 const routes: Routes = [
   {
     path: '',
-    component: walletComponent,
+    component: WalletComponent
+  },
+  {
+    path: 'edit/:buId',
+    component: SpendingRuleComponent
   }
 ];
 
@@ -21,9 +26,9 @@ const routes: Routes = [
     FuseWidgetModule
   ],
   declarations: [
-    walletComponent    
+    WalletComponent, SpendingRuleComponent
   ],
-  providers: [ walletService, DatePipe]
+  providers: [ WalletSpendingRuleService, DatePipe]
 })
 
 export class WalletSpengingRulesModule {}

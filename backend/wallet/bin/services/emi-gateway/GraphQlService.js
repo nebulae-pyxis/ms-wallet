@@ -6,6 +6,7 @@ const Rx = require("rxjs");
 const jsonwebtoken = require("jsonwebtoken");
 const { map, mergeMap, catchError, tap } = require('rxjs/operators');
 const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, "\n");
+const spendingRules = require('../../domain/spending-rules');
 
 
 let instance;
@@ -148,7 +149,15 @@ class GraphQlService {
       {
         aggregateType: "HelloWorld",
         messageType: "emi-gateway.graphql.query.getHelloWorldFromwallet"
-      }     
+      },
+      {
+        aggregateType: "Wallet",
+        messageType: "emi-gateway.graphql.query.getSpendingRule"
+      },
+      {
+        aggregateType: "Wallet",
+        messageType: "emi-gateway.graphql.query.getSpendingRules"
+      } 
     ];
   }
 
@@ -158,11 +167,18 @@ class GraphQlService {
    */
   generateFunctionMap() {    
     return {
-      //Sample incoming request, please remove
       "emi-gateway.graphql.query.getHelloWorldFromwallet": {
         fn: helloWorld.getHelloWorld$,
         obj: helloWorld
-      },      
+      },
+      "emi-gateway.graphql.query.getSpendingRule": {
+        fn: spendingRules.cqrs.getSpendingRule$,
+        obj: spendingRules.cqrs
+      },
+      "emi-gateway.graphql.query.getSpendingRules": {
+        fn: spendingRules.cqrs.getSpendingRules$,
+        obj: spendingRules.cqrs
+      },
     };
   }
 }
