@@ -1,49 +1,104 @@
 "Hello world sample, please remove"
-type HelloWorldwallet{
+type HelloWorldwallet {
   "text"
-  sn: String!  
+  sn: String!
 }
 
-type WalletProductUtility{
+"Command response"
+type CommandResponse {
+  "Response code"
+  code: Int
+  "Response message"
+  message: String
+}
+
+"Wallet info"
+type Pocket {
+  "balance pocket"
+  balance: Float
+  "bonus pocket"
+  bonus: Float
+  "balance pocket"
+  credit: Float
+}
+
+"Wallet info"
+type Wallet {
+  "Wallet ID"
+  _id: ID!
+  "pocket info"
+  pockets: Pocket!
+  "Wallet state"
+  state: String
+  "Business ID"
+  businessId: String
+}
+
+"Business info"
+type Business {
+  "Business id"
+  _id: ID
+  "Business name"
+  name: String
+}
+
+type WalletProductUtility {
   type: String
   concept: String
   percentageByMain: Float
   percentageByCredit: Float
 }
 
-enum ComparatorEnum{
+input ManualBalanceAdjustmentInput {
+  "Business ID"
+  businessId: String!
+  "Value"
+  value: Float!
+  "Adjustment type"
+  adjustmentType: String!  
+  "Notes"
+  notes: String!
+  "Location"
+  location: LocationInput
+}
+
+input LocationInput {
+  latitude: String!
+  longitude: String!
+}
+
+enum ComparatorEnum {
   "Less than"
   LT
   "Greater than"
   GT
-   "Less than or equal"
+  "Less than or equal"
   LTE
   "Greater thanor equal"
   GTE
   "Enough"
   ENOUGH
-
 }
 
-type WaletPocketSelectionRuleCondition{
+type WalletPocketSelectionRuleCondition {
   pocket: String
   comparator: ComparatorEnum
   value: Int
 }
 
-type WaletPocketSelectionRule{
+type WalletPocketSelectionRule {
   priority: Int
   toUse: String
   When: WaletPocketSelectionRuleCondition
 }
 
-type WalletSpendingRule{
+type WalletSpendingRule {
   id: BigInt
   businessId: String
   businessName: String
   minOperationAmount: Int
   productUtilitiesConfig: [WalletProductUtility]
-  autoPocketSelection: [WaletPocketSelectionRule],
+  autoPocketSelection: [WalletPocketSelectionRule]
   lastEdition: BigInt
   editedBy: String
 }
@@ -54,10 +109,27 @@ type Query {
   "Fetch spending of the buiness given as parameter"
   WalletGetSpendingRule(businessId: String): WalletSpendingRule
   "Get all businesses filtered"
-  WalletGetSpendingRules(page: Int!, count: Int!, filter: String, sortColumn: String, sortOrder: String): [WalletSpendingRule]
+  WalletGetSpendingRules(
+    page: Int!
+    count: Int!
+    filter: String
+    sortColumn: String
+    sortOrder: String
+  ): [WalletSpendingRule]
+  "Get business"
+  getWalletBusiness: Business
+  "Get businesses"
+  getWalletBusinesses: [Business]
+  "Get wallet info of the business"
+  getWallet(businessId: String!): Wallet
+}
+
+type Mutation {
+  "Mutation to create manual balance adjustments"
+  makeManualBalanceAdjustment(input: ManualBalanceAdjustmentInput): CommandResponse
 }
 
 type Subscription {
   "Hello world sample, please remove"
-  walletHelloWorldSubscription: HelloWorldwallet  
+  walletHelloWorldSubscription: HelloWorldwallet
 }
