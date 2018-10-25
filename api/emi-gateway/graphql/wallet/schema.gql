@@ -4,9 +4,57 @@ type HelloWorldwallet{
   sn: String!  
 }
 
+type WalletProductUtility{
+  type: String
+  concept: String
+  percentageByMain: Float
+  percentageByCredit: Float
+}
+
+enum ComparatorEnum{
+  "Less than"
+  LT
+  "Greater than"
+  GT
+   "Less than or equal"
+  LTE
+  "Greater thanor equal"
+  GTE
+  "Enough"
+  ENOUGH
+
+}
+
+type WaletPocketSelectionRuleCondition{
+  pocket: String
+  comparator: ComparatorEnum
+  value: Int
+}
+
+type WaletPocketSelectionRule{
+  priority: Int
+  toUse: String
+  When: WaletPocketSelectionRuleCondition
+}
+
+type WalletSpendingRule{
+  id: BigInt
+  businessId: String
+  businessName: String
+  minOperationAmount: Int
+  productUtilitiesConfig: [WalletProductUtility]
+  autoPocketSelection: [WaletPocketSelectionRule],
+  lastEdition: BigInt
+  editedBy: String
+}
+
 type Query {
   "Hello world sample, please remove"
   getHelloWorldFromwallet: HelloWorldwallet
+  "Fetch spending of the buiness given as parameter"
+  WalletGetSpendingRule(businessId: String): WalletSpendingRule
+  "Get all businesses filtered"
+  WalletGetSpendingRules(page: Int!, count: Int!, filter: String, sortColumn: String, sortOrder: String): [WalletSpendingRule]
 }
 
 type Subscription {

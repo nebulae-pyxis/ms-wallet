@@ -1,5 +1,7 @@
 const Rx = require("rxjs");
 const { CustomError } = require("./customError");
+const { take, mergeMap, tap, catchError, map, reduce} = require('rxjs/operators');
+const  { forkJoin, of, interval, throwError, from } = require('rxjs');
 
 /**
  * Role validator
@@ -12,8 +14,7 @@ class RoleValidator {
  * @param {*} UserRoles Roles of the authenticated user
  * @param {*} name Context name
  * @param {*} method method name
- * @param {*} errorCode  This is the error code that will be thrown if the user do not have the required roles
- * @param {*} errorMessage This is the error message that will be used if the user do not have the required roles
+ * @param {*} error  This is the error that will be thrown if the user do not have the required roles
  * @param {*} requiredRoles Array with required roles (The authenticated user must have at least one of the required roles,
  *  otherwise the operation that the user is trying to do will be rejected.
  */
@@ -21,12 +22,13 @@ static checkPermissions$(
     userRoles,
     contextName,
     method,
-    errorCode,
-    errorMessage,
+    error,
     requiredRoles
   ) {
-    return Rx.Observable.from(requiredRoles)
-      .map(requiredRole => {
+    console.log("USERSER_ROLES: ", userRoles);
+    return from(requiredRoles)
+    .pipe(
+      map(requiredRole => {
         const role = {name: requiredRole, value: false};
         if (
           userRoles == undefined ||
@@ -34,23 +36,29 @@ static checkPermissions$(
           !userRoles.includes(requiredRole)
         ) {
           role.value = false;
+        }else{
+          role.value = true;
         }
-        role.value = true;
+        
         return role;
-      })
-      .reduce((acc, val) => {
+      }),
+      reduce((acc, val) => {
         acc[val.name] = val.value;
         return acc;
-      }, {})
-      .mergeMap(validRoles => {
+      }, {}),
+      mergeMap(validRoles => {
+        console.log(validRoles);
         if (!Object.values(validRoles).includes(true)) {
-          return Rx.Observable.throw(
-            new CustomError(contextName, method, errorCode, errorMessage)
+          console.log("MISSING ROLES");
+          return throwError(
+            new CustomError(contextName, method, error.code, error.description)
           );
         } else {
-          return Rx.Observable.of(validRoles);
+          console.log("ENOUHT ROLES");
+          return of(validRoles);
         }
-      });
+      })
+    );
   }
   
   /**

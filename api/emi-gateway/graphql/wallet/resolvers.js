@@ -21,40 +21,59 @@ function getResponseFromBackEnd$(response) {
 
 
 module.exports = {
+  //// QUERY ///////
 
-    //// QUERY ///////
-
-    Query: {
-        getHelloWorldFromwallet(root, args, context) {
-            return broker
-                .forwardAndGetReply$(
-                    "HelloWorld",
-                    "emi-gateway.graphql.query.getHelloWorldFromwallet",
-                    { root, args, jwt: context.encodedToken },
-                    2000
-                )
-                .mergeMap(response => getResponseFromBackEnd$(response))
-                .toPromise();
-        }
+  Query: {
+    getHelloWorldFromwallet(root, args, context) {
+      return broker
+        .forwardAndGetReply$(
+          "HelloWorld",
+          "emi-gateway.graphql.query.getHelloWorldFromwallet",
+          { root, args, jwt: context.encodedToken },
+          2000
+        )
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
     },
+    WalletGetSpendingRule(root, args, context) {
+      return broker
+        .forwardAndGetReply$(
+          "Wallet",
+          "emi-gateway.graphql.query.getSpendingRule",
+          { root, args, jwt: context.encodedToken },
+          2000
+        )
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    WalletGetSpendingRules(root, args, context) {
+        return broker
+          .forwardAndGetReply$(
+            "Wallet",
+            "emi-gateway.graphql.query.getSpendingRules",
+            { root, args, jwt: context.encodedToken },
+            2000
+          )
+          .mergeMap(response => getResponseFromBackEnd$(response))
+          .toPromise();
+      },
+  },
 
-    //// MUTATIONS ///////
+  //// MUTATIONS ///////
 
-
-    //// SUBSCRIPTIONS ///////
-    Subscription: {
-        walletHelloWorldSubscription: {
-            subscribe: withFilter(
-                (payload, variables, context, info) => {
-                    return pubsub.asyncIterator("walletHelloWorldSubscription");
-                },
-                (payload, variables, context, info) => {
-                    return true;
-                }
-            )
+  //// SUBSCRIPTIONS ///////
+  Subscription: {
+    walletHelloWorldSubscription: {
+      subscribe: withFilter(
+        (payload, variables, context, info) => {
+          return pubsub.asyncIterator("walletHelloWorldSubscription");
+        },
+        (payload, variables, context, info) => {
+          return true;
         }
-
+      )
     }
+  }
 };
 
 

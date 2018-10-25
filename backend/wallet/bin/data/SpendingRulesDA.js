@@ -57,6 +57,50 @@ class SpendingRules {
                 map(result => result && result.value ? result.value : undefined)
             )
     }
+    /**
+     * 
+     * @param {string} businessId Business unit related
+     */
+    static getSpendingRule$(businessId) {
+        const collection = mongoDB.db.collection(COLLECTION_NAME);
+        return of(businessId)
+            .pipe(
+                mergeMap(id => defer(() => collection.findOne(
+                    // { businessId: id }
+                )))
+            )
+    }
+
+    
+    static getSpendingRules$(page, count, filter, sortColumn, order) {
+        let filterObject = {};
+        const orderObject = {};
+        if (filter && filter != "") {
+          filterObject = {
+            $or: [
+              { 'businessName': { $regex: `${filter}.*`, $options: "i" } },
+              { 'businessId': { $regex: `${filter}.*`, $options: "i" } }
+            ]
+          };
+        }
+        
+        if (sortColumn && order) {
+          let column = sortColumn;      
+          orderObject[column] = order == 'asc' ? 1 : -1;
+        }
+        const collection = mongoDB.db.collection(COLLECTION_NAME);
+
+        return defer( () =>
+          collection
+            .find(filterObject)
+            .sort(orderObject)
+            .skip(count * page)
+            .limit(count)
+            .toArray()
+        );
+      
+    }
+
 
     /**
    * Extracts the next value from a mongo cursor if available, returns undefined otherwise
