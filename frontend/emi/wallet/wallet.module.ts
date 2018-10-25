@@ -1,16 +1,24 @@
+
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../../core/modules/shared.module';
 import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
 
-import { walletService } from './wallet.service';
+import { ManualPocketAdjustmentService } from './manual-pocket-adjustment/manual-pocket-adjustment.service';
+import { WalletService } from './wallet.service';
 import { walletComponent } from './wallet.component';
+import { TransactionHistoryComponent } from './transaction-history/transaction-history.component';
+import { ManualPocketAdjustmentComponent } from './manual-pocket-adjustment/manual-pocket-adjustment.component';
 
 const routes: Routes = [
   {
-    path: '',
-    component: walletComponent,
+    path: 'transaction-history',
+    component: TransactionHistoryComponent,
+  },
+  {
+    path: 'manual-pocket-adjustment',
+    component: ManualPocketAdjustmentComponent,
   }
 ];
 
@@ -21,9 +29,11 @@ const routes: Routes = [
     FuseWidgetModule
   ],
   declarations: [
-    walletComponent    
+    walletComponent,
+    TransactionHistoryComponent,
+    ManualPocketAdjustmentComponent    
   ],
-  providers: [ walletService, DatePipe]
+  providers: [ WalletService, DatePipe, ManualPocketAdjustmentService]
 })
 
 export class walletModule {}

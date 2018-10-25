@@ -1,43 +1,69 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import * as Rx from 'rxjs';
-import { GatewayService } from '../../../api/gateway.service';
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs/Observable";
+import * as Rx from "rxjs";
+import { GatewayService } from "../../../api/gateway.service";
 import {
-  getHelloWorld,
+  getWalletBusiness,
+  getWalletBusinesses,
+  getWallet,
   walletHelloWorldSubscription
-} from './gql/wallet';
+} from "./gql/wallet";
 
 @Injectable()
-export class walletService {
-
-
-  constructor(private gateway: GatewayService) {
-
-  }
+export class WalletService {
+  constructor(private gateway: GatewayService) {}
 
   /**
-   * Hello World sample, please remove
+   * get the business which the user belongs
+   *
+   * @returns {Observable}
    */
-  getHelloWorld$() {
-    return this.gateway.apollo
-      .watchQuery<any>({
-        query: getHelloWorld,
-        fetchPolicy: "network-only"
-      })
-      .valueChanges.map(
-        resp => resp.data.getHelloWorldFromwallet.sn
-      );
+  getBusiness$() {
+    return this.gateway.apollo.query<any>({
+      query: getWalletBusiness,
+      fetchPolicy: "network-only",
+      errorPolicy: "all"
+    });
   }
 
   /**
-  * Hello World subscription sample, please remove
-  */
- getEventSourcingMonitorHelloWorldSubscription$(): Observable<any> {
-  return this.gateway.apollo
-    .subscribe({
-      query: walletHelloWorldSubscription
-    })
-    .map(resp => resp.data.walletHelloWorldSubscription.sn);
-}
+   * get all of the businesses
+   *
+   * @returns {Observable}
+   */
+  getBusinesses$() {
+    return this.gateway.apollo.query<any>({
+      query: getWalletBusinesses,
+      fetchPolicy: "network-only",
+      errorPolicy: "all"
+    });
+  }
 
+  /**
+   * get wallet info of a business
+   *   
+   * @param business business filter
+   * @returns {Observable}
+   */
+  getWallet$(business) {
+    return this.gateway.apollo.query<any>({
+      query: getWallet,
+      variables: {
+        businessId: business._id
+      },
+      fetchPolicy: "network-only",
+      errorPolicy: "all"
+    });
+  }
+
+  /**
+   * Hello World subscription sample, please remove
+   */
+  getEventSourcingMonitorHelloWorldSubscription$(): Observable<any> {
+    return this.gateway.apollo
+      .subscribe({
+        query: walletHelloWorldSubscription
+      })
+      .map(resp => resp.data.walletHelloWorldSubscription.sn);
+  }
 }

@@ -1,4 +1,4 @@
-import { walletService } from './wallet.service';
+import { WalletService } from './wallet.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { fuseAnimations } from '../../../core/animations';
 import { Subscription } from 'rxjs/Subscription';
@@ -17,14 +17,14 @@ export class walletComponent implements OnInit, OnDestroy {
   helloWorldLabelQuery$: Rx.Observable<any>;
   helloWorldLabelSubscription$: Rx.Observable<any>;
 
-  constructor(private walletervice: walletService  ) {    
+  constructor(private walletervice: WalletService  ) {    
 
   }
     
 
   ngOnInit() {
-    this.helloWorldLabelQuery$ = this.walletervice.getHelloWorld$();
-    this.helloWorldLabelSubscription$ = this.walletervice.getEventSourcingMonitorHelloWorldSubscription$();
+    // this.helloWorldLabelQuery$ = this.walletervice.getHelloWorld$();
+    // this.helloWorldLabelSubscription$ = this.walletervice.getEventSourcingMonitorHelloWorldSubscription$();
   }
 
   

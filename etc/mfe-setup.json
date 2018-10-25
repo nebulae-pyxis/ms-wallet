@@ -4,29 +4,44 @@
         "src": "frontend/emi/wallet",
         "groups": [
             {
-              "id": "WALLET_TRANSACTION",
-              "icon": "location_searching",
+              "id": "WALLET",
+              "icon": "attach_money",
               "translate": {
                 "en": "Wallet",
-                "es": "Transacciones"
+                "es": "Billetera"
               },
               "priority": 1000
             }
           ],
         "contents": [
             {
-                "groupId": "WALLET_TRANSACTION",
-                "id": "transaction-wallet-history",
-                "icon": "dashboard",
+                "groupId": "WALLET",
+                "id": "historical-transaction-wallet",
+                "icon": "history",
                 "translate": {
-                    "en": "Transaction-history",
+                    "en": "Historical transactions",
                     "es": "Historial de transacciones"
                 },
-                "navURL": "/wallet",
+                "navURL": "/wallet/transaction-history",
                 "path": "wallet",
                 "loadChildren": "./main/content/wallet/wallet.module#walletModule",
                 "priority": 1000,
-                "roles" : ["developer"],
+                "roles" : ["SYSADMIN", "business-owner"],
+                "default" : false
+            },
+            {
+                "groupId": "WALLET",
+                "id": "manual-wallet-adjustments",
+                "icon": "adjust",
+                "translate": {
+                    "en": "Ajustes manuales de saldo",
+                    "es": "Manual balance adjustments"
+                },
+                "navURL": "/wallet/manual-pocket-adjustment",
+                "path": "wallet",
+                "loadChildren": "./main/content/wallet/wallet.module#walletModule",
+                "priority": 1000,
+                "roles" : ["SYSADMIN"],
                 "default" : false
             }            
         ],
