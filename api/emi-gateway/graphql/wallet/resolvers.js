@@ -28,7 +28,7 @@ module.exports = {
       return broker
         .forwardAndGetReply$(
           "HelloWorld",
-          "emi-gateway.graphql.query.getHelloWorldFromwallet",
+          "emigateway.graphql.query.getHelloWorldFromwallet",
           { root, args, jwt: context.encodedToken },
           2000
         )
@@ -38,8 +38,8 @@ module.exports = {
     WalletGetSpendingRule(root, args, context) {
       return broker
         .forwardAndGetReply$(
-          "Wallet",
-          "emi-gateway.graphql.query.getSpendingRule",
+          "SpendingRule",
+          "emigateway.graphql.query.getSpendingRule",
           { root, args, jwt: context.encodedToken },
           2000
         )
@@ -49,8 +49,8 @@ module.exports = {
     WalletGetSpendingRules(root, args, context) {
         return broker
           .forwardAndGetReply$(
-            "Wallet",
-            "emi-gateway.graphql.query.getSpendingRules",
+            "SpendingRule",
+            "emigateway.graphql.query.getSpendingRules",
             { root, args, jwt: context.encodedToken },
             2000
           )
