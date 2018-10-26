@@ -1,16 +1,15 @@
 "use strict";
 
 let mongoDB = undefined;
-const Rx = require("rxjs");
 const CollectionName = "Business";
-const { defer, of } = require('rxjs');
+const { Observable, defer, of } = require('rxjs');
 const { map, mergeMap } = require('rxjs/operators');
 const { CustomError } = require("../tools/customError");
 
 class BusinessDA {
 
   static start$(mongoDbInstance) {
-    return Rx.Observable.create((observer) => {
+    return Observable.create((observer) => {
       if (mongoDbInstance) {
         mongoDB = mongoDbInstance;
         observer.next('using given mongo instance ');
@@ -28,14 +27,14 @@ class BusinessDA {
    */
   static getBusiness$(id) {
     const collection = mongoDB.db.collection(CollectionName);
-    return Rx.Observable.defer(() => collection.findOne({ '_id': id }));
+    return defer(() => collection.findOne({ '_id': id }));
   }
 
   /**
    * Gets all businesses from the database using a iterator
    */
   static getAllBusinesses$() {
-    return Rx.Observable.create(async observer => {
+    return Observable.create(async observer => {
       const collection = mongoDB.db.collection(CollectionName);
       const cursor = collection.find({});
       let obj = await this.extractNextFromMongoCursor(cursor);
@@ -70,7 +69,7 @@ class BusinessDA {
   static updateBusinessGeneralInfo$(id, businessGeneralInfo) {
     const collection = mongoDB.db.collection(CollectionName);
     console.log("####", id, businessGeneralInfo);
-    return Rx.defer(() =>
+    return defer(() =>
       collection.findOneAndUpdate(
         { _id: id },
         {

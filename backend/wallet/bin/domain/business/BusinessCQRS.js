@@ -1,4 +1,5 @@
-const Rx = require("rxjs");
+const { mergeMap, catchError, map, toArray } = require('rxjs/operators');
+const { of } = require('rxjs');
 const broker = require("../../tools/broker/BrokerFactory")();
 const MATERIALIZED_VIEW_TOPIC = "emi-materialized-view-updates";
 const BusinessHelper = require("./BusinessHelper");
@@ -28,22 +29,24 @@ class BusinessCQRS {
       "getWalletBusiness$",
       PERMISSION_DENIED_ERROR,
       ["SYSADMIN", "business-owner"]
-      ).mergeMap(roles => {
-        const isSysAdmin = roles.SYSADMIN;
-        //If a user does not have the role to get info from other business, we must return an error
-          if (!isSysAdmin && authToken.businessId != args.businessId) {
-            return this.createCustomError$(
-              PERMISSION_DENIED_ERROR,
-              method
-            );
-          }
-          return Rx.Observable.of(roles);
-        })
-      .mergeMap(roles => BusinessDA.getBusiness$(args.businessId))
-      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
-      .catch(err => {
-        return this.handleError$(err);
-      });
+      ).pipe(
+        mergeMap(roles => {
+          const isSysAdmin = roles.SYSADMIN;
+          //If a user does not have the role to get info from other business, we must return an error
+            if (!isSysAdmin && authToken.businessId != args.businessId) {
+              return this.createCustomError$(
+                PERMISSION_DENIED_ERROR,
+                method
+              );
+            }
+            return of(roles);
+          }),
+          mergeMap(roles => BusinessDA.getBusiness$(args.businessId)),
+          mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+          catchError(err => {
+            return this.handleError$(err);
+          })
+      );
   }
 
   /**
@@ -58,42 +61,44 @@ class BusinessCQRS {
       "getWalletBusinesses$()",
       PERMISSION_DENIED_ERROR,
       ["SYSADMIN", "business-owner"]
-    )
-      .mergeMap(val => BusinessDA.getAllBusinesses$())
-      .toArray()
-      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
-      .catch(err => {
+    ).pipe(
+      mergeMap(val => BusinessDA.getAllBusinesses$()),
+      toArray(),
+      mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+      catchError(err => {
         return this.handleError$(err);
-      });
+      })
+    );
   }
 
   //#region  mappers for API responses
   handleError$(err) {
     console.log("Handle error => ", err);
-    return Rx.Observable.of(err).map(err => {
-      const exception = { data: null, result: {} };
-      const isCustomError = err instanceof CustomError;
-      if (!isCustomError) {
-        err = new DefaultError(err);
-      }
-      exception.result = {
-        code: err.code,
-        error: { ...err.getContent() }
-      };
-      return exception;
-    });
+    return of(err).pipe(
+      map(err => {
+        const exception = { data: null, result: {} };
+        const isCustomError = err instanceof CustomError;
+        if (!isCustomError) {
+          err = new DefaultError(err);
+        }
+        exception.result = {
+          code: err.code,
+          error: { ...err.getContent() }
+        };
+        return exception;
+      })
+    );
   }
 
   buildSuccessResponse$(rawRespponse) {
-    console.log("buildSuccessResponse en business");
-    return Rx.Observable.of(rawRespponse).map(resp => {
-      return {
+    return of(rawRespponse).pipe(
+      map(resp => ({
         data: resp,
         result: {
           code: 200
         }
-      };
-    });
+      }))
+    )
   }
 }
 

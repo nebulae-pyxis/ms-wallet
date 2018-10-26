@@ -23,10 +23,10 @@ export const getWalletBusinesses = gql`
 `;
 
 export const getWallet = gql`
-  query getWallet($businessId: String) {
+  query getWallet($businessId: String!) {
     getWallet(businessId: $businessId) {
       _id
-      pocket {
+      pockets {
         balance
         bonus
         credit
@@ -39,7 +39,7 @@ export const getWallet = gql`
 
 // MUTATIONS
 export const makeManualBalanceAdjustment = gql`
-  mutation makeManualBalanceAdjustment($input: ManualbalanceAdjustmentInput) {
+  mutation makeManualBalanceAdjustment($input: ManualBalanceAdjustmentInput) {
     makeManualBalanceAdjustment(input: $input) {
       code
       message

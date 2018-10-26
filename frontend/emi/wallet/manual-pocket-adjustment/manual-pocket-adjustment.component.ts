@@ -32,7 +32,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
   selectedBusinessData: any = null;
   allBusiness: any = [];
   wallet: any = null;
-  private selectedBusinessSubject = new BehaviorSubject(null);
+  private selectedBusinessSubject$ = new Subject();
 
   constructor(
     private walletService: WalletService,
@@ -47,31 +47,42 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
 
   ngOnInit() {
     this.manualBalanceAdjustmentsForm = this.createManualBalanceAdjustmentForm();
+    this.loadBusinessData();
+    this.loadWalletData();
   }
 
   /**
    * Loads all the information needed for the form (business)
    */
-  loadData(){
-    Rx.Observable.combineLatest(
-      this.getAllBusiness$(),
-      this.selectedBusinessSubject.startWith(null)
-    ).pipe(
+  loadBusinessData(){
+    this.getAllBusiness$().pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter((resp: any) => !resp.errors || resp.errors.length === 0),
-      mergeMap(([businessData, selectedBusiness]) => {
-        if(selectedBusiness){
-          return this.getWallet$(selectedBusiness).map(wallet => [businessData, selectedBusiness, wallet])
-        }
-        return Rx.Observable.of([businessData, selectedBusiness])
-      }),
       takeUntil(this.ngUnsubscribe)
-    ).subscribe(([businessData, selectedBusiness, wallet]) => {
+    ).subscribe(businessData => {
+
+      console.log('loadBusinessData => ', businessData);
+
       this.allBusiness = businessData;
-      this.selectedBusinessData = selectedBusiness;
-      this.wallet = wallet;
     });
 
+  }
+
+  /**
+   * Get the wallet info according to the selected business
+   */
+  loadWalletData(){
+    this.selectedBusinessSubject$
+    .pipe(
+      mergeMap(selectedBusiness => this.getWallet$(selectedBusiness)),
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      filter((resp: any) => !resp.errors || resp.errors.length === 0),
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe(wallet => {
+      console.log('loadWalletData => ', wallet);
+
+      this.wallet = wallet;
+    })
   }
 
   /**
@@ -80,7 +91,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
   getAllBusiness$() {
     return this.walletService.getBusinesses$().pipe(
       mergeMap(res => {
-        return Rx.Observable.from(res.data.getBusinesses);
+        return Rx.Observable.from(res.data.getWalletBusinesses);
       }),
       map((business: any) => {
         return {
@@ -134,7 +145,14 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
   makeManualBalanceAdjustment(adjustmentType: String){
     const data = this.manualBalanceAdjustmentsForm.getRawValue();
 
-    this.manualPocketAdjustmentService.makeManualBalanceAdjustment$(data)
+    const manualBalanceAdjustment = {
+      adjustmentType,
+      businessId: data.business._id,
+      value: data.value,
+      notes: data.notes
+    };
+
+    this.manualPocketAdjustmentService.makeManualBalanceAdjustment$(manualBalanceAdjustment)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter((resp: any) => !resp.errors || resp.errors.length === 0)
@@ -155,7 +173,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
    * @param business  selected business
    */
   onSelectBusinessEvent(business) {
-    this.selectedBusinessSubject.next(business);
+    this.selectedBusinessSubject$.next(business);
   }
 
     /**

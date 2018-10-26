@@ -4,6 +4,7 @@ const pubsub = new PubSub();
 const Rx = require("rxjs");
 const broker = require("../../broker/BrokerFactory")();
 const RoleValidator = require('../../tools/RoleValidator');
+const { CustomError } = require("../../tools/customError");
 //Every single error code
 // please use the prefix assigned to this microservice
 const INTERNAL_SERVER_ERROR_CODE = 19001;
@@ -24,6 +25,26 @@ function getResponseFromBackEnd$(response) {
             }
             return resp.data;
         });
+}
+
+/**
+ * Handles errors
+ * @param {*} err
+ * @param {*} operationName
+ */
+function handleError$(err, methodName) {
+  return Rx.Observable.of(err).map(err => {
+    const exception = { data: null, result: {} };
+    const isCustomError = err instanceof CustomError;
+    if (!isCustomError) {
+      err = new CustomError(err.name, methodName, INTERNAL_SERVER_ERROR_CODE, err.message);
+    }
+    exception.result = {
+      code: err.code,
+      error: { ...err.getContent() }
+    };
+    return exception;
+  });
 }
 
 
@@ -120,7 +141,7 @@ module.exports = {
       )
         .mergeMap(roles => {
           return context.broker.forwardAndGetReply$(
-            "ManualBalanceAdjustment",
+            "Wallet",
             "emigateway.graphql.mutation.makeManualBalanceAdjustment",
             { root, args, jwt: context.encodedToken },
             2000
