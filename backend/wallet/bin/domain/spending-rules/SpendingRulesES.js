@@ -43,7 +43,7 @@ class SpendingRulesES {
 
   handleSpendingRuleUpdated$(evt){
     console.log("############################# commig event ot update the spenbding rule ");
-    return of(evt.data)
+    return of(evt.data.input)
     .pipe(
       mergeMap(spendingRule => SpendingRulesDA.updateWalletSpendingRule$(spendingRule))
     )

@@ -67,7 +67,7 @@ class SpendingRules {
                 mergeMap(spendingRuleUpdated => Rx.defer(() => collection.findOneAndUpdate(
                     { businessId: spendingRuleUpdated.businessId },
                     {
-                        $set: { spendingRuleUpdated }
+                        $set: { ...spendingRuleUpdated }
                     }, {
                         returnOriginal: false
                     }

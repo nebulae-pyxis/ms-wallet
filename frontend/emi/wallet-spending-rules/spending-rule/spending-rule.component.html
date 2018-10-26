@@ -1,4 +1,4 @@
-<div id="spending_rule" class="page-layout carded fullwidth" fusePerfectScrollbar>
+<div id="device" class="page-layout carded fullwidth" fusePerfectScrollbar>
 
   <!-- TOP BACKGROUND -->
   <div class="top-bg mat-accent-bg"></div>
@@ -8,87 +8,175 @@
   <div class="center">
 
     <!-- HEADER -->
-    <div class="header white-fg" fxLayout="column" fxLayoutAlign="center center" fxLayout.gt-xs="row"
-      fxLayoutAlign.gt-xs="space-between center">
+    <div class="header white-fg" fxLayout="row" fxLayoutAlign="space-between center">
 
       <!-- APP TITLE -->
-      <div class="logo my-12 m-sm-0" fxLayout="row" fxLayoutAlign="start center">
-        <mat-icon class="logo-icon mr-16" *fuseIfOnDom [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">bookmark</mat-icon>
-        <span class="logo-text h1">{{ 'SPENDING_RULES' | translate }}</span>
+      <div fxLayout="row" fxLayoutAlign="start center">
+
+        <div fxLayout="column" fxLayoutAlign="start start" *fuseIfOnDom>
+
+          <div class="h2">
+            {{'WALLET.MANUAL_BALANCE_ADJUSTMENT' | translate}}
+          </div>
+
+
+          <div class="subtitle secondary-text" *ngIf="false">
+            <span>{{'USER.USER_DETAIL' | translate}}</span>
+          </div>
+        </div>
       </div>
       <!-- / APP TITLE -->
-
     </div>
     <!-- / HEADER -->
 
     <!-- CONTENT CARD -->
     <div class="content-card mat-white-bg">
-      <!-- BASIC DETAILS -->
+      <form style="overflow-x: scroll" name="manualBalanceAdjustmentsForm" [formGroup]="settingsForm" class="user w-100-p"
+        fxLayout="column" class="mat-white-bg p-24 m-24">
 
-      <div [formGroup]="settingsForm" class="widget-group" fxLayout="row" fxFlex="100" fxLayoutWrap fxLayoutAlign="start start"
-        *fuseIfOnDom [@animateStagger]="{value:'50'}">
-
-
-        <div formGroupName="basicAttributes" class="example-container">
-          <mat-form-field>
-            <input matInput placeholder="{{ 'DIALOG.FORM_NAME'  | translate }}" formControlName="buId" required>
-          </mat-form-field>
-          <mat-form-field>
-            <input matInput placeholder="{{ 'DIALOG.FORM_TYPE'  | translate }}" formControlName="buName" required>
-          </mat-form-field>
-          <mat-form-field>
-            <input matInput placeholder="{{ 'DIALOG.FORM_TYPE'  | translate }}" formControlName="minOperationAmount"
+        <div class="mb-24" class="example-container" fxFlex="100" fxLayout="row wrap">
+          <!-- BASIC SPENDING RULES STTRIBUTES -->
+          <mat-form-field  fxFlex="100" fxFlex.gt-sm="50">
+            <input matInput placeholder="{{ 'SPENDING_RULE.BUSINESS_ID'  | translate }}" formControlName="businessId"
               required>
           </mat-form-field>
+
+          <mat-form-field fxFlex="100" fxFlex.gt-sm="50">
+            <input matInput placeholder="{{ 'SPENDING_RULE.BUSINESS_NAME'  | translate }}" formControlName="businessName"
+              required>
+          </mat-form-field>
+
+          <mat-form-field fxFlex="100" fxFlex.gt-sm="50">
+            <input matInput placeholder="{{ 'SPENDING_RULE.MIN_OPERATION_AMOUNT'  | translate }}" formControlName="minOperationAmount"
+              required type="number" >
+          </mat-form-field>
+          <!-- BASIC SPENDING RULES STTRIBUTES -->
         </div>
 
-        <!-- FARECOLLECTOR -->
-        <mat-card class="marging-b-t-5" fxFlex="100" fxLayout="column">
-          <div fxFlex="100" fxLayout="row" fxLayoutAlign="center center">
+
+        <!-- SETTINGS BY PRODUCT -->
+        <div fxFlex="100" fxLayout="column">
+          <div fxFlex="100" fxLayoutAlign="center center">
             <span fxLayoutAlign="center center"> {{'SETTINGS.FARE_COLLECTOR_TITTLE' | translate}} </span>
-            <button mat-icon-button>
-              <mat-icon>info</mat-icon>
-            </button>
           </div>
-          <div fxFlex="100">
+          <div fxFlex="100" fxLayout="row wrap">
             <div *ngFor="let item of settingsForm.get('utilitiesByProduct')['controls']; let i = index;" fxFlex="100"
               formArrayName="utilitiesByProduct">
-              <div [formGroupName]="i" fxFlex="100" fxLayoutWrap>
-                <mat-form-field fxFlex="40" fxFlex.xs="100">
-                  <input matInput formControlName="businessUnitFrom" placeholder="{{'FORM.BU_FROM' | translate}}">
+              <div  [formGroupName]="i" fxFlex="100" fxLayout="row wrap">
+                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="23">
+                  <input matInput formControlName="type" placeholder="{{'TYPE' | translate}}">
                 </mat-form-field>
-                <mat-form-field fxFlex="40" fxFlex.xs="100">
-                  <input matInput formControlName="businessUnitId" placeholder="{{'FORM.BUID_PLACEHOLDER' | translate}}">
+                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="23">
+                  <input matInput formControlName="concept" placeholder="{{'CONCEPT' | translate}}">
                 </mat-form-field>
-                <mat-form-field fxFlex="15" fxFlex.xs="100">
-                  <input type="number" matInput formControlName="percentage" placeholder="{{'FORM.PERCENTAGE_BELONG' | translate}}"
-                    [value]="settingsForm.controls['utilitiesByProduct']['controls'][i].controls.percentage.value">
+                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="23">
+                  <input type="number" matInput formControlName="percentageByMain" placeholder="{{'PERCETAGE_WITH_MAIN' | translate}}"
+                    [value]="settingsForm.controls['utilitiesByProduct']['controls'][i].controls.percentageByMain.value">
                   <!-- value="{{  }}" -->
                 </mat-form-field>
-                <button *ngIf="currentVersion" fxFlex="5" fxFlex.xs="100" mat-icon-button (click)="deleteControl( 'utilitiesByProduct', i)">
-                  <mat-icon>delete</mat-icon>
-                </button>
+                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="23">
+                  <input type="number" matInput formControlName="percentageByCredit" placeholder="{{'PERCENTAGE_WITH_CREDIT' | translate}}"
+                    [value]="settingsForm.controls['utilitiesByProduct']['controls'][i].controls.percentageByCredit.value">
+                  <!-- value="{{  }}" -->
+                </mat-form-field>
+                <div *ngIf="currentVersion" fxFlex="100" fxFlex.gt-sm="8" fxLayoutAlign="center center">
+                  <button mat-icon-button (click)="deleteControl('utilitiesByProduct', i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+
               </div>
             </div>
-            <button *ngIf="settingsForm.get('utilitiesByProduct').value.length == 0 && currentVersion" mat-icon-button
-              (click)="addActor('utilitiesByProduct')">
-              <mat-icon>add</mat-icon>
-            </button>
+            <div fxFlex="100" fxLayoutAlign="center center">
+              <button mat-icon-button (click)="addProductSetting()">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+
           </div>
-        </mat-card>
+        </div>
+        <!-- SETTINGS BY PRODUCT -->
 
-      </div>
+        <!-- AUTOPOCKET SELLECTION SETTINGS -->
+        <div class="marging-b-t-5 p-24" fxFlex="100" fxLayout="column">
+          <div fxFlex="100" fxLayoutAlign="center center">
+            <span fxLayoutAlign="center center"> {{'SETTINGS.FARE_COLLECTOR_TITTLE' | translate}} </span>
+          </div>
+          <div fxFlex="100" fxLayout="row wrap">
+            <div *ngFor="let item of settingsForm.get('autoPocketSelectionRules')['controls']; let i = index;" fxFlex="100"
+              formArrayName="autoPocketSelectionRules">
+              <div [formGroupName]="i" fxFlex="100" fxLayout="row wrap">
+                <!-- PRIORITY -->
+                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="10">
+                  <input matInput type="number" formControlName="priority" placeholder="{{'PRIORITY' | translate}}">
+                </mat-form-field>
+                <!-- PRIORITY -->
+                <!-- POCKET TO USE -->
+                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="20">
+                  <input matInput formControlName="toUse" placeholder="{{'POCKET' | translate}}">
+                </mat-form-field>
+                <!-- POCKET TO USE -->
+
+                <p fxFlex="100" fxFlex.gt-sm="15" class="pr-5 pl-5" style="text-align: center"> {{ 'WHEN' | translate}}
+                </p>
+
+                <!-- POCKET -->
+                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="20">
+                  <input matInput formControlName="pocket" placeholder="{{'POCKET' | translate}}" [value]="settingsForm.controls['autoPocketSelectionRules']['controls'][i].controls.pocket.value">
+                  <!-- value="{{  }}" -->
+                </mat-form-field>
+                <!-- POCKET -->
+                <!-- COMPARATOR -->
+                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="10">
+                  <input matInput formControlName="comparator" placeholder="{{'COMPARATOR' | translate}}" [value]="settingsForm.controls['autoPocketSelectionRules']['controls'][i].controls.comparator.value">
+                  <!-- value="{{  }}" -->
+                </mat-form-field>
+                <!-- COMPARATOR -->
+                <!-- VALUE -->
+                <mat-form-field *ngIf="settingsForm.get('autoPocketSelectionRules')['controls'][0]['value']['comparator'] != 'ENOUGH'" class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="20">
+                  <input type="number" matInput formControlName="value" placeholder="{{'VALUE' | translate}}" [value]="settingsForm.controls['autoPocketSelectionRules']['controls'][i].controls.value.value">
+                  <!-- value="{{  }}" -->
+                </mat-form-field>
+                <!-- VALUE -->
+
+                <div *ngIf="currentVersion" class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="5" fxLayoutAlign="center center">
+                  <button mat-icon-button (click)="deleteControl('autoPocketSelectionRules', i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+                <hr style="background: blue" fxFlex="100" fxHide.gt-sm="5" fxLayoutAlign="center center">
+
+
+              </div>
+            </div>
+            <div fxFlex="100" fxLayoutAlign="center center">
+              <button mat-icon-button (click)="addAutoPocketSelectionRule()">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+
+          </div>
+        </div>
+        <!-- AUTOPOCKET SELLECTION SETTINGS -->
+        <div fxFlex="100" fxFlexLayout="row" fxLayoutAlign="space-around center" >
+
+            <button mat-stroked-button  (click)="saveSpendingRule()">SAVE</button>
+            <button mat-stroked-button color="primary" (click)="undoChanges()">UNDO CHANGES</button>
+
+        </div>
 
 
 
 
 
+        <!-- </div> -->
+      </form>
 
-      <!-- BASIC DETAILS -->
-
+      <!-- / CONTENT -->
 
     </div>
     <!-- / CONTENT CARD -->
+
   </div>
   <!-- / CENTER -->
 </div>
