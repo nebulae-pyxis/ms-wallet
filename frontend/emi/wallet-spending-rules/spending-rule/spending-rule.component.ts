@@ -9,6 +9,7 @@ import { FormGroup, FormControl, Validators, FormArray, FormBuilder } from '@ang
 import { ActivatedRoute, Router } from '@angular/router';
 import { filter, mergeMap, map, tap } from 'rxjs/operators';
 import { syntaxError } from '@angular/compiler';
+import { forkJoin, from } from 'rxjs';
 
 export interface SpendingRule {
   id: string;
@@ -17,8 +18,8 @@ export interface SpendingRule {
   editedBy: string;
   lastEdition: number;
   minOperationAmount: number;
-  autoPocketSelection: any[];
-  productUtilitiesConfig: SpendingRule[];
+  autoPocketSelection: AutoPocketRule[];
+  productUtilitiesConfig: ProductConfigRule[];
 }
 
 export interface ProductConfigRule {
@@ -27,10 +28,11 @@ export interface ProductConfigRule {
   percentageByMain: number;
   percentageByCredit: number;
 }
+
 export interface AutoPocketRule {
   priority: number;
   toUse: string;
-  When: { pocket: string, comparator: string, value: number | null };
+  when: { pocket: string, comparator: string, value: number | null };
 }
 
 
@@ -48,8 +50,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
     businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
     minOperationAmount: new FormControl(null, [Validators.required]),
-    utilitiesByProduct: new FormArray([], [Validators.required]),
-    autoPocketSelectionRules: new FormArray([], [Validators.required])
+    productUtilitiesConfig: new FormArray([], [Validators.required]),
+    autoPocketSelection: new FormArray([], [Validators.required])
 
   });
 
@@ -69,6 +71,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       map(params => params['buId']),
       tap(r => console.log('Business Id: ', r)),
       mergeMap(buId => this.walletSpendingRuleService.getSpendinRule$(buId)),
+      map(rule => JSON.parse(JSON.stringify(rule))),
       mergeMap(spendingRule => this.loadSpendingRule$(spendingRule))
     )
     .subscribe(p => console.log('Query params', p), e => console.log(e), () => console.log('Completed'));
@@ -78,23 +81,49 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
    *
    * @param businesId Business id to search its spending rule
    */
-  loadSpendingRule$(spendingRule: SpendingRule): Observable<any>{
+  loadSpendingRule$(spendingRule: any){
     console.log('Spending RUle ==> ', spendingRule);
-    this.settingsForm.get('businessName').setValue(spendingRule.businessName);
-    this.settingsForm.get('businessId').setValue(spendingRule.businessId);
-    this.settingsForm.get('minOperationAmount').setValue(spendingRule.minOperationAmount);
+    return Rx.Observable.of(spendingRule)
+    .pipe(
 
-
-
-    return Rx.Observable.of(0);
+      mergeMap((spendingRuleItem: SpendingRule) => Rx.Observable.forkJoin(
+        Rx.Observable.of(spendingRuleItem)
+        .pipe(
+          tap(sr => {
+            this.settingsForm.get('businessName').setValue(sr.businessName);
+            this.settingsForm.get('businessId').setValue(sr.businessId);
+            this.settingsForm.get('minOperationAmount').setValue(sr.minOperationAmount);
+          })
+        ),
+        Rx.Observable.of(spendingRuleItem)
+        .pipe(
+          map(sr => sr.autoPocketSelection.sort((a: AutoPocketRule , b: AutoPocketRule) => a.priority - b.priority )),
+          mergeMap(autoPocketRules =>
+            from(autoPocketRules).pipe(
+              tap(autoPocketRule =>  this.addAutoPocketSelectionRule(autoPocketRule)  )
+            )
+          )
+        ),
+        Rx.Observable.of(spendingRuleItem)
+        .pipe(
+          map(sr => sr.productUtilitiesConfig),
+          mergeMap(productRules =>
+            from(productRules).pipe(
+              tap(productRule =>  this.addProductSetting(productRule)  )
+            )
+          )
+        )
+      )
+      )
+    );
   }
 
   addProductSetting(productConfig?: ProductConfigRule ): void {
-    const items = this.settingsForm.get('utilitiesByProduct') as FormArray;
+    const items = this.settingsForm.get('productUtilitiesConfig') as FormArray;
     items.push(this.createProductSetting( productConfig ));
   }
   addAutoPocketSelectionRule(autoPocketRule?: AutoPocketRule ): void {
-    const items = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
+    const items = this.settingsForm.get('autoPocketSelection') as FormArray;
     items.push(this.createAutoPocketRule( autoPocketRule ));
   }
 
@@ -106,9 +135,9 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   createAutoPocketRule(pocketRule: AutoPocketRule) {
     if (!pocketRule){
       pocketRule = {
-        priority : (this.settingsForm.get('autoPocketSelectionRules') as FormArray).length + 1,
+        priority : (this.settingsForm.get('autoPocketSelection') as FormArray).length + 1,
         toUse: 'MAIN',
-        When: {
+        when: {
           pocket: 'MAIN',
           comparator: 'ENOUGH',
           value: null
@@ -116,11 +145,11 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       };
     }
     return this.formBuilder.group({
-      priority: new FormControl({ value: pocketRule.priority, disabled: !this.currentVersion }, [Validators.required]),
+      priority: new FormControl({ value: pocketRule.priority, disabled: !this.currentVersion }, [Validators.required, Validators.min(1)]),
       toUse: new FormControl({ value: pocketRule.toUse, disabled: !this.currentVersion }, [Validators.required]),
-      pocket: new FormControl({ value: pocketRule.When.pocket, disabled: !this.currentVersion }, [Validators.required]),
-      comparator: new FormControl({ value: pocketRule.When.comparator, disabled: !this.currentVersion }, [Validators.required]),
-      value: new FormControl({ value: pocketRule.When.value, disabled: !this.currentVersion }),
+      pocket: new FormControl({ value: pocketRule.when.pocket, disabled: !this.currentVersion }, [Validators.required]),
+      comparator: new FormControl({ value: pocketRule.when.comparator, disabled: !this.currentVersion }, [Validators.required]),
+      value: new FormControl({ value: pocketRule.when.value, disabled: !this.currentVersion }),
     });
   }
 
@@ -157,8 +186,43 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     return (index !== -1) ? { 'percentageExceeded': true } : null;
   }
 
-  saveSpendingRule(){
-
+  saveSpendingRule() {
+    const update = this.settingsForm.getRawValue();
+    console.log('Spending rule to send', update);
+    Rx.Observable.of(this.settingsForm.getRawValue())
+      .pipe(map(
+        ({
+          businessId,
+          minOperationAmount,
+          productUtilitiesConfig,
+          autoPocketSelection
+        }) => ({
+          businessId,
+          minOperationAmount,
+          productUtilitiesConfig,
+          autoPocketSelection: autoPocketSelection.reduce(
+            (acc, p) => {
+              console.log('Before', acc);
+              acc.push({
+                priority: p.priority,
+                toUse: p.toUse,
+                when: {
+                  pocket: p.pocket,
+                  comparator: p.comparator,
+                  value: p.value
+                }
+              });
+              console.log('AFTER', acc);
+              return acc;
+            },
+            []
+          )
+        })
+      ),
+        tap(r => console.log('TERMINA DE HACER EL MAPPING', r)),
+        mergeMap(spendingRuleUpdate => this.walletSpendingRuleService.updateSpendingRule$(spendingRuleUpdate))
+      )
+      .subscribe(r => {}, e => console.log(), () => {});
   }
 
   undoChanges(){

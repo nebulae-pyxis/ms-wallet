@@ -90,19 +90,19 @@ type WalletPocketSelectionRuleCondition {
 input WalletPocketSelectionRuleConditionInput {
   pocket: String
   comparator: ComparatorEnum
-  value: Int
+  value: Int 
 }
 
 type WalletPocketSelectionRule {
   priority: Int
   toUse: String
-  When: WalletPocketSelectionRuleCondition
+  when: WalletPocketSelectionRuleCondition
 }
 
 input WalletPocketSelectionRuleInput {
   priority: Int
   toUse: String
-  When: WalletPocketSelectionRuleConditionInput
+  when: WalletPocketSelectionRuleConditionInput
 }
 
 
@@ -118,14 +118,10 @@ type WalletSpendingRule {
 }
 
 input WalletSpendingRuleInput {
-  id: BigInt
   businessId: String
-  businessName: String
   minOperationAmount: Int
   productUtilitiesConfig: [WalletProductUtilityInput]
   autoPocketSelection: [WalletPocketSelectionRuleInput]
-  lastEdition: BigInt
-  editedBy: String
 }
 
 

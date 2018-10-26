@@ -5,7 +5,8 @@ import { GatewayService } from '../../../api/gateway.service';
 import {
   getHelloWorld,
   getSpendingRule,
-  walletHelloWorldSubscription
+  walletHelloWorldSubscription,
+  updateSpendingRule
 } from './gql/wallet-spending-rules';
 
 @Injectable()
@@ -84,6 +85,17 @@ getSpendinRules$(page: number, count: number, filter: string, sortColumn: string
       .valueChanges.map(
         resp => resp.data.WalletGetSpendingRule
       );
+}
+
+updateSpendingRule$(spendingRuleInput: any){
+  return this.gateway.apollo
+  .mutate<any>({
+    mutation: updateSpendingRule,
+    variables: {
+      input: spendingRuleInput
+    },
+    errorPolicy: 'all'
+  });
 }
 
 

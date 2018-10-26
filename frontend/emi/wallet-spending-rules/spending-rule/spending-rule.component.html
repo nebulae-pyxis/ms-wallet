@@ -60,8 +60,8 @@
             <span fxLayoutAlign="center center"> {{'SETTINGS.FARE_COLLECTOR_TITTLE' | translate}} </span>
           </div>
           <div fxFlex="100" fxLayout="row wrap">
-            <div *ngFor="let item of settingsForm.get('utilitiesByProduct')['controls']; let i = index;" fxFlex="100"
-              formArrayName="utilitiesByProduct">
+            <div *ngFor="let item of settingsForm.get('productUtilitiesConfig')['controls']; let i = index;" fxFlex="100"
+              formArrayName="productUtilitiesConfig">
               <div  [formGroupName]="i" fxFlex="100" fxLayout="row wrap">
                 <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="23">
                   <input matInput formControlName="type" placeholder="{{'TYPE' | translate}}">
@@ -69,18 +69,18 @@
                 <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="23">
                   <input matInput formControlName="concept" placeholder="{{'CONCEPT' | translate}}">
                 </mat-form-field>
-                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="23">
+                <mat-form-field class="pr-5 pl-5" fxFlex="50" fxFlex.gt-sm="23">
                   <input type="number" matInput formControlName="percentageByMain" placeholder="{{'PERCETAGE_WITH_MAIN' | translate}}"
-                    [value]="settingsForm.controls['utilitiesByProduct']['controls'][i].controls.percentageByMain.value">
+                    [value]="settingsForm.controls['productUtilitiesConfig']['controls'][i].controls.percentageByMain.value">
                   <!-- value="{{  }}" -->
                 </mat-form-field>
-                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="23">
+                <mat-form-field class="pr-5 pl-5" fxFlex="50" fxFlex.gt-sm="23">
                   <input type="number" matInput formControlName="percentageByCredit" placeholder="{{'PERCENTAGE_WITH_CREDIT' | translate}}"
-                    [value]="settingsForm.controls['utilitiesByProduct']['controls'][i].controls.percentageByCredit.value">
+                    [value]="settingsForm.controls['productUtilitiesConfig']['controls'][i].controls.percentageByCredit.value">
                   <!-- value="{{  }}" -->
                 </mat-form-field>
                 <div *ngIf="currentVersion" fxFlex="100" fxFlex.gt-sm="8" fxLayoutAlign="center center">
-                  <button mat-icon-button (click)="deleteControl('utilitiesByProduct', i)">
+                  <button mat-icon-button (click)="deleteControl('productUtilitiesConfig', i)">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
@@ -103,16 +103,16 @@
             <span fxLayoutAlign="center center"> {{'SETTINGS.FARE_COLLECTOR_TITTLE' | translate}} </span>
           </div>
           <div fxFlex="100" fxLayout="row wrap">
-            <div *ngFor="let item of settingsForm.get('autoPocketSelectionRules')['controls']; let i = index;" fxFlex="100"
-              formArrayName="autoPocketSelectionRules">
+            <div *ngFor="let item of settingsForm.get('autoPocketSelection')['controls']; let i = index;" fxFlex="100"
+              formArrayName="autoPocketSelection">
               <div [formGroupName]="i" fxFlex="100" fxLayout="row wrap">
                 <!-- PRIORITY -->
-                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="10">
+                <mat-form-field class="pr-5 pl-5" fxFlex="30" fxFlex.gt-sm="10">
                   <input matInput type="number" formControlName="priority" placeholder="{{'PRIORITY' | translate}}">
                 </mat-form-field>
                 <!-- PRIORITY -->
                 <!-- POCKET TO USE -->
-                <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="20">
+                <mat-form-field class="pr-5 pl-5" fxFlex="70" fxFlex.gt-sm="20">
                   <input matInput formControlName="toUse" placeholder="{{'POCKET' | translate}}">
                 </mat-form-field>
                 <!-- POCKET TO USE -->
@@ -122,25 +122,25 @@
 
                 <!-- POCKET -->
                 <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="20">
-                  <input matInput formControlName="pocket" placeholder="{{'POCKET' | translate}}" [value]="settingsForm.controls['autoPocketSelectionRules']['controls'][i].controls.pocket.value">
+                  <input matInput formControlName="pocket" placeholder="{{'POCKET' | translate}}" [value]="settingsForm.controls['autoPocketSelection']['controls'][i].controls.pocket.value">
                   <!-- value="{{  }}" -->
                 </mat-form-field>
                 <!-- POCKET -->
                 <!-- COMPARATOR -->
                 <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="10">
-                  <input matInput formControlName="comparator" placeholder="{{'COMPARATOR' | translate}}" [value]="settingsForm.controls['autoPocketSelectionRules']['controls'][i].controls.comparator.value">
+                  <input matInput formControlName="comparator" placeholder="{{'COMPARATOR' | translate}}" [value]="settingsForm.controls['autoPocketSelection']['controls'][i].controls.comparator.value">
                   <!-- value="{{  }}" -->
                 </mat-form-field>
                 <!-- COMPARATOR -->
                 <!-- VALUE -->
-                <mat-form-field *ngIf="settingsForm.get('autoPocketSelectionRules')['controls'][0]['value']['comparator'] != 'ENOUGH'" class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="20">
-                  <input type="number" matInput formControlName="value" placeholder="{{'VALUE' | translate}}" [value]="settingsForm.controls['autoPocketSelectionRules']['controls'][i].controls.value.value">
+                <mat-form-field *ngIf="settingsForm.get('autoPocketSelection')['controls'][i]['value']['comparator'] != 'ENOUGH'" class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="20">
+                  <input type="number" matInput formControlName="value" placeholder="{{'VALUE' | translate}}" [value]="settingsForm.controls['autoPocketSelection']['controls'][i].controls.value.value">
                   <!-- value="{{  }}" -->
                 </mat-form-field>
                 <!-- VALUE -->
 
                 <div *ngIf="currentVersion" class="pr-5 pl-5" fxFlex="100" fxFlex.gt-sm="5" fxLayoutAlign="center center">
-                  <button mat-icon-button (click)="deleteControl('autoPocketSelectionRules', i)">
+                  <button mat-icon-button (click)="deleteControl('autoPocketSelection', i)">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
