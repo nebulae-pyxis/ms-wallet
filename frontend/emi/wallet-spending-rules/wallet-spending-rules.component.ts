@@ -1,5 +1,11 @@
 import { WalletSpendingRuleService } from './wallet-spending-rules.service';
-import { Component, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ElementRef
+} from '@angular/core';
 import { fuseAnimations } from '../../../core/animations';
 import { TranslateService } from '@ngx-translate/core';
 import { FuseTranslationLoaderService } from './../../../core/services/translation-loader.service';
@@ -8,9 +14,17 @@ import { locale as spanish } from './i18n/es';
 // tslint:disable-next-line:import-blacklist
 import * as Rx from 'rxjs/Rx';
 import { MatTableDataSource } from '@angular/material';
-import { debounceTime, startWith, distinctUntilChanged, filter, map, tap, mergeMap } from 'rxjs/operators';
+import {
+  debounceTime,
+  startWith,
+  distinctUntilChanged,
+  filter,
+  map,
+  tap,
+  mergeMap
+} from 'rxjs/operators';
 
-export interface SpendingRule{
+export interface SpendingRule {
   businessId: string;
   businessName: string;
   minOperationAmount: number;
@@ -26,13 +40,18 @@ export interface SpendingRule{
   animations: fuseAnimations
 })
 export class WalletComponent implements OnInit, OnDestroy {
-
-  @ViewChild('filter') filter: ElementRef;
+  @ViewChild('filter')
+  filter: ElementRef;
 
   spendingRulesDataSource = new MatTableDataSource();
   allSubscriptions = [];
-  tableColumns: string[] = ['businessId', 'businessName', 'minOperationAmount', 'lastEdition', 'editedBy'];
-
+  tableColumns: string[] = [
+    'businessId',
+    'businessName',
+    'minOperationAmount',
+    'lastEdition',
+    'editedBy'
+  ];
 
   tableSize: number;
   page = 0;
@@ -46,20 +65,20 @@ export class WalletComponent implements OnInit, OnDestroy {
     private walletSpendingService: WalletSpendingRuleService,
     private translationLoader: FuseTranslationLoaderService,
     private translatorService: TranslateService
-    ) {
-      this.translationLoader.loadTranslations(english, spanish);
-      this.spendingRulesDataSource.data = [ {
+  ) {
+    this.translationLoader.loadTranslations(english, spanish);
+    this.spendingRulesDataSource.data = [
+      {
         businessId: 'GANA_MED_015',
-         businessName: 'GANA',
-         minOperationAmount: 1000000,
-         lastEdition: 1234656987,
-         editedBy: 'juan.santa'
-      }];
+        businessName: 'GANA',
+        minOperationAmount: 1000000,
+        lastEdition: 1234656987,
+        editedBy: 'juan.santa'
+      }
+    ];
   }
 
-
   ngOnInit() {
-
     /**
      * subscription to listen the filter text
      */
@@ -71,18 +90,24 @@ export class WalletComponent implements OnInit, OnDestroy {
           distinctUntilChanged(),
           filter(() => this.filter.nativeElement),
           map(() => this.filter.nativeElement.value.trim()),
-          tap((filterText => this.filterText = filterText)),
-          // mergeMap(() => this.walletSpendingService.getSpendinRules$(this.page, this.count, this.filterText, this.sortColumn, this.sortOrder)),
-          // map(response => response.data.getTags),
-          // mergeMap((responseArray) => this.loadRowDataInDataTable$(responseArray))
+          tap(filterText => (this.filterText = filterText)),
+          mergeMap(() =>
+            this.walletSpendingService.getSpendinRules$(
+              this.page,
+              this.count,
+              this.filterText,
+              this.sortColumn,
+              this.sortOrder
+            )
+          ),
+          map(response => response.data.WalletGetSpendingRules),
+          tap(
+            spendingRules => (this.spendingRulesDataSource.data = spendingRules)
+          )
         )
-        .subscribe((r) => { console.log(r); }, (error) => console.log(error), () => { })
+        .subscribe( r => console.log(r), e => console.log(e), () => {} )
     );
-
   }
 
-
-  ngOnDestroy() {
-  }
-
+  ngOnDestroy() {}
 }

@@ -30,22 +30,26 @@ class SpendingRulesES {
 
   // esto va para un helper
   createDefaultSpendingRule$(buId, buName){
-    return of({
-      businessId: buId,
-      businessName: buName,
-      minAmountOperation: 100000,
-      productsConfig: [],
-      autoPocketSellection: [],
-      lastEdition: Date.now(),
-      editedBy: "SYSTEM"
-    })
+    return of(Date.now())
+    .pipe(
+      map(time => ({
+        id: time,
+        businessId: buId,
+        businessName: buName,
+        minAmountOperation: 100000,
+        productsConfig: [],
+        autoPocketSellection: [],
+        lastEdition: time,
+        editedBy: "SYSTEM"
+      }))
+    );
   }
 
   handleSpendingRuleUpdated$(evt){
     console.log("############################# commig event ot update the spenbding rule ");
     return of(evt.data.input)
     .pipe(
-      mergeMap(spendingRule => SpendingRulesDA.updateWalletSpendingRule$(spendingRule))
+      mergeMap(spendingRule => SpendingRulesDA.updateWalletSpendingRule$(spendingRule, evt.user ))
     )
   }
 

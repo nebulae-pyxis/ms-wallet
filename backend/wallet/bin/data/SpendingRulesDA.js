@@ -58,8 +58,12 @@ class SpendingRules {
             )
     }
 
-
-    static updateWalletSpendingRule$(spendingRule) {
+    /**
+     * 
+     * @param {any} spendingRule Spending rule Object
+     * @param {string} responsibleUser user responsible for the edition
+     */
+    static updateWalletSpendingRule$(spendingRule, responsibleUser ) {
         console.log(spendingRule);
         const collection = mongoDB.db.collection(COLLECTION_NAME);
         return of(spendingRule)
@@ -67,7 +71,7 @@ class SpendingRules {
                 mergeMap(spendingRuleUpdated => Rx.defer(() => collection.findOneAndUpdate(
                     { businessId: spendingRuleUpdated.businessId },
                     {
-                        $set: { ...spendingRuleUpdated }
+                        $set: { ...spendingRuleUpdated, editedBy: responsibleUser }
                     }, {
                         returnOriginal: false
                     }
@@ -86,7 +90,7 @@ class SpendingRules {
         return of(businessId)
             .pipe(
                 mergeMap(id => defer(() => collection.findOne(
-                    // { businessId: id }
+                    { businessId: id }
                 )))
             )
     }

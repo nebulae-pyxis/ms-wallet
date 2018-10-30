@@ -78,7 +78,7 @@
           <mat-header-cell fxFlex="20" *cdkHeaderCellDef>{{'TABLE.LAST_EDITION' | translate }}</mat-header-cell>
           <mat-cell fxFlex="20" *cdkCellDef="let spendingRule">
             <div  class="margin_right_left_5">
-              <span>{{spendingRule.lastEdition}}</span>
+              <span>{{ spendingRule.lastEdition | date }}</span>
             </div>
           </mat-cell>
         </ng-container>

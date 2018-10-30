@@ -39,43 +39,32 @@ export const getSpendingRule = gql`
   }
 `;
 
-export const getSpendingRules = gql`
-  query WalletGetSpendingRules(
-    $page: Int!
-    $count: Int!
-    $filter: String
-    $sortColumn: String
-    $sortOrder: String
-  ) {
-    WalletGetSpendingRules(
-      page: $page
-      count: $count
-      filter: $filter
-      sortColumn: $sortColumn
-      sortOrder: $sortOrder
-    ) {
-      id
-      businessId
-      minOperationAmount
-      productUtilitiesConfig {
-        type
-        concept
-        percentageByMain
-        percentageByCredit
-      }
-      autoPocketSelection {
-        priority
-        toUse
-        when {
-          pocket
-          comparator
-          value
-        }
-      }
-      lastEdition
-      editedBy
+export const getSpendingRules = gql`query  WalletGetSpendingRules($page: Int!, $count: Int!, $filter: String, $sortColumn: String, $sortOrder: String   ){
+  WalletGetSpendingRules(page: $page, count: $count,filter: $filter,sortColumn: $sortColumn,sortOrder: $sortOrder){
+    id
+    businessId
+    businessName
+    minOperationAmount
+    productUtilitiesConfig{
+      type
+      concept
+      percentageByMain
+      percentageByCredit
     }
+    autoPocketSelection{
+      priority
+      toUse
+      when{
+        pocket
+        comparator
+        value
+      }
+    }
+    lastEdition
+    editedBy
+
   }
+}
 `;
 
 export const updateSpendingRule = gql`

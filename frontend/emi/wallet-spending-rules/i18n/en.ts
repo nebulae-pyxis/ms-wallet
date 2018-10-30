@@ -9,6 +9,34 @@ export const locale = {
       MIN_AMOUNT_ALLOWED: 'Min operation amount',
       LAST_EDITION: 'Last edition',
       EDITED_BY: 'Edited_by'
-    }
+    },
+    SPENDING_RULE: {
+      BUSINESS_ID: 'Business unit ID',
+      BUSINESS_NAME: 'Business unit name',
+      MIN_OPERATION_AMOUNT: 'Minimun operation amount',
+      TYPE: 'Type',
+      CONCEPT: 'Concept',
+      PERCETAGE_WITH_MAIN: 'Main',
+      PERCENTAGE_WITH_CREDIT: 'Credit',
+      PRIORITY: 'Priority',
+      POCKET: 'Pocket',
+      WHEN: 'when',
+      COMPARATOR: 'Comparator',
+      VALUE: 'Value'
+    },
+    WALLET: {
+      SPENDING_RULE: 'Wallet spending rules',
+      UTILITIES_BY_PRODUCT: 'Utilities by product',
+      AUTO_WALLET_SELLECTION: 'Auto pocket selection',
+      MAIN: 'Main',
+      BONUS: 'Bonus',
+      LT: '<',
+      GT: '>',
+      LTE: '≤',
+      GTE: '≥',
+      ENOUGH: 'Is enough'
+    },
+    SAVE: 'Save',
+    UNDO: 'Undo'
   }
 };

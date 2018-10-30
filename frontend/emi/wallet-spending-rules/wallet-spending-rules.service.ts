@@ -5,6 +5,7 @@ import { GatewayService } from '../../../api/gateway.service';
 import {
   getHelloWorld,
   getSpendingRule,
+  getSpendingRules,
   walletHelloWorldSubscription,
   updateSpendingRule
 } from './gql/wallet-spending-rules';
@@ -71,7 +72,7 @@ page: Int!, $count: Int!, $filter: String, $sortColumn: String, $sortOrder: Stri
 getSpendinRules$(page: number, count: number, filter: string, sortColumn: string, sortOrder: string){
   return this.gateway.apollo
       .watchQuery<any>({
-        query: getSpendingRule,
+        query: getSpendingRules,
         fetchPolicy: 'network-only',
         errorPolicy: 'all',
         variables: {
@@ -82,9 +83,7 @@ getSpendinRules$(page: number, count: number, filter: string, sortColumn: string
           sortOrder: sortOrder
         }
       })
-      .valueChanges.map(
-        resp => resp.data.WalletGetSpendingRule
-      );
+      .valueChanges.map(r => { console.log(r.data); return r; });
 }
 
 updateSpendingRule$(spendingRuleInput: any){
