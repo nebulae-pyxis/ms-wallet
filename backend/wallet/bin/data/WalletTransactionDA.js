@@ -1,14 +1,15 @@
 "use strict";
 
 let mongoDB = undefined;
-const Rx = require("rxjs");
-const CollectionName = "WalletTransactions";
+const { take, mergeMap, tap, catchError, map, filter, defaultIfEmpty, first} = require('rxjs/operators'); 
+const  { forkJoin, of, interval, from, throwError, defer, Observable } = require('rxjs');
+const CollectionName = "TransactionsHistory";
 const { CustomError } = require("../tools/customError");
 
 class WalletTransactionDA {
 
   static start$(mongoDbInstance) {
-    return Rx.Observable.create((observer) => {
+    return Observable.create((observer) => {
       if (mongoDbInstance) {
         mongoDB = mongoDbInstance;
         observer.next('using given mongo instance ');
@@ -22,35 +23,14 @@ class WalletTransactionDA {
 
   /**
    * Creates a new transaction
-   * @param {*} transaction transaction to create
+   * @param {*} transactionData transaction to create
    */
-  static createTransaction$(transaction) {
+  static saveTransactionHistory$(transactionData) {
     const collection = mongoDB.db.collection(CollectionName);    
-    const transactionData = {
-      _id: business._id,
-      name: business.generalInfo.name
-    };
-    return Rx.Observable.defer(() => collection.insertOne(transactionData));
+    return defer(() => collection.insertOne(transactionData));
   }
 
-  /**
-   * modifies the general info of the indicated business 
-   * @param {*} id  Business ID
-   * @param {*} businessGeneralInfo  New general information of the business
-   */
-  static updateBusinessGeneralInfo$(id, businessGeneralInfo) {
-    const collection = mongoDB.db.collection(CollectionName);
-    return Rx.Observable.defer(()=>
-        collection.findOneAndUpdate(
-          { _id: id },
-          {
-            $set: {name: businessGeneralInfo.name}
-          },{
-            returnOriginal: false
-          }
-        )
-    ).map(result => result && result.value ? result.value : undefined);
-  }
+
 
     /**
    * Extracts the next value from a mongo cursor if available, returns undefined otherwise
