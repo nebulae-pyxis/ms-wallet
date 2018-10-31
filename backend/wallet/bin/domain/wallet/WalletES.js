@@ -5,6 +5,8 @@ const { take, mergeMap, tap, catchError, map, filter, defaultIfEmpty, first} = r
 const  { forkJoin, of, interval, from, throwError } = require('rxjs');
 const uuidv4 = require("uuid/v4");
 const [ BALANCE_POCKET, BONUS_POCKET ]  = [ 'BALANCE', 'BONUS' ];
+const eventSourcing = require("../../tools/EventSourcing")();
+const Event = require("@nebulae/event-store").Event;
 
 let instance;
 
@@ -19,46 +21,97 @@ class BusinessES {
     .pipe(
       mergeMap(eventData => forkJoin(
         WalletDA.getWallet$(eventData.businessId),
-        SpendingRulesDA.getSpendingRule$(eventData.businessId),
-        of(eventData.value)
+        SpendingRulesDA.getSpendingRule$(eventData.businessId)
       )),
-      mergeMap(([wallet, spendingRule, value]) => this.selectPockect$(wallet, spendingRule, value)),
+      mergeMap(([wallet, spendingRule]) => this.selectPockect$(wallet, spendingRule, evt.data.value)),
+      map(result => ({...result, spendingRule: spendingRule.productBonusConfigs.find(e => (e.tpe == evt.data.type && e.concept == evt.data.concept)) })),
       mergeMap(result => this.calculateTransactionsToExecute$(evt, result))
     )
   }
 
-  calculateTransactionsToExecute$(evt, result){
-    return of({ 
+  calculateTransactionsToExecute$(evt, result) {
+    return of({
       businessId: evt.data.businessId,
       type: evt.data.type,
       concept: evt.data.concept
     })
-    .pipe(
-      mergeMap(tx => 
-        forkJoin(
-        of({
+      .pipe(
+        mergeMap(tx =>
+          forkJoin(
+            of(tx),
+            this.calculateMainTransaction$(evt, result),
+            this.calculateBonusTransaction$(evt, result)
+          ),
+          mergeMap(([basicObj, mainTx, bonusTx]) => ({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => (e != null && e != undefined) ) }))
+        ),
+        mergeMap((txToExecute) =>
+          eventSourcing.eventStore.emitEvent$(
+            new Event({
+              eventType: "WalletTransactionExecuted",
+              eventTypeVersion: 1,
+              aggregateType: "Wallet",
+              aggregateId: result.wallet._id,
+              data: txToExecute,
+              user: 'SYSTEM'
+            })
+          )
+        )
+      )
+  }
+
+  calculateMainTransaction$(evt, result) {
+    return of({ evt, result })
+      .pipe(
+        map(() => ({
           id: uuidv4(),
-          pocket: result.pocketSelected,
+          pocket: result.selectedPocket,
+          value: evt.data.value * -1,
           user: evt.user,
           location: evt.data.location,
           notes: evt.data.notes,
-          terminal: evt.data.evt,
+          terminal: evt.data.terminal,
           associatedTransactionIds: []
-        }),
-        this.calculateMainTransaction(evt, result),
-        this.calculateBonusTransaction(evt, result)
-      ),
-      mergeMap(([basicObj, mainTx, bonusTx]) =>   )
-      ),
-      map(tx => ({ ...tx, transactions: [{
-        
-      }]})),
-      map(txToExecute => {})
-    )
-
-
+        })
+        )
+      )
   }
 
+  calculateBonusTransaction$(evt, result){
+    return of({evt, result})
+    .pipe(
+      filter(() => result.selectedPocket == "BALANCE" ),
+      map(() => ({
+        id: uuidv4(),
+        pocket: result.selectedPocket,
+        value: 0,
+        user: evt.user,
+        location: evt.data.location,
+        notes: evt.data.notes,
+        terminal: evt.data.terminal
+      })),
+      mergeMap(tx => forkJoin(
+        of(tx),
+        of({txAmount: evt.data.value, spendingRule: result.spendingRule, wallet: result.wallet, pocket: result.selectedPocket})
+        .pipe(
+          mergeMap(data => {
+            if(data.spendingRule.bonusType == "FIXED"){
+              return (data.wallet.balance >= data.txAmount)
+                ? data.spendingRule.bonusValueByBalance
+                : data.spendingRule.bonusValueByCredit
+            } else{
+              return (data.wallet.balance >= data.txAmount)
+                ? data.spendingRule.bonusValueByBalance
+                : data.spendingRule.bonusValueByCredit
+            }
+          })
+        )
+      ),
+      mergeMap(([transaction, transactionValue]) => ({...transaction, value: transactionValue}) )
+      ),
+      map(tx => ({...tx, value}) ),
+      defaultIfEmpty(null)
+    ) 
+  }
  
 
   selectPockect$(wallet, spendingRule, transactionAmount) {
@@ -72,44 +125,33 @@ class BusinessES {
             .pipe(
               from(rules),
               filter(pocketSelectionRule => {
-                const comparator = pocketSelectionRule.when.comparator;
                 if (
                   (pocketSelectionRule.when.pocket != 'BALANCE' && pocketSelectionRule.when.pocket != 'BONUS')
                   || (pocketSelectionRule.when.comparator != 'ENOUGH' && !pocketSelectionRule.when.value)) {
                   return throwError('Error ')
                 }
-                switch (comparator) {
-                  case 'GT': {
-                    return pocketSelectionRule.when.pocket == 'BALANCE'
-                      ? wallet.pockets.balance > pocketSelectionRule.when.value
-                      : wallet.pockets.bonus > pocketSelectionRule.when.value;
-                  }
-                  case 'GTE': {
-                    return pocketSelectionRule.when.pocket == 'BALANCE'
-                      ? wallet.pockets.balance >= pocketSelectionRule.when.value
-                      : wallet.pockets.bonus >= pocketSelectionRule.when.value;
-                  }
-                  case 'LT': {
-                    return pocketSelectionRule.when.pocket == 'BALANCE'
-                      ? wallet.pockets.balance < pocketSelectionRule.when.value
-                      : wallet.pockets.bonus < pocketSelectionRule.when.value;
-                  }
-                  case 'LTE': {
-                    return pocketSelectionRule.when.pocket == 'BALANCE'
-                      ? wallet.pockets.balance <= pocketSelectionRule.when.value
-                      : wallet.pockets.bonus <= pocketSelectionRule.when.value;
-                  }
-                  case 'ENOUGH': {
-                    return pocketSelectionRule.when.pocket == 'BALANCE'
-                      ? wallet.pockets.balance >= transactionAmount
-                      : wallet.pockets.bonus >= transactionAmount
-                  }
+                switch (pocketSelectionRule.when.comparator) {
+                  case 'GT': return wallet.pockets[pocketSelectionRule.when.pocket.toLowerCase()] > pocketSelectionRule.when.value                  
+                  case 'GTE': return wallet.pockets[pocketSelectionRule.when.pocket.toLowerCase()] >= pocketSelectionRule.when.value                  
+                  case 'LT': return wallet.pockets[pocketSelectionRule.when.pocket.toLowerCase()] < pocketSelectionRule.when.value
+                  case 'LTE': return wallet.pockets[pocketSelectionRule.when.pocket.toLowerCase()] <= pocketSelectionRule.when.value
+                  case 'ENOUGH': return wallet.pockets[pocketSelectionRule.when.pocket.toLowerCase()] > transactionAmount
                   default: return throwError('Invalid comparator');
                 }
+
               }),
+              defaultIfEmpty({ toUse: 'BALANCE' }),
               first(),
-              map(spendingRule => ({wallet, spendingRule, transactionAmount, pocketSelected: spendingRule.toUse })),
-              defaultIfEmpty({ wallet, spendingRule, transactionAmount, pocketSelected: "BALANCE" })
+              map(({toUse}) =>  toUse),
+              map(selectedPocket => {
+                return (
+                  (selectedPocket == 'BALANCE' && wallet.pockets[selectedPocket.toLowerCase()] > 0)
+                  || (selectedPocket == 'BONUS' &&  wallet.pockets[selectedPocket.toLowerCase()] > transactionAmount )
+                  )
+                  ? selectedPocket
+                  : "BALANCE"
+              }),
+              map(selectedPocket => ({ wallet, spendingRule, selectedPocket}))              
             )
         ))
       )
