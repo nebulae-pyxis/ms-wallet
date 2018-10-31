@@ -3,6 +3,7 @@ const Rx = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
 const business = require("../../domain/business/");
 const spendingRule = require('../../domain/spending-rules');
+const wallet = require('../../domain/wallet');
 const helloWorld = require("../../domain/HelloWorld")();
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
@@ -139,6 +140,10 @@ class EventStoreService {
       SpendingRuleUpdated:{
         fn: spendingRule.eventSourcing.handleSpendingRuleUpdated$,
         obj: spendingRule.eventSourcing
+      },
+      WalletSpendingCommited: {
+        fn: wallet.eventSourcing.handleWalletSpendingCommited$,
+        obj: wallet.eventSourcing
       }
     };
   }
@@ -163,8 +168,11 @@ class EventStoreService {
       {
         aggregateType: "SpendingRule",
         eventType: "SpendingRuleUpdated"
+      },
+      {
+        aggregateType: "Wallet",
+        eventType: "WalletSpendingCommited"
       }
-
     ]
   }
 }
