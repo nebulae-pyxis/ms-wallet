@@ -1,10 +1,10 @@
-
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../../core/modules/shared.module';
 import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
 
+import { TransactionHistoryService } from './transaction-history/transaction-history.service';
 import { ManualPocketAdjustmentService } from './manual-pocket-adjustment/manual-pocket-adjustment.service';
 import { WalletService } from './wallet.service';
 import { walletComponent } from './wallet.component';
@@ -33,7 +33,7 @@ const routes: Routes = [
     TransactionHistoryComponent,
     ManualPocketAdjustmentComponent    
   ],
-  providers: [ WalletService, DatePipe, ManualPocketAdjustmentService]
+  providers: [ WalletService, DatePipe, ManualPocketAdjustmentService, TransactionHistoryService]
 })
 
 export class walletModule {}

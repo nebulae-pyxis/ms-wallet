@@ -11,8 +11,6 @@ export class ManualPocketAdjustmentService {
 
   constructor(private gateway: GatewayService) { }
 
-  makeManualBalanceAdjustment
-
   /**
    * Make a new manual balance adjustment
    * @param manualBalanceAdjustment Balance adjustment to be created
