@@ -1,5 +1,6 @@
 const BusinessDA = require("../../data/BusinessDA");
 const WalletDA = require('../../data/WalletDA');
+const WalletHelper = require("./WalletHelper");
 const SpendingRulesDA = require('../../data/SpendingRulesDA');
 const { take, mergeMap, tap, catchError, map, filter, defaultIfEmpty, first} = require('rxjs/operators');
 const  { forkJoin, of, interval, from, throwError } = require('rxjs');
@@ -240,9 +241,22 @@ class BusinessES {
    */
   handleWalletTransactionExecuted$(walletTransactionExecuted){
     console.log('handleWalletTransactionExecuted => ', walletTransactionExecuted);
-    return of(walletTransactionExecuted)
+    return of(walletTransactionExecuted.data)
     .pipe(
-      
+      //Check if there are transactions to be processed
+      filter(event => event.data.transactions && event.data.transactions > 0),
+      //Get the business implied in the transactions
+      mergeMap(event => 
+        BusinessDA.getBusiness$(event.data.businessId)
+        .pipe(
+          map(business => ([event, business]))
+        )
+      ),
+      mergeMap(([event, business]) => concat(
+        WalletHelper.saveTransactions$(event),
+        WalletHelper.applyTransactionsOnWallet$(event, business),
+        WalletHelper.checkAlarms$(event)
+      )),
     );
   }
 
@@ -252,7 +266,7 @@ class BusinessES {
    * @param {*} event settlementJobTriggered event
    */
   errorHandler$(error, event) {
-    return Rx.Observable.of({ error, event }).mergeMap(log =>
+    return of({ error, event }).mergeMap(log =>
       LogErrorDA.persistAccumulatedTransactionsError$(log)
     );
   }
