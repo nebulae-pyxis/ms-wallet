@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs/Observable";
 import * as Rx from "rxjs";
+import { Observable, BehaviorSubject } from "rxjs";
 import { GatewayService } from "../../../api/gateway.service";
 import {
   getWalletBusiness,
@@ -11,6 +11,7 @@ import {
 
 @Injectable()
 export class WalletService {
+
   constructor(private gateway: GatewayService) {}
 
   /**

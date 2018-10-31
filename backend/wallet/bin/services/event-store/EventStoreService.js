@@ -144,6 +144,10 @@ class EventStoreService {
       WalletSpendingCommited: {
         fn: wallet.eventSourcing.handleWalletSpendingCommited$,
         obj: wallet.eventSourcing
+      },
+      WalletDepositCommited: {
+        fn: wallet.eventSourcing.handleWalletDepositCommited$$,
+        obj: wallet.eventSourcing
       }
     };
   }
@@ -172,6 +176,10 @@ class EventStoreService {
       {
         aggregateType: "Wallet",
         eventType: "WalletSpendingCommited"
+      },
+      {
+        aggregateType: "Wallet",
+        eventType: "WalletDepositCommited"
       }
     ]
   }

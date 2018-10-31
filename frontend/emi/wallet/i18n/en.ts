@@ -11,7 +11,10 @@ export const locale = {
       MAX_CHARACTER_NOTES: 'Max 200 characters',
       VALUE_REQUIRED: 'Value required',
       NOTES_REQUIRED: 'Notes required',
-      BUSINESS_REQUIRED: 'You should select the agent to which you want to make a manual balance adjustment.'
+      BUSINESS_REQUIRED: 'You should select the agent to which you want to make a manual balance adjustment.',
+      TRANSACTION_HISTORY: 'Transaction history',
+      BUSINESS: 'Agent:',
+      SELECT_BUSINESS: 'Select an agent'
     }
   }
 };
