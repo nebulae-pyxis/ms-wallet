@@ -29,7 +29,7 @@ export interface SpendingRule {
 export interface ProductConfigRule {
   type: string;
   concept: string;
-  percentageByMain: number;
+  percentageByBalance: number;
   percentageByCredit: number;
 }
 
@@ -163,9 +163,9 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     if (!pocketRule){
       pocketRule = {
         priority : (this.settingsForm.get('autoPocketSelection') as FormArray).length + 1,
-        toUse: 'MAIN',
+        toUse: 'BALANCE',
         when: {
-          pocket: 'MAIN',
+          pocket: 'BALANCE',
           comparator: 'ENOUGH',
           value: null
         }
@@ -185,14 +185,14 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       productConfig = {
         type: '',
         concept: '',
-        percentageByMain: 0,
+        percentageByBalance: 0,
         percentageByCredit: 0
       };
     }
     return this.formBuilder.group({
       type: new FormControl( { value: productConfig.type, disabled: !this.currentVersion }, [Validators.required]),
       concept: new FormControl({ value: productConfig.concept, disabled: !this.currentVersion }, [Validators.required]),
-      percentageByMain: new FormControl({ value: productConfig.percentageByMain, disabled: !this.currentVersion }, [
+      percentageByBalance: new FormControl({ value: productConfig.percentageByBalance, disabled: !this.currentVersion }, [
           Validators.required,
           Validators.min(0),
           Validators.max(100)
@@ -210,7 +210,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
 
   validatePercentages(): { [s: string]: boolean } {
     const reloaders = this.settingsForm.get('productUtilitiesConfig') as FormArray;
-    const index = reloaders.getRawValue().findIndex(e => ( e.percentageByMain >= 100 || e.percentageByCredit >= 100 || ( e.comparator === 'ENOUGH' && !e.value  ) ));
+    const index = reloaders.getRawValue().findIndex(e => ( e.percentageByBalance >= 100 || e.percentageByCredit >= 100 || ( e.comparator === 'ENOUGH' && !e.value  ) ));
     return (index !== -1) ? { 'percentageExceeded': true } : null;
   }
 
@@ -261,7 +261,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
               acc.push({
                 type: p.type,
                 concept: p.concept,
-                percentageByMain: p.percentageByMain,
+                percentageByBalance: p.percentageByBalance,
                 percentageByCredit: p.percentageByCredit
               });
               return acc;

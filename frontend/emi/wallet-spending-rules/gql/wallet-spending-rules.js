@@ -21,7 +21,7 @@ export const getSpendingRule = gql`
       productUtilitiesConfig {
         type
         concept
-        percentageByMain
+        percentageByBalance
         percentageByCredit
       }
       autoPocketSelection {
@@ -48,7 +48,7 @@ export const getSpendingRules = gql`query  WalletGetSpendingRules($page: Int!, $
     productUtilitiesConfig{
       type
       concept
-      percentageByMain
+      percentageByBalance
       percentageByCredit
     }
     autoPocketSelection{

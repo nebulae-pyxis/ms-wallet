@@ -39,14 +39,14 @@ type Business {
 type WalletProductUtility {
   type: String
   concept: String
-  percentageByMain: Float
+  percentageByBalance: Float
   percentageByCredit: Float
 }
 
 input WalletProductUtilityInput {
   type: String
   concept: String
-  percentageByMain: Float
+  percentageByBalance: Float
   percentageByCredit: Float
 }
 
