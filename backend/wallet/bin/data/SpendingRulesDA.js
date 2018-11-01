@@ -63,7 +63,7 @@ class SpendingRules {
      * @param {any} spendingRule Spending rule Object
      * @param {string} responsibleUser user responsible for the edition
      */
-    static updateWalletSpendingRule$(spendingRule, responsibleUser ) {
+    static updateWalletSpendingRule$(spendingRule, responsibleUser, timestamp ) {
         console.log(spendingRule);
         const collection = mongoDB.db.collection(COLLECTION_NAME);
         return of(spendingRule)
@@ -71,7 +71,7 @@ class SpendingRules {
                 mergeMap(spendingRuleUpdated => Rx.defer(() => collection.findOneAndUpdate(
                     { businessId: spendingRuleUpdated.businessId },
                     {
-                        $set: { ...spendingRuleUpdated, editedBy: responsibleUser }
+                        $set: { ...spendingRuleUpdated, editedBy: responsibleUser, lastEdition: timestamp }
                     }, {
                         returnOriginal: false
                     }

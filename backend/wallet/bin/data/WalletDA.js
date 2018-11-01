@@ -1,10 +1,9 @@
 "use strict";
-
-const { mergeMap} = require('rxjs/operators');
-const  { of, Observable, defer } = require('rxjs');
-
 let mongoDB = undefined;
 const COLLECTION_NAME = "Wallet";
+const { CustomError } = require("../tools/customError");
+const { take, mergeMap, catchError, map, tap } = require('rxjs/operators');
+const  { Observable, forkJoin, of, interval, defer } = require('rxjs');
 
 class WalletDA {
   static start$(mongoDbInstance) {
