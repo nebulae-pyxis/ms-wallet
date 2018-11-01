@@ -4,6 +4,8 @@ let mongoDB = undefined;
 const Rx = require("rxjs");
 const COLLECTION_NAME = "Wallet";
 const { CustomError } = require("../tools/customError");
+const { take, mergeMap, catchError, map, tap } = require('rxjs/operators');
+const  { forkJoin, of, interval, defer } = require('rxjs');
 
 class WalletDA {
   static start$(mongoDbInstance) {
