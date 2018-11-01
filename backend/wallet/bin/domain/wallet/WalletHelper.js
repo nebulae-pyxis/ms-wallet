@@ -89,7 +89,8 @@ class WalletHelper {
         SpendingRulesDA.getSpendingRule$(business._id)
       )),
       mergeMap(([wallet, spendingRule]) => {
-        const debt = (wallet.pocket.balance || 0) + (wallet.pocket.bonus || 0);
+        console.log('checkWalletSpendingAlarms => ', JSON.stringify([wallet, spendingRule]));
+        const debt = (wallet.pockets.balance || 0) + (wallet.pockets.bonus || 0);
 
         if (debt < spendingRule.minOperationAmount && wallet.spendingState == 'ALLOWED') {
           return this.changeWalletSpendingState$(wallet.businessId, 'FORBIDDEN');
@@ -124,8 +125,8 @@ class WalletHelper {
         const alarm = {
           businessId: business._id,
           wallet: {
-            balance: updatedWallet.pocket.balance,
-            bonus: updatedWallet.pocket.bonus
+            balance: updatedWallet.pockets.balance,
+            bonus: updatedWallet.pockets.bonus
           }
         };
 
@@ -141,6 +142,37 @@ class WalletHelper {
         );
       })
     );
+  }
+
+  static throwAlarm$(wallet){
+    return of(wallet)
+    .pipe(
+      mergeMap(updateOperation => {
+        console.log('updateWalletSpendingState result => ', updateOperation);
+
+        const updatedWallet = updateOperation.result;
+        const eventType = updatedWallet.spendingState == 'FORBIDDEN' ? 'WalletSpendingForbidden': 'WalletSpendingAllowed';
+
+        const alarm = {
+          businessId: business._id,
+          wallet: {
+            balance: updatedWallet.pockets.balance,
+            bonus: updatedWallet.pockets.bonus
+          }
+        };
+
+        return eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType,
+            eventTypeVersion: 1,
+            aggregateType: "Wallet",
+            aggregateId: updatedWallet._id,
+            data: alarm,
+            user: 'SYSTEM'
+          })
+        );
+      })
+    )    
   }
 
 

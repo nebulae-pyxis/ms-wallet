@@ -36,7 +36,29 @@ class WalletES {
           }
         }
       }),
-      mergeMap(wallet => WalletDA.createWallet$(wallet))
+      mergeMap(wallet => WalletDA.createWallet$(wallet)),
+      mergeMap(result => {
+        const updatedWallet = updateOperation.result;
+
+        const alarm = {
+          businessId: businessCreatedEvent.data._id,
+          wallet: {
+            balance: 0,
+            bonus: 0
+          }
+        };
+
+        return eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType: 'WalletSpendingForbidden',
+            eventTypeVersion: 1,
+            aggregateType: "Wallet",
+            aggregateId: businessCreatedEvent.data._id,
+            data: alarm,
+            user: 'SYSTEM'
+          })
+        );
+      })
     )
   }
 
@@ -328,6 +350,10 @@ class WalletES {
             user: 'SYSTEM'
           })
         );
+      }),
+      catchError(error => {
+        console.log(`An error was generated while a walletDepositCommitedEvent was being processed: ${error.stack}`);
+        return this.errorHandler$(walletDepositCommitedEvent, error.stack, 'walletDepositCommitedEvent');
       })
     )
   }
@@ -353,7 +379,7 @@ class WalletES {
    * @param {string} [transactions[].terminal.username] Terminal username
    * @param {string[]} [transactions[].associatedTransactionIds] Id that refers to the transactions related with this one.
    */
-  createWalletTransactionExecuted(businessId, transactionType= true, transactionConcept, ...transactions){
+  createWalletTransactionExecuted(businessId, transactionType, transactionConcept, ...transactions){
     return {
       businessId,
       transactionType,
