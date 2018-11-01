@@ -22,7 +22,8 @@ export const locale = {
       POCKET: 'Pocket',
       WHEN: 'when',
       COMPARATOR: 'Comparator',
-      VALUE: 'Value'
+      VALUE: 'Value',
+      BONUS_TYPE: 'Bonus type'
     },
     WALLET: {
       SPENDING_RULE: 'Wallet spending rules',
@@ -34,7 +35,9 @@ export const locale = {
       GT: '>',
       LTE: '≤',
       GTE: '≥',
-      ENOUGH: 'Is enough'
+      ENOUGH: 'Is enough',
+      FIXED: 'Fixed',
+      PERCENTAGE: 'Percentage'
     },
     SAVE: 'Save',
     UNDO: 'Undo'

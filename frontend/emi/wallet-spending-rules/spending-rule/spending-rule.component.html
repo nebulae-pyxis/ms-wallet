@@ -46,27 +46,48 @@
 
         <!-- SETTINGS BY PRODUCT -->
         <!-- <mat-card>Simple card</mat-card> -->
-          <div *ngFor="let item of settingsForm.get('productUtilitiesConfig')['controls']; let i = index;" fxFlex="100"
-            formArrayName="productUtilitiesConfig">
+          <div *ngFor="let item of settingsForm.get('productBonusConfigs')['controls']; let i = index;" fxFlex="100"
+            formArrayName="productBonusConfigs">
             <div class="border" [formGroupName]="i" fxFlex="100" fxLayout="row wrap">
-              <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="23">
+              <!-- TYPE -->
+              <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
                 <input matInput formControlName="type" placeholder="{{'SPENDING_RULE.TYPE' | translate}}">
               </mat-form-field>
-              <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="23">
+              <!-- TYPE -->
+
+              <!-- CONCEPT -->
+              <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
                 <input matInput formControlName="concept" placeholder="{{'SPENDING_RULE.CONCEPT' | translate}}">
               </mat-form-field>
-              <mat-form-field class="pr-5 pl-5" fxFlex="50" fxFlex.gt-xs="23">
-                <input type="number" matInput formControlName="percentageByBalance" placeholder="{{'SPENDING_RULE.PERCETAGE_WITH_BALANCE' | translate}}"
-                  [value]="settingsForm.controls['productUtilitiesConfig']['controls'][i].controls.percentageByBalance.value">
+              <!-- CONCEPT -->
+
+              <!-- BONUS TYPE -->
+              <mat-form-field class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
+                <mat-select formControlName="bonusType" placeholder="{{'SPENDING_RULE.BONUS_TYPE' | translate}}">
+                  <mat-option *ngFor="let bonusType of ['PERCENTAGE', 'FIXED']" [value]="bonusType">
+                    {{ 'WALLET.' + bonusType | translate}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <!-- BONUS TYPE -->
+
+              <!-- BONUS VALUE BY BALANCE -->
+              <mat-form-field class="pr-5 pl-5" fxFlex="50" fxFlex.gt-xs="20">
+                <input type="number" matInput formControlName="bonusValueByBalance" placeholder="{{'SPENDING_RULE.PERCETAGE_WITH_BALANCE' | translate}}"
+                  [value]="settingsForm.controls['productBonusConfigs']['controls'][i].controls.bonusValueByBalance.value">
                 <!-- value="{{  }}" -->
               </mat-form-field>
-              <mat-form-field class="pr-5 pl-5" fxFlex="50" fxFlex.gt-xs="23">
-                <input type="number" matInput formControlName="percentageByCredit" placeholder="{{'SPENDING_RULE.PERCENTAGE_WITH_CREDIT' | translate}}"
-                  [value]="settingsForm.controls['productUtilitiesConfig']['controls'][i].controls.percentageByCredit.value">
+              <!-- BONUS VALUE BY BALANCE -->
+
+              <!-- BONUS VALUE BY BALANCE -->
+              <mat-form-field class="pr-5 pl-5" fxFlex="50" fxFlex.gt-xs="20">
+                <input type="number" matInput formControlName="bonusValueByCredit" placeholder="{{'SPENDING_RULE.PERCENTAGE_WITH_CREDIT' | translate}}"
+                  [value]="settingsForm.controls['productBonusConfigs']['controls'][i].controls.bonusValueByCredit.value">
                 <!-- value="{{  }}" -->
               </mat-form-field>
-              <div *ngIf="currentVersion" fxFlex="100" fxFlex.gt-xs="8" fxLayoutAlign="center center">
-                <button mat-icon-button (click)="deleteControl('productUtilitiesConfig', i)">
+              <!-- BONUS VALUE BY BALANCE -->
+              <div *ngIf="currentVersion" fxFlex="100" fxFlex.gt-xs="6" fxLayoutAlign="center center">
+                <button mat-icon-button (click)="deleteControl('productBonusConfigs', i)">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -85,8 +106,8 @@
         </div>
 
         <!-- AUTOPOCKET SELLECTION SETTINGS -->
-          <div *ngFor="let item of settingsForm.get('autoPocketSelection')['controls']; let i = index;" fxFlex="100"
-            formArrayName="autoPocketSelection" class="border">
+          <div *ngFor="let item of settingsForm.get('autoPocketSelectionRules')['controls']; let i = index;" fxFlex="100"
+            formArrayName="autoPocketSelectionRules" class="border">
             <div [formGroupName]="i" fxFlex="100" fxLayout="row wrap"  >
               <!-- PRIORITY -->
               <mat-form-field class="center-text pr-5 pl-5" fxFlex="30" fxFlex.gt-xs="10">
@@ -130,16 +151,16 @@
               <!-- COMPARATOR -->
 
               <!-- VALUE -->
-              <mat-form-field *ngIf="settingsForm.get('autoPocketSelection')['controls'][i]['value']['comparator'] != 'ENOUGH'"
+              <mat-form-field *ngIf="settingsForm.get('autoPocketSelectionRules')['controls'][i]['value']['comparator'] != 'ENOUGH'"
                 class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="15">
                 <input type="number" matInput formControlName="value" placeholder="{{'SPENDING_RULE.VALUE' | translate}}"
-                  [value]="settingsForm.controls['autoPocketSelection']['controls'][i].controls.value.value">
+                  [value]="settingsForm.controls['autoPocketSelectionRules']['controls'][i].controls.value.value">
                 <!-- value="{{  }}" -->
               </mat-form-field>
               <!-- VALUE -->
 
               <div *ngIf="currentVersion" class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="5" fxLayoutAlign="center center">
-                <button mat-icon-button (click)="deleteControl('autoPocketSelection', i)">
+                <button mat-icon-button (click)="deleteControl('autoPocketSelectionRules', i)">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>

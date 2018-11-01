@@ -22,19 +22,22 @@ export const locale = {
       POCKET: 'Bolsillo',
       WHEN: 'Cuando',
       COMPARATOR: 'Comparador',
-      VALUE: 'Valor'
+      VALUE: 'Valor',
+      BONUS_TYPE: 'Tipo de comision'
     },
     WALLET: {
-      SPENDING_RULE: 'Reglas de manejo billetera',
+      SPENDING_RULE: 'Reglas de gastos de billetera',
       UTILITIES_BY_PRODUCT: 'Utilidades por producto',
       AUTO_WALLET_SELLECTION: 'Selección automática de bolsillo',
       BALANCE: 'Saldo',
-      BONUS: 'Bonus',
+      BONUS: 'Comision',
       LT: '<',
       GT: '>',
       LTE: '≤',
       GTE: '≥',
-      ENOUGH: 'Es suficiente'
+      ENOUGH: 'Es suficiente',
+      FIXED: 'Fijo',
+      PERCENTAGE: 'Porcentual'
     },
     SAVE: 'Guardar',
     UNDO: 'Deshacer'

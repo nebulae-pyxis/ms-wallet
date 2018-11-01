@@ -175,7 +175,7 @@ class WalletES {
     return of({ wallet, spendingRule })
       .pipe(
         mergeMap(config => forkJoin(
-          of(config.spendingRule.autoPocketSelection)
+          of(config.spendingRule.autoPocketSelectionRules)
             .pipe(
               map(rules => rules.sort((a, b) => a.priority - b.priority)),
             )
