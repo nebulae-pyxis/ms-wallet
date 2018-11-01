@@ -7,6 +7,7 @@ const { mergeMap, catchError, map, filter, defaultIfEmpty, first} = require('rxj
 const  { forkJoin, of, interval, from, throwError } = require('rxjs');
 const uuidv4 = require("uuid/v4");
 const [ BALANCE_POCKET, BONUS_POCKET ]  = [ 'BALANCE', 'BONUS' ];
+const Crosscutting = require("../../tools/Crosscutting");
 const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
 
@@ -224,9 +225,10 @@ class WalletES {
     .pipe(
       //Create wallet execute transaction
       map(({data, user}) => {
+        const uuId = Crosscutting.generateHistoricalUuid(new Date())
         const transactions = [
           {
-            id: uuidv4(),
+            id: uuId,
             pocket: 'BALANCE',
             value: data.value,
             notes: data.notes,            
