@@ -6,12 +6,8 @@ const SpendingRulesDA = require('../../data/SpendingRulesDA');
 const { mergeMap, catchError, map, defaultIfEmpty, first, tap, filter, toArray} = require('rxjs/operators');
 const  { forkJoin, of, interval, from, throwError, concat, observable } = require('rxjs');
 const uuidv4 = require("uuid/v4");
-<<<<<<< HEAD
-const [ BALANCE_POCKET, BONUS_POCKET ]  = ['BALANCE', 'BONUS'];
-=======
 const [ BALANCE_POCKET, BONUS_POCKET ]  = [ 'BALANCE', 'BONUS' ];
 const Crosscutting = require("../../tools/Crosscutting");
->>>>>>> 56886cc24262caca252c942c39a7d6c041c7a07b
 const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
 
@@ -309,13 +305,8 @@ class WalletES {
         const uuId = Crosscutting.generateHistoricalUuid(new Date())
         const transactions = [
           {
-<<<<<<< HEAD
-            id: uuidv4(),
-            pocket: BALANCE_POCKET,
-=======
             id: uuId,
             pocket: 'BALANCE',
->>>>>>> 56886cc24262caca252c942c39a7d6c041c7a07b
             value: data.value,
             notes: data.notes,            
             user,            
