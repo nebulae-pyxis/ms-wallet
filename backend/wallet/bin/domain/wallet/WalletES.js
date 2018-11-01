@@ -110,6 +110,7 @@ class WalletES {
  */
   calculateTransactionsToExecute$(evt, result) {
     console.log("calculateTransactionsToExecute$");
+    const date = new Date();
     return of({
       businessId: evt.data.businessId,
       type: evt.data.type,
@@ -118,8 +119,8 @@ class WalletES {
       .pipe(
         mergeMap(tx => forkJoin(
           of(tx),
-          this.calculateMainTransaction$(evt, result.selectedPocket),
-          this.calculateBonusTransaction$(evt, result)
+          this.calculateMainTransaction$(evt, result.selectedPocket, date ),
+          this.calculateBonusTransaction$(evt, result, date)
         )),
         mergeMap(([basicObj, mainTx, bonusTx]) => {
           if(bonusTx){
@@ -149,8 +150,8 @@ class WalletES {
    * @param {any} evt WalletSpendingCommited Event
    * @param {String} selectedPocket Selected pocket to use in the transaction
    */
-  calculateMainTransaction$(evt, selectedPocket) {
-    return of({})
+  calculateMainTransaction$(evt, selectedPocket, now) {
+    return of(Crosscutting.generateHistoricalUuid(now))
       .pipe(
         map(() => ({
           id: uuidv4(),
@@ -180,7 +181,7 @@ class WalletES {
    * @param {number} result.productBonusConfig.BonusValueByCredit BonusValueByCredit
    * @param {string} result.selectedPocket selected pocket to use 
    */
-  calculateBonusTransaction$(evt, result) {
+  calculateBonusTransaction$(evt, result, now) {
     console.log("calculateBonusTransaction$", result.selectedPocket);
     return of({ evt, result })
       .pipe(
@@ -190,7 +191,7 @@ class WalletES {
             : of({}).
               pipe(
                 map(() => ({ // create the basic info for transaction
-                  id: uuidv4(),
+                  id: Crosscutting.generateHistoricalUuid(now),
                   pocket: BONUS_POCKET,
                   value: 0,
                   user: "SYSTEM"
