@@ -12,7 +12,6 @@ const WalletDA = require('./data/WalletDA');
 const WalletTransactionDA = require('./data/WalletTransactionDA');
 const LogErrorDA = require('./data/LogErrorDA');
 const SpendingRulesDA = require('./data/SpendingRulesDA');
-const WalletDA = require('./data/WalletDA');
 const graphQlService = require('./services/emi-gateway/GraphQlService')();
 const Rx = require('rxjs');
 
