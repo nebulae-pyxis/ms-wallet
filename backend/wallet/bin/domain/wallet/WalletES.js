@@ -4,7 +4,7 @@ const WalletDA = require('../../data/WalletDA');
 const WalletHelper = require("./WalletHelper");
 const SpendingRulesDA = require('../../data/SpendingRulesDA');
 const { mergeMap, catchError, map, defaultIfEmpty, first, tap, filter, toArray} = require('rxjs/operators');
-const  { forkJoin, of, interval, from, throwError, concat, observable } = require('rxjs');
+const  { forkJoin, of, interval, from, throwError, concat, Observable } = require('rxjs');
 const uuidv4 = require("uuid/v4");
 const [ BALANCE_POCKET, BONUS_POCKET ]  = [ 'BALANCE', 'BONUS' ];
 const Crosscutting = require("../../tools/Crosscutting");
@@ -36,7 +36,29 @@ class WalletES {
           }
         }
       }),
-      mergeMap(wallet => WalletDA.createWallet$(wallet))
+      mergeMap(wallet => WalletDA.createWallet$(wallet)),
+      mergeMap(result => {
+        const updatedWallet = updateOperation.result;
+
+        const alarm = {
+          businessId: businessCreatedEvent.data._id,
+          wallet: {
+            balance: 0,
+            bonus: 0
+          }
+        };
+
+        return eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType: 'WalletSpendingForbidden',
+            eventTypeVersion: 1,
+            aggregateType: "Wallet",
+            aggregateId: businessCreatedEvent.data._id,
+            data: alarm,
+            user: 'SYSTEM'
+          })
+        );
+      })
     )
   }
 
@@ -301,21 +323,21 @@ class WalletES {
       //Create wallet execute transaction
       map(({data, user}) => {
         const uuId = Crosscutting.generateHistoricalUuid(new Date())
-        const transactions = [
-          {
+        const transactions = {
             id: uuId,
             pocket: 'BALANCE',
             value: data.value,
             notes: data.notes,            
             user,            
-          }
-        ];
-        return this.createWalletTransactionExecuted(walletDepositCommited.businessId, 'BALANCE_ADJUSTMENT', 'PAYMENT', transactions);
+        };
+        return this.createWalletTransactionExecuted(data.businessId, 'BALANCE_ADJUSTMENT', 'PAYMENT', transactions);
       }),
       //Get wallet of the implied business
-      mergeMap(walletTransactionExecuted => WalletDA.getWallet$(walletDepositCommitedEvent.businessId).pipe(map(wallet => [wallet, walletTransactionExecuted]))),
+      mergeMap(walletTransactionExecuted => WalletDA.getWallet$(walletTransactionExecuted.businessId).pipe(map(wallet => [wallet, walletTransactionExecuted]))),
       //Emit the wallet transaction executed
-      mergeMap(([wallet, walletTransactionExecuted]) => {            
+      mergeMap(([wallet, walletTransactionExecuted]) => {
+        console.log('wallet => ', wallet);           
+        console.log('walletTransactionExecuted => ', walletTransactionExecuted);           
         return eventSourcing.eventStore.emitEvent$(
           new Event({
             eventType: 'WalletTransactionExecuted',
@@ -326,6 +348,10 @@ class WalletES {
             user: 'SYSTEM'
           })
         );
+      }),
+      catchError(error => {
+        console.log(`An error was generated while a walletDepositCommitedEvent was being processed: ${error.stack}`);
+        return this.errorHandler$(walletDepositCommitedEvent, error.stack, 'walletDepositCommitedEvent');
       })
     )
   }
@@ -351,7 +377,7 @@ class WalletES {
    * @param {string} [transactions[].terminal.username] Terminal username
    * @param {string[]} [transactions[].associatedTransactionIds] Id that refers to the transactions related with this one.
    */
-  createWalletTransactionExecuted(businessId, transactionType= true, transactionConcept, ...transactions){
+  createWalletTransactionExecuted(businessId, transactionType, transactionConcept, ...transactions){
     return {
       businessId,
       transactionType,
@@ -372,11 +398,11 @@ class WalletES {
    * @param {*} walletTransactionExecuted wallet transaction executed event
    */
   handleWalletTransactionExecuted$(walletTransactionExecuted){
-    console.log('handleWalletTransactionExecuted => ', walletTransactionExecuted);
-    return of(walletTransactionExecuted.data)
+    console.log('handleWalletTransactionExecuted => ', JSON.stringify(walletTransactionExecuted));
+    return of(walletTransactionExecuted)
     .pipe(
       //Check if there are transactions to be processed
-      filter(event => event.data.transactions && event.data.transactions > 0),
+      filter(event => event.data.transactions && event.data.transactions.length > 0),
       //Get the business implied in the transactions
       mergeMap(event => 
         BusinessDA.getBusiness$(event.data.businessId)
@@ -403,8 +429,10 @@ class WalletES {
    * @param {*} event settlementJobTriggered event
    */
   errorHandler$(event, error, errorType) {
-    return of({ error, type: errorType, event }).mergeMap(log =>
-      LogErrorDA.persistLogError$(log)
+    return of({ error, type: errorType, event }).pipe(
+      mergeMap(log =>
+        LogErrorDA.persistLogError$(log)
+      )
     );
   }
 }
