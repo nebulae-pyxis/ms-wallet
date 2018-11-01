@@ -6,7 +6,12 @@ const SpendingRulesDA = require('../../data/SpendingRulesDA');
 const { mergeMap, catchError, map, defaultIfEmpty, first, tap, filter, toArray} = require('rxjs/operators');
 const  { forkJoin, of, interval, from, throwError, concat, observable } = require('rxjs');
 const uuidv4 = require("uuid/v4");
+<<<<<<< HEAD
 const [ BALANCE_POCKET, BONUS_POCKET ]  = ['BALANCE', 'BONUS'];
+=======
+const [ BALANCE_POCKET, BONUS_POCKET ]  = [ 'BALANCE', 'BONUS' ];
+const Crosscutting = require("../../tools/Crosscutting");
+>>>>>>> 56886cc24262caca252c942c39a7d6c041c7a07b
 const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
 
@@ -16,6 +21,41 @@ class WalletES {
   constructor() {
   }
 
+
+  /**
+   * Receives a business created event and create a wallet for the business
+   * @param {*} businessCreated Business created event
+   */
+  handleBusinessCreated$(businessCreatedEvent) {
+    return of(businessCreatedEvent.data) 
+    .pipe(
+      map(businessCreated => {
+        return {
+          businessId: businessCreated._id,
+          businessName: businessCreated.generalInfo.name,
+          spendingState: 'FORBIDDEN',
+          pockets: {
+            balance: 0,
+            bonus: 0
+          }
+        }
+      }),
+      mergeMap(wallet => WalletDA.createWallet$(wallet))
+    )
+  }
+
+  /**
+   * Receives a business created event and create a wallet for the business
+   * @param {*} businessCreated Business created event
+   */
+  handleBusinessGeneralInfoUpdated$(businessGeneralInfoUpdatedEvent) {
+    return of(businessGeneralInfoUpdatedEvent) 
+    .pipe(
+      mergeMap(businessGeneralInfoUpdatedEvent => WalletDA
+        .updateWalletBusinessName$(businessGeneralInfoUpdatedEvent.aid, businessGeneralInfoUpdatedEvent.data.name)
+      )
+    );
+  }
   
   handleWalletSpendingCommited$(evt){
     console.log("handleWalletSpendingCommited$");
@@ -266,10 +306,16 @@ class WalletES {
     .pipe(
       //Create wallet execute transaction
       map(({data, user}) => {
+        const uuId = Crosscutting.generateHistoricalUuid(new Date())
         const transactions = [
           {
+<<<<<<< HEAD
             id: uuidv4(),
             pocket: BALANCE_POCKET,
+=======
+            id: uuId,
+            pocket: 'BALANCE',
+>>>>>>> 56886cc24262caca252c942c39a7d6c041c7a07b
             value: data.value,
             notes: data.notes,            
             user,            

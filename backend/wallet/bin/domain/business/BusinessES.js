@@ -1,6 +1,7 @@
 const Rx = require("rxjs");
 const BusinessDA = require("../../data/BusinessDA");
 const spendingRules = require('../spending-rules');
+const wallet = require('../wallet');
 const { take, mergeMap, tap, catchError, map } = require('rxjs/operators');
 const  { forkJoin, of, interval } = require('rxjs');
 
@@ -19,7 +20,8 @@ class BusinessES {
     .pipe(
       mergeMap((business) => forkJoin(
         BusinessDA.persistBusiness$(business.data),
-        spendingRules.eventSourcing.handleBusinessCreated$(business.data)
+        spendingRules.eventSourcing.handleBusinessCreated$(business.data),
+        wallet.eventSourcing.handleBusinessCreated$(businessCreatedEvent)
       ))
     )
   }
@@ -34,9 +36,10 @@ class BusinessES {
         mergeMap(businessUpdated => forkJoin(
           BusinessDA.updateBusinessGeneralInfo$(
             evt.aid,
-            businessUpdated.generalInfo
+            businessUpdated
           ),
-          spendingRules.eventSourcing.handleBusinessGeneralInfoUpdated$(evt.aid, businessUpdated.generalInfo.name )
+          spendingRules.eventSourcing.handleBusinessGeneralInfoUpdated$(evt.aid, businessUpdated.name ),
+          wallet.eventSourcing.handleBusinessGeneralInfoUpdated$(evt)
         )
         )
       );

@@ -4,7 +4,6 @@ const eventSourcing = require("../../tools/EventSourcing")();
 const business = require("../../domain/business/");
 const spendingRule = require('../../domain/spending-rules');
 const wallet = require('../../domain/wallet');
-const helloWorld = require("../../domain/HelloWorld")();
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
  * Singleton instance
@@ -132,11 +131,6 @@ class EventStoreService {
         fn: business.eventSourcing.handleBusinessGeneralInfoUpdated$,
         obj: business.eventSourcing
       },
-      //Sample for handling event-sourcing events, please remove
-      HelloWorldEvent: {
-        fn: helloWorld.handleHelloWorld$,
-        obj: helloWorld
-      },
       SpendingRuleUpdated:{
         fn: spendingRule.eventSourcing.handleSpendingRuleUpdated$,
         obj: spendingRule.eventSourcing
@@ -168,10 +162,6 @@ class EventStoreService {
       {
         aggregateType: "Business",
         eventType: "BusinessGeneralInfoUpdated"
-      },
-      {
-        aggregateType: "HelloWorld",
-        eventType: "HelloWorldEvent"
       },
       {
         aggregateType: "SpendingRule",

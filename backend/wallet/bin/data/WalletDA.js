@@ -1,7 +1,9 @@
 "use strict";
 
+const { mergeMap} = require('rxjs/operators');
+const  { of, Observable, defer } = require('rxjs');
+
 let mongoDB = undefined;
-const Rx = require("rxjs");
 const COLLECTION_NAME = "Wallet";
 const { CustomError } = require("../tools/customError");
 const { take, mergeMap, catchError, map, tap } = require('rxjs/operators');
@@ -9,7 +11,7 @@ const  { forkJoin, of, interval, defer } = require('rxjs');
 
 class WalletDA {
   static start$(mongoDbInstance) {
-    return Rx.Observable.create(observer => {
+    return Observable.create(observer => {
       if (mongoDbInstance) {
         mongoDB = mongoDbInstance;
         observer.next("using given mongo instance ");
@@ -29,6 +31,47 @@ class WalletDA {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return of(businessId).pipe(
       mergeMap(id => defer(() => collection.findOne({ businessId: id })))
+    );
+  }
+
+  /**
+   * Persists the wallet info . If the wallet has been already created and error will be generated.
+   * @param {*} wallet 
+   */
+  static createWallet$(wallet) {
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
+    return of(wallet)
+    .pipe(
+      mergeMap(wallet => defer(() => {
+        const walletData = {
+          businessId: wallet.businessId,
+          businessName: wallet.businessName,
+          spendingState: wallet.spendingState,
+          pockets: {
+            balance: wallet.pockets.balance,
+            bonus: wallet.pockets.bonus
+          }
+        };
+        return collection.insertOne(walletData);
+      }))
+    );
+  }
+
+  /**
+   * updates the wallet business name.
+   * @param {*} businessId ID of the business associated to the wallet
+   * @param {*} newBusinessName new business name
+   */
+  static updateWalletBusinessName$(businessId, newBusinessName) {
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
+    return of({businessId, newBusinessName})
+    .pipe(
+      mergeMap(business => defer(() => {
+        const updateQuery = {
+          $set: {businessName: newBusinessName}
+        };
+        return collection.updateOne({ businessId }, updateQuery);
+      }))
     );
   }
 

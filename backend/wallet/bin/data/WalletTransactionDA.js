@@ -1,10 +1,8 @@
 "use strict";
 
 let mongoDB = undefined;
-const { take, mergeMap, tap, catchError, map, filter, defaultIfEmpty, first} = require('rxjs/operators'); 
-const  { forkJoin, of, interval, from, throwError, defer, Observable } = require('rxjs');
-const CollectionName = "TransactionsHistory";
-const { CustomError } = require("../tools/customError");
+const  { defer, Observable } = require('rxjs');
+const COLLECTION_NAME = `TransactionsHistory_{0}`;
 
 class WalletTransactionDA {
 
@@ -22,11 +20,15 @@ class WalletTransactionDA {
   }
 
   /**
-   * Creates a new transaction
+   * Saves the transaction in a Mongo collection. The collection where the transaction 
+   * will be stored is determined according to the last four (4) characters of the uuid.
+   * since these correspond to the month and year where the info will be persisted.
+   * 
    * @param {*} transactionData transaction to create
    */
   static saveTransactionHistory$(transactionData) {
-    const collection = mongoDB.db.collection(CollectionName);    
+    const monthYear = transactionData._id.substr(transactionData._id.length - 4)
+    const collection = mongoDB.db.collection(COLLECTION_NAME.format(monthYear));    
     return defer(() => collection.insertOne(transactionData));
   }
 
