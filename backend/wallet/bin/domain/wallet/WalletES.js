@@ -99,7 +99,14 @@ class WalletES {
           this.calculateMainTransaction$(evt, result.selectedPocket),
           this.calculateBonusTransaction$(evt, result)
         )),
-        mergeMap(([basicObj, mainTx, bonusTx]) => of({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => (e != null && e != undefined) ) })),       
+        mergeMap(([basicObj, mainTx, bonusTx]) => {
+          if(bonusTx){
+            bonusTx.associatedTransactionIds.push(mainTx.id);
+            mainTx.associatedTransactionIds.push(bonusTx.id);
+          }
+          return of({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => (e != null && e != undefined) ) })       
+        }),
+        
         // mergeMap((txToExecute) =>
         //   eventSourcing.eventStore.emitEvent$(
         //     new Event({
@@ -152,7 +159,7 @@ class WalletES {
    * @param {string} result.selectedPocket selected pocket to use 
    */
   calculateBonusTransaction$(evt, result) {
-    console.log("calculateBonusTransaction$");
+    console.log("calculateBonusTransaction$", result.selectedPocket);
     return of({ evt, result })
       .pipe(
         mergeMap(() => {
@@ -184,19 +191,11 @@ class WalletES {
                             : (data.wallet.balance >= data.txAmount)
                               ? (data.txAmount / 100) * data.spendingRule.bonusValueByBalance
                               : (data.txAmount / 100) * data.spendingRule.bonusValueByCredit
-                          // // if bonus type is FIXED
-                          // if (data.spendingRule.bonusType == "FIXED") {
-                          //   return data.wallet.balance >= data.txAmount ? data.spendingRule.bonusValueByBalance : data.spendingRule.bonusValueByCredit;
-                          // } else {
-                          //   // if bonus type is PERCENTAGE
-                          //   return data.wallet.balance >= data.txAmount ? (data.txAmount / 100) * data.spendingRule.bonusValueByBalance : (data.txAmount / 100) * data.spendingRule.bonusValueByCredit;
-                          // }
                         })
                       )
                   )          
                 ),
-                mergeMap(([transaction, transactionValue]) => of({ ...transaction, value: transactionValue }))
-
+                mergeMap(([transaction, transactionValue]) => of({ ...transaction, value: transactionValue, associatedTransactionIds: [] }))
               )
         }),
         // filter(() => result.selectedPocket == BALANCE_POCKET), // this flow continue only if it's using balance pocket to create the transaction
@@ -286,7 +285,6 @@ class WalletES {
             ? selectedPocket
             : BALANCE_POCKET
         }),
-        map(() => BALANCE_POCKET),
         mergeMap(selectedPocket => of({ wallet, spendingRule, selectedPocket }))
       )
   }

@@ -248,7 +248,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   }
 
   saveSpendingRule() {
-    console.log(this.settingsForm);
+    console.log(this.settingsForm.getRawValue());
     Rx.Observable.of(this.settingsForm.getRawValue())
       .pipe(map(
         ({
