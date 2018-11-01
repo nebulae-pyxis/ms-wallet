@@ -54,6 +54,7 @@ class WalletCQRS {
    * @param {string} authToken JWT token
    */
   makeManualBalanceAdjustment$(data, authToken) {
+    console.log('makeManualBalanceAdjustment =>  ', data);
     const manualBalanceAdjustment = !data.args ? undefined : data.args.input;
     manualBalanceAdjustment._id = uuidv4();
     return RoleValidator.checkPermissions$(

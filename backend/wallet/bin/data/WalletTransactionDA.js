@@ -2,7 +2,7 @@
 
 let mongoDB = undefined;
 const  { defer, Observable } = require('rxjs');
-const COLLECTION_NAME = `TransactionsHistory_{0}`;
+const COLLECTION_NAME = `TransactionsHistory_`;
 
 class WalletTransactionDA {
 
@@ -27,8 +27,9 @@ class WalletTransactionDA {
    * @param {*} transactionData transaction to create
    */
   static saveTransactionHistory$(transactionData) {
+    console.log('saveTransactionHistory => ', transactionData);
     const monthYear = transactionData._id.substr(transactionData._id.length - 4)
-    const collection = mongoDB.db.collection(COLLECTION_NAME.format(monthYear));    
+    const collection = mongoDB.db.collection(`${COLLECTION_NAME}${monthYear}`);    
     return defer(() => collection.insertOne(transactionData));
   }
 

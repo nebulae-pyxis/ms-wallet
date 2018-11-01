@@ -15,6 +15,7 @@ class WalletHelper {
    * @param {*} event 
    */
   static saveTransactions$(walletTransactionExecuted){
+    console.log('saveTransactions ', JSON.stringify(walletTransactionExecuted));
     return of(walletTransactionExecuted)
     .pipe(
       //Processes each transaction one by one
@@ -22,31 +23,36 @@ class WalletHelper {
       // Persist transaction
       mergeMap(transaction => {
         const transactionData = {
-          _id: event.id,
-          timestamp: walletTransactionExecuted.data.timestamp,
-          businessId: transaction.businessId,
-          type: walletTransactionExecuted.data.data.type,
-          concept: walletTransactionExecuted.data.data.concept,
-          value: walletTransactionExecuted.data.data.value,
-          terminal: {
-            id: walletTransactionExecuted.data.data.terminal.id,
-            id: walletTransactionExecuted.data.data.terminal.userId,
-            id: walletTransactionExecuted.data.data.terminal.username
-          },
-          user: walletTransactionExecuted.data.data.user,
-          notes: walletTransactionExecuted.data.data.notes,
-          location: walletTransactionExecuted.data.data.location,
+          _id: transaction.id,
+          timestamp: walletTransactionExecuted.timestamp,
+          businessId: walletTransactionExecuted.data.businessId,
+          type: walletTransactionExecuted.data.transactionType,
+          concept: walletTransactionExecuted.data.transactionConcept,
+          pocket: transaction.pocket,
+          value: transaction.value,
+          user: walletTransactionExecuted.user,
+          notes: transaction.notes,
+          location: transaction.location,
         };
+
+        if (transaction.terminal) {
+          transactionData.terminal = {
+            id: transaction.terminal.id,
+            userId: transaction.terminal.userId,
+            username: transaction.terminal.username,
+          };
+        }
 
         return WalletTransactionDA.saveTransactionHistory$(transactionData)
       })
-    )
+    );
   }
 
   /**
    * Updates the value of the pockets according to the received transactions
    * @param {*} walletTransactionExecuted 
    * @param {*} business Business info
+   * @returns {Observable}
    */
   static applyTransactionsOnWallet$(walletTransactionExecuted, business){
     return of(walletTransactionExecuted)
@@ -56,9 +62,9 @@ class WalletHelper {
       //Calculates the increment value from balance and bonus pockets
       reduce((acc, transaction) => {
         if(transaction.pocket.toUpperCase() == 'BALANCE'){
-          acc.balance += transaction.pocket.value;
+          acc.balance += transaction.value;
         }else if(transaction.pocket.toUpperCase() == 'BONUS'){
-          acc.bonus += transaction.pocket.value;
+          acc.bonus += transaction.value;
         }else{
           throw new Error(`Invalid pocket: ${transaction.pocket}`);
         }
@@ -66,7 +72,7 @@ class WalletHelper {
       }, {balance: 0, bonus: 0}),
       //Update wallet values
       mergeMap(increment => WalletDA.updateWalletPockets$(business, increment))
-    )
+    );
   }
 
   /**
@@ -80,7 +86,7 @@ class WalletHelper {
     .pipe(
       mergeMap(business => forkJoin(
         WalletDA.getWallet$(business._id),
-        SpendingRulesDA.getSpendingRule$(businessId)
+        SpendingRulesDA.getSpendingRule$(business._id)
       )),
       mergeMap(([wallet, spendingRule]) => {
         const debt = (wallet.pocket.balance || 0) + (wallet.pocket.bonus || 0);
