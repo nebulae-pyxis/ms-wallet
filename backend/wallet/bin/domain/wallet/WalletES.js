@@ -21,15 +21,33 @@ class BusinessES {
     return of(evt.data)
     .pipe(
       mergeMap(eventData => forkJoin(
+        // search the wallet for business unit
         WalletDA.getWallet$(eventData.businessId),
+        // Search the spendingRule for business unit
         SpendingRulesDA.getSpendingRule$(eventData.businessId)
       )),
+      // selects the pocket to use and returns => { wallet, spendingRule, selectedPocket }
       mergeMap(([wallet, spendingRule]) => this.selectPockect$(wallet, spendingRule, evt.data.value)),
-      map(result => ({...result, spendingRule: spendingRule.productBonusConfigs.find(e => (e.tpe == evt.data.type && e.concept == evt.data.concept)) })),
+      // selects the according productBonusConfig returns => { wallet, productBonusConfig, selectedPocket }
+      map(result => ({...result, spendingRule: spendingRule.productBonusConfigs.find(e => (e.tpe == evt.data.type && e.concept == evt.data.concept))[0] })),
       mergeMap(result => this.calculateTransactionsToExecute$(evt, result))
     )
   }
-
+/**
+ * 
+ * @param {any} evt WalletSpendingCommited Event
+ * @param {Object} result Transaction object
+ * @param {Object} result.wallet business unitWallet
+ * @param {Object} result.wallet.pockets business unit pockets in wallet
+ * @param {number} result.wallet.pockets.balance balance amount in wallet
+ * @param {number} result.wallet.pockets.bonus bonus amount in wallet
+ * @param {Object} result.productBonusConfig productBonus configuration
+ * @param {string} result.productBonusConfig.bonusType bonustype
+ * @param {number} result.productBonusConfig.BonusValueByBalance BonusValueByBalance
+ * @param {number} result.productBonusConfig.BonusValueByCredit BonusValueByCredit
+ * @param {string} result.selectedPocket selected pocket to use 
+ * 
+ */
   calculateTransactionsToExecute$(evt, result) {
     return of({
       businessId: evt.data.businessId,
@@ -40,7 +58,7 @@ class BusinessES {
         mergeMap(tx =>
           forkJoin(
             of(tx),
-            this.calculateMainTransaction$(evt, result),
+            this.calculateMainTransaction$(evt, result.selectedPocket),
             this.calculateBonusTransaction$(evt, result)
           ),
           mergeMap(([basicObj, mainTx, bonusTx]) => ({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => (e != null && e != undefined) ) }))
@@ -60,12 +78,17 @@ class BusinessES {
       )
   }
 
-  calculateMainTransaction$(evt, result) {
-    return of({ evt, result })
+  /**
+   * 
+   * @param {any} evt WalletSpendingCommited Event
+   * @param {String} selectedPocket Selected pocket to use in the transaction
+   */
+  calculateMainTransaction$(evt, selectedPocket) {
+    return of({})
       .pipe(
         map(() => ({
           id: uuidv4(),
-          pocket: result.selectedPocket,
+          pocket: selectedPocket,
           value: evt.data.value * -1,
           user: evt.user,
           location: evt.data.location,
@@ -77,44 +100,75 @@ class BusinessES {
       )
   }
 
-  calculateBonusTransaction$(evt, result){
-    return of({evt, result})
-    .pipe(
-      filter(() => result.selectedPocket == "BALANCE" ),
-      map(() => ({
-        id: uuidv4(),
-        pocket: result.selectedPocket,
-        value: 0,
-        user: evt.user,
-        location: evt.data.location,
-        notes: evt.data.notes,
-        terminal: evt.data.terminal
-      })),
-      mergeMap(tx => forkJoin(
-        of(tx),
-        of({txAmount: evt.data.value, spendingRule: result.spendingRule, wallet: result.wallet, pocket: result.selectedPocket})
-        .pipe(
-          mergeMap(data => {
-            if(data.spendingRule.bonusType == "FIXED"){
-              return (data.wallet.balance >= data.txAmount)
-                ? data.spendingRule.bonusValueByBalance
-                : data.spendingRule.bonusValueByCredit
-            } else{
-              return (data.wallet.balance >= data.txAmount)
-                ? data.spendingRule.bonusValueByBalance
-                : data.spendingRule.bonusValueByCredit
-            }
-          })
-        )
-      ),
-      mergeMap(([transaction, transactionValue]) => ({...transaction, value: transactionValue}) )
-      ),
-      map(tx => ({...tx, value}) ),
-      defaultIfEmpty(null)
-    ) 
+  /**
+   * 
+   * @param {any} evt WalletSpendingCommited Event
+   * @param {Object} result Transaction object
+   * @param {Object} result.wallet business unitWallet
+   * @param {Object} result.wallet.pockets business unit pockets in wallet
+   * @param {number} result.wallet.pockets.balance balance amount in wallet
+   * @param {number} result.wallet.pockets.bonus bonus amount in wallet
+   * @param {Object} result.productBonusConfig productBonus configuration
+   * @param {string} result.productBonusConfig.bonusType bonustype
+   * @param {number} result.productBonusConfig.BonusValueByBalance BonusValueByBalance
+   * @param {number} result.productBonusConfig.BonusValueByCredit BonusValueByCredit
+   * @param {string} result.selectedPocket selected pocket to use 
+   */
+  calculateBonusTransaction$(evt, result) {
+    return of({ evt, result })
+      .pipe( 
+        filter(() => result.selectedPocket == "BALANCE"), // this flow continue only if it's using balance pocket to create the transaction
+        map(() => ({ // create the basic info for transaction
+          id: uuidv4(),
+          pocket: result.selectedPocket,
+          value: 0,
+          user: evt.user,
+          location: evt.data.location,
+          notes: evt.data.notes,
+          terminal: evt.data.terminal
+        })),
+        mergeMap( tx =>
+          forkJoin( 
+            of(tx), // keeps the basic transaction data 
+            of({    // calculate the transaction amount
+              txAmount: evt.data.value,
+              spendingRule: result.spendingRule,
+              wallet: result.wallet,
+              pocket: result.selectedPocket
+            })
+              .pipe(
+                map(data => {
+                  return (data.spendingRule.bonusType == "FIXED")
+                    ? (data.wallet.balance >= data.txAmount)
+                      ? data.spendingRule.bonusValueByBalance
+                      : data.spendingRule.bonusValueByCredit
+                    : (data.wallet.balance >= data.txAmount)
+                      ? (data.txAmount / 100) * data.spendingRule.bonusValueByBalance
+                      : (data.txAmount / 100) * data.spendingRule.bonusValueByCredit
+                  // // if bonus type is FIXED
+                  // if (data.spendingRule.bonusType == "FIXED") {
+                  //   return data.wallet.balance >= data.txAmount ? data.spendingRule.bonusValueByBalance : data.spendingRule.bonusValueByCredit;
+                  // } else {
+                  //   // if bonus type is PERCENTAGE
+                  //   return data.wallet.balance >= data.txAmount ? (data.txAmount / 100) * data.spendingRule.bonusValueByBalance : (data.txAmount / 100) * data.spendingRule.bonusValueByCredit;
+                  // }
+                })
+              )
+          ),
+          mergeMap(([transaction, transactionValue]) => of({ ...transaction, value: transactionValue }))
+        ),
+        // map(tx => ({ ...tx, value })),
+        defaultIfEmpty(null)
+      );
   }
  
 
+  /**
+   * 
+   * @param {any} wallet business unit Wallet 
+   * @param {any} spendingRule Business spending rules
+   * @param {number} transactionAmount Transaction amount
+   */
   selectPockect$(wallet, spendingRule, transactionAmount) {
     return of({ wallet, spendingRule })
       .pipe(
@@ -152,7 +206,7 @@ class BusinessES {
                   ? selectedPocket
                   : "BALANCE"
               }),
-              map(selectedPocket => ({ wallet, spendingRule, selectedPocket}))              
+              map(selectedPocket => ({ wallet, spendingRule, selectedPocket }))              
             )
         ))
       )
@@ -219,7 +273,7 @@ class BusinessES {
    * @param {string} [transactions[].terminal.username] Terminal username
    * @param {string[]} [transactions[].associatedTransactionIds] Id that refers to the transactions related with this one.
    */
-  createWalletTransactionExecuted(businessId, transactionType, transactionConcept, ...transactions){
+  createWalletTransactionExecuted(businessId, transactionType= true, transactionConcept, ...transactions){
     return {
       businessId,
       transactionType,
