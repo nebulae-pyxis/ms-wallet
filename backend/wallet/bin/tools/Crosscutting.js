@@ -12,8 +12,11 @@ class Crosscutting{
      * @param {*} date Date with which will be generated the suffix of the uuid.
      */
     static generateHistoricalUuid(date){
-        const month = date.getMonth()+1;
-        const year = date.getFullYear();
+        let month = date.getMonth()+1;
+        let year = date.getFullYear() + '';
+        month = (month.length == 1 ? '0': '') + month;
+        year = year.substr(year.length - 2)
+
         const sufixUuid = `-${month}${year}`;
         const uuId = `${uuidv4()}${sufixUuid}`;
         return uuId;

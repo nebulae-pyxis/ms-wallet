@@ -17,6 +17,41 @@ class WalletES {
   constructor() {
   }
 
+
+  /**
+   * Receives a business created event and create a wallet for the business
+   * @param {*} businessCreated Business created event
+   */
+  handleBusinessCreated$(businessCreatedEvent) {
+    return of(businessCreatedEvent.data) 
+    .pipe(
+      map(businessCreated => {
+        return {
+          businessId: businessCreated._id,
+          businessName: businessCreated.generalInfo.name,
+          spendingState: 'FORBIDDEN',
+          pockets: {
+            balance: 0,
+            bonus: 0
+          }
+        }
+      }),
+      mergeMap(wallet => WalletDA.createWallet$(wallet))
+    )
+  }
+
+  /**
+   * Receives a business created event and create a wallet for the business
+   * @param {*} businessCreated Business created event
+   */
+  handleBusinessGeneralInfoUpdated$(businessGeneralInfoUpdatedEvent) {
+    return of(businessGeneralInfoUpdatedEvent) 
+    .pipe(
+      mergeMap(businessGeneralInfoUpdatedEvent => WalletDA
+        .updateWalletBusinessName$(businessGeneralInfoUpdatedEvent.aid, businessGeneralInfoUpdatedEvent.data.name)
+      )
+    );
+  }
   
   handleWalletSpendingCommited$(evt){
     console.log(evt);

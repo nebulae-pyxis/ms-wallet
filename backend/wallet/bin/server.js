@@ -7,8 +7,10 @@ if (process.env.NODE_ENV !== 'production') {
 const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
-const HelloWorldDA = require('./data/HelloWorldDA');
 const BusinessDA = require('./data/BusinessDA');
+const WalletDA = require('./data/WalletDA');
+const WalletTransactionDA = require('./data/WalletTransactionDA');
+const LogErrorDA = require('./data/LogErrorDA');
 const SpendingRulesDA = require('./data/SpendingRulesDA');
 const graphQlService = require('./services/emi-gateway/GraphQlService')();
 const Rx = require('rxjs');
@@ -18,8 +20,10 @@ const start = () => {
         eventSourcing.eventStore.start$(),
         eventStoreService.start$(),
         mongoDB.start$(),
-        HelloWorldDA.start$(),
         BusinessDA.start$(),
+        WalletDA.start$(),
+        WalletTransactionDA.start$(),
+        LogErrorDA.start$(),
         SpendingRulesDA.start$(),
         graphQlService.start$()
     ).subscribe(
