@@ -36,18 +36,20 @@ type Business {
   name: String
 }
 
-type WalletProductUtility {
+type ProductBonusConfig {
   type: String
   concept: String
-  percentageByBalance: Float
-  percentageByCredit: Float
+  bonusType: String
+  bonusValueByBalance: Float
+  bonusValueByCredit: Float
 }
 
-input WalletProductUtilityInput {
+input ProductBonusConfigInput {
   type: String
   concept: String
-  percentageByBalance: Float
-  percentageByCredit: Float
+  bonusType: String
+  bonusValueByBalance: Float
+  bonusValueByCredit: Float
 }
 
 input ManualBalanceAdjustmentInput {
@@ -111,8 +113,8 @@ type WalletSpendingRule {
   businessId: String
   businessName: String
   minOperationAmount: Int
-  productUtilitiesConfig: [WalletProductUtility]
-  autoPocketSelection: [WalletPocketSelectionRule]
+  productBonusConfigs: [ProductBonusConfig]
+  autoPocketSelectionRules: [WalletPocketSelectionRule]
   lastEdition: BigInt
   editedBy: String
 }
@@ -120,8 +122,8 @@ type WalletSpendingRule {
 input WalletSpendingRuleInput {
   businessId: String
   minOperationAmount: Int
-  productUtilitiesConfig: [WalletProductUtilityInput]
-  autoPocketSelection: [WalletPocketSelectionRuleInput]
+  productBonusConfigs: [ProductBonusConfigInput]
+  autoPocketSelectionRules: [WalletPocketSelectionRuleInput]
 }
 
 

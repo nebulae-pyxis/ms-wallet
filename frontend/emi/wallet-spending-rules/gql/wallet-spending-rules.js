@@ -18,13 +18,14 @@ export const getSpendingRule = gql`
       businessId
       businessName
       minOperationAmount
-      productUtilitiesConfig {
+      productBonusConfigs {
         type
         concept
-        percentageByBalance
-        percentageByCredit
+        bonusType
+        bonusValueByBalance
+        bonusValueByCredit
       }
-      autoPocketSelection {
+      autoPocketSelectionRules {
         priority
         toUse
         when {
@@ -45,13 +46,14 @@ export const getSpendingRules = gql`query  WalletGetSpendingRules($page: Int!, $
     businessId
     businessName
     minOperationAmount
-    productUtilitiesConfig{
+    productBonusConfigs{
       type
       concept
-      percentageByBalance
-      percentageByCredit
+      bonusType
+      bonusValueByBalance
+      bonusValueByCredit
     }
-    autoPocketSelection{
+    autoPocketSelectionRules{
       priority
       toUse
       when{

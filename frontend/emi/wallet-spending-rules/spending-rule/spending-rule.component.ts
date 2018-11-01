@@ -22,15 +22,16 @@ export interface SpendingRule {
   editedBy: string;
   lastEdition: number;
   minOperationAmount: number;
-  autoPocketSelection: AutoPocketRule[];
-  productUtilitiesConfig: ProductConfigRule[];
+  autoPocketSelectionRules: AutoPocketRule[];
+  productBonusConfigs: ProductConfigRule[];
 }
 
 export interface ProductConfigRule {
   type: string;
   concept: string;
-  percentageByBalance: number;
-  percentageByCredit: number;
+  bonusType: String;
+  bonusValueByBalance: number;
+  bonusValueByCredit: number;
 }
 
 export interface AutoPocketRule {
@@ -56,8 +57,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
     businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
     minOperationAmount: new FormControl(null, [ Validators.required ]),
-    productUtilitiesConfig: new FormArray([]),
-    autoPocketSelection: new FormArray([])
+    productBonusConfigs: new FormArray([]),
+    autoPocketSelectionRules: new FormArray([])
   });
 
   constructor(
@@ -67,8 +68,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private observableMedia: ObservableMedia ) {
       this.translationLoader.loadTranslations(english, spanish);
-      this.settingsForm.get('autoPocketSelection').setValidators([ Validators.required, this.validateAllAutoPocketSelection.bind(this) ]);
-      this.settingsForm.get('productUtilitiesConfig').setValidators([ Validators.required, this.validateAllProductRules.bind(this) ]);
+      this.settingsForm.get('autoPocketSelectionRules').setValidators([ Validators.required, this.validateAllAutoPocketSelection.bind(this) ]);
+      this.settingsForm.get('productBonusConfigs').setValidators([ Validators.required, this.validateAllProductRules.bind(this) ]);
       this.settingsForm.setValidators([this.validateAll.bind(this)]);
   }
 
@@ -120,8 +121,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         ),
         Rx.Observable.of(spendingRuleItem)
         .pipe(
-          filter(rule => (rule.autoPocketSelection != null) ),
-          map(sr => sr.autoPocketSelection.sort((a: AutoPocketRule , b: AutoPocketRule) => a.priority - b.priority )),
+          filter(rule => (rule.autoPocketSelectionRules != null) ),
+          map(sr => sr.autoPocketSelectionRules.sort((a: AutoPocketRule , b: AutoPocketRule) => a.priority - b.priority )),
           mergeMap(autoPocketRules =>
             from(autoPocketRules).pipe(
               tap(autoPocketRule =>  this.addAutoPocketSelectionRule(autoPocketRule)  )
@@ -130,8 +131,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         ),
         Rx.Observable.of(spendingRuleItem)
         .pipe(
-          filter(rule => (rule.productUtilitiesConfig != null) ),
-          map(sr => sr.productUtilitiesConfig),
+          filter(rule => (rule.productBonusConfigs != null) ),
+          map(sr => sr.productBonusConfigs),
           mergeMap(productRules =>
             from(productRules).pipe(
               tap(productRule =>  this.addProductSetting(productRule))
@@ -144,12 +145,12 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   }
 
   addProductSetting(productConfig?: ProductConfigRule ): void {
-    const items = this.settingsForm.get('productUtilitiesConfig') as FormArray;
+    const items = this.settingsForm.get('productBonusConfigs') as FormArray;
     items.push(this.createProductSetting( productConfig ));
     console.log(this.settingsForm);
   }
   addAutoPocketSelectionRule(autoPocketRule?: AutoPocketRule ): void {
-    const items = this.settingsForm.get('autoPocketSelection') as FormArray;
+    const items = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
     items.push(this.createAutoPocketRule( autoPocketRule ));
     console.log(this.settingsForm);
   }
@@ -162,7 +163,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   createAutoPocketRule(pocketRule: AutoPocketRule) {
     if (!pocketRule){
       pocketRule = {
-        priority : (this.settingsForm.get('autoPocketSelection') as FormArray).length + 1,
+        priority : (this.settingsForm.get('autoPocketSelectionRules') as FormArray).length + 1,
         toUse: 'BALANCE',
         when: {
           pocket: 'BALANCE',
@@ -185,20 +186,22 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       productConfig = {
         type: '',
         concept: '',
-        percentageByBalance: 0,
-        percentageByCredit: 0
+        bonusType:'PERCENTAGE',
+        bonusValueByBalance: 0,
+        bonusValueByCredit: 0
       };
     }
     return this.formBuilder.group({
       type: new FormControl( { value: productConfig.type, disabled: !this.currentVersion }, [Validators.required]),
       concept: new FormControl({ value: productConfig.concept, disabled: !this.currentVersion }, [Validators.required]),
-      percentageByBalance: new FormControl({ value: productConfig.percentageByBalance, disabled: !this.currentVersion }, [
+      bonusType: new FormControl({ value: productConfig.bonusType, disabled: !this.currentVersion }, [Validators.required]),
+      bonusValueByBalance: new FormControl({ value: productConfig.bonusValueByBalance, disabled: !this.currentVersion }, [
           Validators.required,
           Validators.min(0),
           Validators.max(100)
         ]
       ),
-      percentageByCredit: new FormControl({ value: productConfig.percentageByCredit, disabled: !this.currentVersion }, [
+      bonusValueByCredit: new FormControl({ value: productConfig.bonusValueByCredit, disabled: !this.currentVersion }, [
         Validators.required,
         Validators.min(0),
         Validators.max(100)
@@ -209,36 +212,36 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
 
 
   validatePercentages(): { [s: string]: boolean } {
-    const reloaders = this.settingsForm.get('productUtilitiesConfig') as FormArray;
-    const index = reloaders.getRawValue().findIndex(e => ( e.percentageByBalance >= 100 || e.percentageByCredit >= 100 || ( e.comparator === 'ENOUGH' && !e.value  ) ));
+    const reloaders = this.settingsForm.get('productBonusConfigs') as FormArray;
+    const index = reloaders.getRawValue().findIndex(e => ( e.bonusValueByBalance >= 100 || e.bonusValueByCredit >= 100 || ( e.comparator === 'ENOUGH' && !e.value  ) ));
     return (index !== -1) ? { 'percentageExceeded': true } : null;
   }
 
   validateAllProductRules(): { [s: string]: boolean } {
-    const reloaders = this.settingsForm.get('productUtilitiesConfig') as FormArray;
+    const reloaders = this.settingsForm.get('productBonusConfigs') as FormArray;
     const index = reloaders.getRawValue().findIndex(e => e.concept === '' || e.concept == null || e.type === '' || e.type == null );
     return (index !== -1) ? { 'typeOrConceptInvalidInArray': true } : null;
   }
 
   validateAllAutoPocketSelection(): { [s: string]: boolean } {
-    const reloaders = this.settingsForm.get('productUtilitiesConfig') as FormArray;
+    const reloaders = this.settingsForm.get('productBonusConfigs') as FormArray;
     const index = reloaders.getRawValue().findIndex(e => ( e.type == null || e.concept == null ));
     return (index !== -1) ? { 'typeOrConceptInvalid': true } : null;
   }
 
   validateValue(): { [s: string]: boolean } {
-    const reloaders = this.settingsForm.get('autoPocketSelection') as FormArray;
+    const reloaders = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
     const index = reloaders.getRawValue().findIndex(e => (e.comparator !== 'ENOUGH' && e.value == null ) );
     return (index !== -1) ? { 'valueRequired': true } : null;
   }
 
   validateAll(): { [s: string]: boolean } {
     let error = null;
-    let controls = this.settingsForm.get('autoPocketSelection') as FormArray;
+    let controls = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
     let index = controls.getRawValue().findIndex(e => (e.comparator !== 'ENOUGH' && e.value == null ) );
     error = (index !== -1) ? { 'valueRequired': true } : null;
     if (error){ return error; }
-    controls = this.settingsForm.get('productUtilitiesConfig') as FormArray;
+    controls = this.settingsForm.get('productBonusConfigs') as FormArray;
     index = controls.getRawValue().findIndex(e => ( e.type === '' || !e.type || e.concept === '' || !e.concept ) );
     error = (index !== -1) ? { 'conceptAndtypeRequired': true } : null;
     if (error){ return error; }
@@ -251,24 +254,25 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         ({
           businessId,
           minOperationAmount,
-          productUtilitiesConfig,
-          autoPocketSelection
+          productBonusConfigs,
+          autoPocketSelectionRules
         }) => ({
           businessId,
           minOperationAmount,
-          productUtilitiesConfig: productUtilitiesConfig.reduce(
+          productBonusConfigs: productBonusConfigs.reduce(
             (acc, p) => {
               acc.push({
                 type: p.type,
                 concept: p.concept,
-                percentageByBalance: p.percentageByBalance,
-                percentageByCredit: p.percentageByCredit
+                bonusType: p.bonusType,
+                bonusValueByBalance: p.bonusValueByBalance,
+                bonusValueByCredit: p.bonusValueByCredit
               });
               return acc;
             },
             []
           ),
-          autoPocketSelection: autoPocketSelection.reduce(
+          autoPocketSelectionRules: autoPocketSelectionRules.reduce(
             (acc, p) => {
               acc.push({
                 priority: p.priority,
@@ -299,8 +303,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
           businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
           businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
           minOperationAmount: new FormControl(null, [Validators.required]),
-          productUtilitiesConfig: new FormArray([], [Validators.required]),
-          autoPocketSelection: new FormArray([], [Validators.required])
+          productBonusConfigs: new FormArray([], [Validators.required]),
+          autoPocketSelectionRules: new FormArray([], [Validators.required])
         });
       }),
       mergeMap(() => this.loadSpendingRule$(this.selectedSpendingRule) )
