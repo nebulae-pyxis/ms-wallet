@@ -1,7 +1,10 @@
 const WalletDA = require('../../data/WalletDA');
+const SpendingRulesDA = require('../../data/SpendingRulesDA');
 const WalletTransactionDA = require('../../data/WalletTransactionDA');
 const { mergeMap, reduce } = require('rxjs/operators');
-const  { of, from } = require('rxjs');
+const  { of, from, forkJoin } = require('rxjs');
+const eventSourcing = require("../../tools/EventSourcing")();
+const Event = require("@nebulae/event-store").Event;
 
 class WalletHelper {
 
@@ -50,6 +53,7 @@ class WalletHelper {
     .pipe(
       //Processes each transaction one by one
       mergeMap(event => from(event.data.transactions)),
+      //Calculates the increment value from balance and bonus pockets
       reduce((acc, transaction) => {
         if(transaction.pocket.toUpperCase() == 'BALANCE'){
           acc.balance += transaction.pocket.value;
@@ -60,12 +64,77 @@ class WalletHelper {
         }
         return acc;
       }, {balance: 0, bonus: 0}),
+      //Update wallet values
       mergeMap(increment => WalletDA.updateWalletPockets$(business, increment))
     )
   }
 
-  static checkAlarms$(walletTransactionExecuted){
-    return of(walletTransactionExecuted)
+  /**
+   * Checks if an alarm must be generated taking into account the wallet and 
+   * the spending rules associated with the indicated business.
+   * @param {*} business Business that will be checked
+   * @return {Observable}
+   */
+  static checkWalletSpendingAlarms$(business){
+    return of(business)
+    .pipe(
+      mergeMap(business => forkJoin(
+        WalletDA.getWallet$(business._id),
+        SpendingRulesDA.getSpendingRule$(businessId)
+      )),
+      mergeMap(([wallet, spendingRule]) => {
+        const debt = (wallet.pocket.balance || 0) + (wallet.pocket.bonus || 0);
+
+        if (debt < spendingRule.minOperationAmount && wallet.spendingState == 'ALLOWED') {
+          return this.changeWalletSpendingState$(wallet.businessId, 'FORBIDDEN');
+        } else if (debt > spendingRule.minOperationAmount && wallet.spendingState == 'FORBIDDEN') {
+          return this.changeWalletSpendingState$(wallet.businessId, 'ALLOWED');
+        }else{
+          return of(null);
+        }
+      })
+    )
+  }
+
+  /**
+   * Changes the spending state in the wallet and emits an alarm (FORBIDDEN, ALLOWED)
+   * 
+   * @param {*} business Business to which the wallet will be updated
+   * @param {*} newSpendingState New spending state that will be applied to the wallet of the business
+   * @return {Observable}
+   */
+  static changeWalletSpendingState$(business, newSpendingState){
+    return of({business, newSpendingState})
+    .pipe(
+      //Updates the wallet spending state
+      mergeMap(({business, newSpendingState}) => WalletDA.updateWalletSpendingState$(business._id, newSpendingState)),
+      // Emit the wallet spending alarm
+      mergeMap(updateOperation => {
+        console.log('updateWalletSpendingState result => ', updateOperation);
+
+        const updatedWallet = updateOperation.result;
+        const eventType = updatedWallet.spendingState == 'FORBIDDEN' ? 'WalletSpendingForbidden': 'WalletSpendingAllowed';
+
+        const alarm = {
+          businessId: business._id,
+          wallet: {
+            balance: updatedWallet.pocket.balance,
+            bonus: updatedWallet.pocket.bonus
+          }
+        };
+
+        return eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType,
+            eventTypeVersion: 1,
+            aggregateType: "Wallet",
+            aggregateId: updatedWallet._id,
+            data: alarm,
+            user: 'SYSTEM'
+          })
+        );
+      })
+    );
   }
 
 

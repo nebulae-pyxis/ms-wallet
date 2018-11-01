@@ -64,9 +64,10 @@ class LogErrorDA {
    * @param {*} log data to persist
    * @param {*} log.error Error detail
    * @param {*} log.event event where the error was generated
+   * @param {*} log.type Error type
    */
-  static persistLogError$(collectionName, log) {
-    const collection = mongoDB.db.collection(collectionName);
+  static persistLogError$(log) {
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
     const logErrorData = {
       error: log.error,
       timestamp: Date.now(),

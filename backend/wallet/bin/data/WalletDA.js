@@ -58,6 +58,26 @@ class WalletDA {
       }))
     );
   }
+
+  /**
+   * Updates the spending state of the indicated business and returns the updated wallet.
+   * @param {*} businessId ID of the business to update
+   * @param {*} newSpendingState new spending state (ALLOWED, FORBIDDEN)
+   */
+  static updateWalletSpendingState$(businessId, newSpendingState) {
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
+    return of({businessId, newSpendingState})
+    .pipe(
+      mergeMap(({businessId, newSpendingState}) => defer(() => {
+        const updateQuery = {
+          $set: {
+            'spendingState': newSpendingState
+          }
+        };
+        return collection.findOneAndUpdate({ businessId }, updateQuery, {returnOriginal: false});
+      }))
+    );
+  }
 }
 
 /**

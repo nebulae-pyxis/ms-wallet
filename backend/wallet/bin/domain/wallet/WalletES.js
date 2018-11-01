@@ -1,8 +1,9 @@
 const BusinessDA = require("../../data/BusinessDA");
+const LogErrorDA = require("../../data/LogErrorDA");
 const WalletDA = require('../../data/WalletDA');
 const WalletHelper = require("./WalletHelper");
 const SpendingRulesDA = require('../../data/SpendingRulesDA');
-const { take, mergeMap, tap, catchError, map, filter, defaultIfEmpty, first} = require('rxjs/operators');
+const { mergeMap, catchError, map, filter, defaultIfEmpty, first} = require('rxjs/operators');
 const  { forkJoin, of, interval, from, throwError } = require('rxjs');
 const uuidv4 = require("uuid/v4");
 const [ BALANCE_POCKET, BONUS_POCKET ]  = [ 'BALANCE', 'BONUS' ];
@@ -11,7 +12,7 @@ const Event = require("@nebulae/event-store").Event;
 
 let instance;
 
-class BusinessES {
+class WalletES {
   constructor() {
   }
 
@@ -309,31 +310,36 @@ class BusinessES {
       mergeMap(([event, business]) => concat(
         WalletHelper.saveTransactions$(event),
         WalletHelper.applyTransactionsOnWallet$(event, business),
-        WalletHelper.checkAlarms$(event)
+        WalletHelper.checkWalletSpendingAlarms$(business)
       )),
+      catchError(error => {
+        console.log(`An error was generated while a walletTransactionExecuted was being processed: ${error.stack}`);
+        return this.errorHandler$(walletTransactionExecuted, error.stack, 'walletTransactionExecuted');
+      })
     );
   }
 
   /**
-   * Handles and persist the errors generated while a settlementJobTriggered was being processed.
-   * @param {*} error Error
+   * Handles and persist the errors generated.
+   * @param {*} error Error stack
+   * @param {*} errorType Error type (walletTransactionExecuted, ...)
    * @param {*} event settlementJobTriggered event
    */
-  errorHandler$(error, event) {
-    return of({ error, event }).mergeMap(log =>
-      LogErrorDA.persistAccumulatedTransactionsError$(log)
+  errorHandler$(event, error, errorType) {
+    return of({ error, type: errorType, event }).mergeMap(log =>
+      LogErrorDA.persistLogError$(log)
     );
   }
 }
 
 /**
- * Business event consumer
- * @returns {BusinessES} BusinessES
+ * Wallet ES consumer
+ * @returns {WalletES}
  */
 module.exports = () => {
   if (!instance) {
-    instance = new BusinessES();
-    console.log("SettlementES Singleton created");
+    instance = new WalletES();
+    console.log("WalletES Singleton created");
   }
   return instance;
 };
