@@ -115,7 +115,7 @@ module.exports = {
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
     },
-    WalletGetSpendingRules(root, args, context) {      
+    WalletGetSpendingRules(root, args, context) {     
         return broker
           .forwardAndGetReply$(
             "SpendingRule",
@@ -168,16 +168,25 @@ module.exports = {
 
   //// SUBSCRIPTIONS ///////
   Subscription: {
-    // walletHelloWorldSubscription: {
-    //   subscribe: withFilter(
-    //     (payload, variables, context, info) => {
-    //       return pubsub.asyncIterator("walletHelloWorldSubscription");
-    //     },
-    //     (payload, variables, context, info) => {
-    //       return true;
-    //     }
-    //   )
-    // }
+    walletUpdated: {
+      subscribe: withFilter(
+        (payload, variables, context, info) => {
+          //Checks the roles of the user, if the user does not have at least one of the required roles, an error will be thrown
+          RoleValidator.checkAndThrowError(
+            context.authToken.realm_access.roles, 
+            ["SYSADMIN", "business-owner"], 
+            contextName, 
+            "walletUpdated", 
+            PERMISSION_DENIED_ERROR_CODE, 
+            "Permission denied");
+
+          return pubsub.asyncIterator("walletUpdated");  
+        },
+        (payload, variables, context, info) => {         
+          return true;
+        }
+      )
+    }
   }
 };
 
@@ -186,13 +195,13 @@ module.exports = {
 //// SUBSCRIPTIONS SOURCES ////
 
 const eventDescriptors = [
-    // {
-    //     backendEventName: 'walletHelloWorldEvent',
-    //     gqlSubscriptionName: 'walletHelloWorldSubscription',
-    //     dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
-    //     onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
-    //     onEvent: (evt, descriptor) => {} // console.log(`Event of type  ${descriptor.backendEventName} arraived`),// OPTIONAL, only use if needed
-    // },
+    {
+        backendEventName: 'walletUpdated',
+        gqlSubscriptionName: 'walletUpdated',
+        dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
+        onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
+        onEvent: (evt, descriptor) => {} // console.log(`Event of type  ${descriptor.backendEventName} arraived`),// OPTIONAL, only use if needed
+    },
 ];
 
 

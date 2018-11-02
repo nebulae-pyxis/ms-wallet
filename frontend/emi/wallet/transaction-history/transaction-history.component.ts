@@ -18,9 +18,16 @@ import {
 ////////// RXJS ///////////
 // tslint:disable-next-line:import-blacklist
 import * as Rx from "rxjs/Rx";
-import { map, mergeMap, toArray, filter, tap, takeUntil, startWith } from "rxjs/operators";
-import { Subject } from 'rxjs';
-
+import {
+  map,
+  mergeMap,
+  toArray,
+  filter,
+  tap,
+  takeUntil,
+  startWith
+} from "rxjs/operators";
+import { Subject } from "rxjs";
 
 //////////// ANGULAR MATERIAL ///////////
 import {
@@ -38,25 +45,37 @@ import { locale as english } from "../i18n/en";
 import { locale as spanish } from "../i18n/es";
 
 //////////// Services ////////////
-import { KeycloakService } from 'keycloak-angular';
-import { WalletService } from './../wallet.service';
-import { TransactionHistoryService } from './transaction-history.service';
+import { KeycloakService } from "keycloak-angular";
+import { WalletService } from "./../wallet.service";
+import { TransactionHistoryService } from "./transaction-history.service";
 import { Observable } from "apollo-link";
 
 @Component({
-  selector: 'app-transaction-history',
-  templateUrl: './transaction-history.component.html',
-  styleUrls: ['./transaction-history.component.scss'],
+  selector: "app-transaction-history",
+  templateUrl: "./transaction-history.component.html",
+  styleUrls: ["./transaction-history.component.scss"],
   animations: fuseAnimations
 })
-export class TransactionHistoryComponent implements OnInit, OnDestroy  {
-
+export class TransactionHistoryComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject();
 
+  filterForm: FormGroup;
   // Table data
   dataSource = new MatTableDataSource();
   // Columns to show in the table
-  displayedColumns = ['timestamp', 'transactionType', 'transactionConcept', 'value', 'pocket', 'user', 'terminalUser' ];
+  displayedColumns = [
+    "timestamp",
+    "transactionType",
+    "transactionConcept",
+    "value",
+    "pocket",
+    "user",
+    "terminalUser"
+  ];
+
+  transactionTypes: any = [];
+  transactionConcepts: any = [];
+
 
   myBusiness: any = null;
   allBusiness: any = [];
@@ -66,17 +85,17 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy  {
   // Table values
   @ViewChild(MatPaginator)
   paginator: MatPaginator;
-  @ViewChild('filter')
+  @ViewChild("filter")
   filter: ElementRef;
   @ViewChild(MatSort)
   sort: MatSort;
   tableSize: number;
   page = 0;
   count = 10;
-  filterText = '';
+  filterText = "";
   sortColumn = null;
   sortOrder = null;
-  itemPerPage = '';
+  itemPerPage = "";
 
   constructor(
     private formBuilder: FormBuilder,
@@ -93,81 +112,100 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy  {
   }
 
   ngOnInit() {
+    this.buildFilterForm();
     this.loadRoleData();
     this.loadBusinessData();
     this.refreshTransactionHistoryTable();
   }
 
-    /**
+  buildFilterForm() {
+    // Reactive Form
+    this.filterForm = this.formBuilder.group({
+      initDate: [""],
+      endDate: [""],
+      terminalId: [""],
+      terminalUserId: [""],
+      terminalUsername: [""],
+      transactionType: [""],
+      transactionConcept: [""]
+    });
+  }
+
+  /**
    * Paginator of the table
    */
   getPaginator$() {
-    return this.paginator.page
-    .pipe(
-      startWith({ pageIndex: 0, pageSize: 10 }),
-    );
+    return this.paginator.page.pipe(startWith({ pageIndex: 0, pageSize: 10 }));
   }
 
   refreshTransactionHistoryTable() {
-      Rx.Observable.combineLatest(
-        this.getPaginator$(),
-        this.transactionHistoryService.selectedBusinessEvent$
-      ).pipe(
-          mergeMap(([paginator, selectedBusiness]) => {
+    Rx.Observable.combineLatest(
+      this.getPaginator$(),
+      this.transactionHistoryService.selectedBusinessEvent$
+    )
+      .pipe(
+        mergeMap(([paginator, selectedBusiness]) => {
+          return this.transactionHistoryService.getTransactionHistory$(
+            paginator.pageIndex,
+            paginator.pageSize,
+            selectedBusiness._id
+          );
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(([businessData, settlements, selectedBusiness]) => {
+        this.isSystemAdmin = businessData[0];
+        this.myBusiness = businessData[1];
+        this.allBusiness = businessData[2];
+        this.selectedBusinessData = selectedBusiness;
 
-            return this.transactionHistoryService
-              .getTransactionHistory$(
-                paginator.pageIndex,
-                paginator.pageSize,
-                selectedBusiness._id
-              );
-          }),
-          takeUntil(this.ngUnsubscribe)
-        )
-        .subscribe(([businessData, settlements, selectedBusiness]) => {
-          this.isSystemAdmin = businessData[0];
-          this.myBusiness = businessData[1];
-          this.allBusiness = businessData[2];
-          this.selectedBusinessData = selectedBusiness;
+        this.dataSource.data = settlements;
 
-          this.dataSource.data = settlements;
-
-          if (!this.isSystemAdmin){
-            this.displayedColumns = ["timestamp", "from", "to", "amount", "state" ]
-          } else{
-            this.displayedColumns = ["timestamp", "from", "to", "amount", "fromBusinessState", "toBusinessState" ]
-          }
-        });
+        if (!this.isSystemAdmin) {
+          this.displayedColumns = [
+            "timestamp",
+            "from",
+            "to",
+            "amount",
+            "state"
+          ];
+        } else {
+          this.displayedColumns = [
+            "timestamp",
+            "from",
+            "to",
+            "amount",
+            "fromBusinessState",
+            "toBusinessState"
+          ];
+        }
+      });
   }
 
   /**
    *
    */
-  loadRoleData(){
+  loadRoleData() {
     this.checkIfUserIsAdmin$()
-    .pipe(
-      takeUntil(this.ngUnsubscribe)
-    ).subscribe(hasSysAdminRole => {
-      this.isSystemAdmin = hasSysAdminRole;
-    });
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(hasSysAdminRole => {
+        this.isSystemAdmin = hasSysAdminRole;
+      });
   }
 
   /**
    * Creates the transaction history filter
    */
-  createTransactionHistoryFilterForm(){
-    return this.formBuilder.group({
-    });
+  createTransactionHistoryFilterForm() {
+    return this.formBuilder.group({});
   }
 
-
-    /**
+  /**
    * Checks if the logged user has role SYSADMIN
    */
-  checkIfUserIsAdmin$(){
-    return Rx.Observable.of(this.keycloakService.getUserRoles(true))
-    .pipe(
-      map(userRoles => userRoles.some(role => role === 'SYSADMIN'))
+  checkIfUserIsAdmin$() {
+    return Rx.Observable.of(this.keycloakService.getUserRoles(true)).pipe(
+      map(userRoles => userRoles.some(role => role === "SYSADMIN"))
     );
   }
 
@@ -187,29 +225,30 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy  {
   //   );
   // }
 
-    /**
+  /**
    * Loads business data
    */
   loadBusinessData() {
     return this.checkIfUserIsAdmin$()
-    .pipe(
-      mergeMap(hasSysAdminRole => {
-        return Rx.Observable.forkJoin(
-          Observable.of(hasSysAdminRole),
-          this.getBusiness$(),
-          hasSysAdminRole ? this.getAllBusiness$() : Rx.Observable.of([])
-        );
-      }),
-      takeUntil(this.ngUnsubscribe)
-    ).subscribe(([hasSysAdminRole, myBusiness, allBusinesses]) => {
-      this.myBusiness = myBusiness;
-      this.allBusiness = allBusinesses;
+      .pipe(
+        mergeMap(hasSysAdminRole => {
+          return Rx.Observable.forkJoin(
+            Observable.of(hasSysAdminRole),
+            this.getBusiness$(),
+            hasSysAdminRole ? this.getAllBusiness$() : Rx.Observable.of([])
+          );
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(([hasSysAdminRole, myBusiness, allBusinesses]) => {
+        this.myBusiness = myBusiness;
+        this.allBusiness = allBusinesses;
 
-      // If the user is not SYSADMIN, he will be only able to see info about its business, therefore the business is selected automatically.
-      if (!hasSysAdminRole && this.myBusiness){
-        this.onSelectBusinessEvent(this.myBusiness);
-      }
-    });
+        // If the user is not SYSADMIN, he will be only able to see info about its business, therefore the business is selected automatically.
+        if (!hasSysAdminRole && this.myBusiness) {
+          this.onSelectBusinessEvent(this.myBusiness);
+        }
+      });
   }
 
   /**
@@ -251,5 +290,4 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy  {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }
-
 }
