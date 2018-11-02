@@ -1,7 +1,7 @@
 const WalletDA = require('../../data/WalletDA');
 const SpendingRulesDA = require('../../data/SpendingRulesDA');
 const WalletTransactionDA = require('../../data/WalletTransactionDA');
-const { mergeMap, reduce } = require('rxjs/operators');
+const { mergeMap, reduce, tap, map } = require('rxjs/operators');
 const  { of, from, forkJoin } = require('rxjs');
 const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
@@ -110,6 +110,7 @@ class WalletHelper {
    * @return {Observable}
    */
   static changeWalletSpendingState$(businessId, newSpendingState){
+    console.log("changeWalletSpendingState$");
     return of({businessId, newSpendingState})
     .pipe(
       //Updates the wallet spending state

@@ -107,6 +107,7 @@ class WalletDA {
    * @param {*} newSpendingState new spending state (ALLOWED, FORBIDDEN)
    */
   static updateWalletSpendingState$(businessId, newSpendingState) {
+    console.log("updateWalletSpendingState$ ==> ", businessId, newSpendingState);
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return of({businessId, newSpendingState})
     .pipe(
