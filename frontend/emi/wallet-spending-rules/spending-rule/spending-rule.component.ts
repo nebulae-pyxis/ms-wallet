@@ -20,7 +20,7 @@ export interface SpendingRule {
   businessId: String;
   businessName: String;
   editedBy: string;
-  lastEdition: number;
+  lastEditionTimestamp: number;
   minOperationAmount: number;
   autoPocketSelectionRules: AutoPocketRule[];
   productBonusConfigs: ProductConfigRule[];

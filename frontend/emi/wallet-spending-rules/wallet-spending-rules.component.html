@@ -74,11 +74,11 @@
         <!-- MIN AMOUNT REQUIRED TO OPERATE -->
 
         <!-- LAST SPENDING RULE EDITION -->
-        <ng-container cdkColumnDef="lastEdition">
+        <ng-container cdkColumnDef="lastEditionTimestamp">
           <mat-header-cell fxFlex="20" *cdkHeaderCellDef>{{'TABLE.LAST_EDITION' | translate }}</mat-header-cell>
           <mat-cell fxFlex="20" *cdkCellDef="let spendingRule">
             <div  class="margin_right_left_5">
-              <span>{{ spendingRule.lastEdition | date }}</span>
+              <span>{{ spendingRule.lastEditionTimestamp | date }}</span>
             </div>
           </mat-cell>
         </ng-container>

@@ -214,6 +214,13 @@ class WalletES {
                             : (data.wallet.balance >= data.txAmount)
                               ? (data.txAmount / 100) * data.spendingRule.bonusValueByBalance
                               : (data.txAmount / 100) * data.spendingRule.bonusValueByCredit
+                        }),
+                        map(amount => amount.toString()),
+                        map( amountAsString  => {
+                         const decimals = 2;
+                         return (amountAsString.indexOf('.') !== -1 &&  ( amountAsString.length - amountAsString.indexOf('.') > decimals + 1 ) )
+                            ? Math.floor(parseFloat(amountAsString) * Math.pow(10, decimals)) / Math.pow(10, decimals)
+                            : parseFloat(amountAsString);
                         })
                       )
                   )          

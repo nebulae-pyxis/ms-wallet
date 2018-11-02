@@ -115,7 +115,7 @@ type WalletSpendingRule {
   minOperationAmount: Int
   productBonusConfigs: [ProductBonusConfig]
   autoPocketSelectionRules: [WalletPocketSelectionRule]
-  lastEdition: BigInt
+  lastEditionTimestamp: BigInt
   editedBy: String
 }
 

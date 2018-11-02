@@ -36,10 +36,10 @@ class SpendingRulesES {
         id: time,
         businessId: buId,
         businessName: buName,
-        minAmountOperation: 100000,
-        productsConfig: [],
-        autoPocketSellection: [],
-        lastEdition: time,
+        minOperationAmount: 100000,
+        productBonusConfigs: [],
+        autoPocketSelectionRules: [],
+        lastEditionTimestamp: time,
         editedBy: "SYSTEM"
       }))
     );

@@ -28,7 +28,7 @@ export interface SpendingRule {
   businessId: string;
   businessName: string;
   minOperationAmount: number;
-  lastEdition: number;
+  lastEditionTimestamp: number;
   editedBy: string;
 }
 
@@ -49,7 +49,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     'businessId',
     'businessName',
     'minOperationAmount',
-    'lastEdition',
+    'lastEditionTimestamp',
     'editedBy'
   ];
 
@@ -66,16 +66,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     private translationLoader: FuseTranslationLoaderService,
     private translatorService: TranslateService
   ) {
-    this.translationLoader.loadTranslations(english, spanish);
-    this.spendingRulesDataSource.data = [
-      {
-        businessId: 'GANA_MED_015',
-        businessName: 'GANA',
-        minOperationAmount: 1000000,
-        lastEdition: 1234656987,
-        editedBy: 'juan.santa'
-      }
-    ];
+    this.translationLoader.loadTranslations(english, spanish);   
   }
 
   ngOnInit() {

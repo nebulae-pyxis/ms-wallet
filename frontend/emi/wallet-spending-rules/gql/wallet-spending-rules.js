@@ -34,7 +34,7 @@ export const getSpendingRule = gql`
           value
         }
       }
-      lastEdition
+      lastEditionTimestamp
       editedBy
     }
   }
@@ -62,7 +62,7 @@ export const getSpendingRules = gql`query  WalletGetSpendingRules($page: Int!, $
         value
       }
     }
-    lastEdition
+    lastEditionTimestamp
     editedBy
 
   }
