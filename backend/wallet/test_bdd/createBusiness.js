@@ -6,7 +6,7 @@ const tocreate = {
     "etv": 1,
     "at": "Business",
     "data": {
-      "_id": "GANA_MED2",
+      "_id": "GANA_MED",
       "generalInfo": { "name": "Gana_mede" },
       "state": "true"
     },
@@ -24,8 +24,8 @@ const toEdit = {
     "et": "BusinessGeneralInfoUpdated",
     "etv": 1,
     "at": "Business",
-    "aid": "GANA_MED2",
-    "data": { "generalInfo": { "name": "Gana_mede" } },
+    "aid": "GANA_MED",
+    "data": { "name": "Gana_MEDELLIN" },
     "user": "juan.santa",
     "timestamp": 1540412513776,
     "av": 28,
@@ -42,7 +42,7 @@ const onWalletSpendingCommited = {
     "at": "Wallet",
     "aid": "5bd0fc425c88675e86b5b326",
     "data": {
-      "businessId": "GANA_MED3",
+      "businessId": "GANA_MED",
       "type": "VENTA",
       "concept": "RECARGA_CIVICA",
       "value": 5000,

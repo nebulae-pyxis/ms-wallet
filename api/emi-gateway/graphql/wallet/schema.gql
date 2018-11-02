@@ -101,13 +101,13 @@ input WalletPocketSelectionRuleConditionInput {
 type WalletPocketSelectionRule {
   priority: Int
   toUse: String
-  when: WalletPocketSelectionRuleCondition
+  condition: WalletPocketSelectionRuleCondition
 }
 
 input WalletPocketSelectionRuleInput {
   priority: Int
   toUse: String
-  when: WalletPocketSelectionRuleConditionInput
+  condition: WalletPocketSelectionRuleConditionInput
 }
 
 

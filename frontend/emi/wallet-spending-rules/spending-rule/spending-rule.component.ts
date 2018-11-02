@@ -37,7 +37,7 @@ export interface ProductConfigRule {
 export interface AutoPocketRule {
   priority: number;
   toUse: string;
-  when: { pocket: string, comparator: string, value: number | null };
+  condition: { pocket: string, comparator: string, value: number | null };
 }
 
 
@@ -165,7 +165,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       pocketRule = {
         priority : (this.settingsForm.get('autoPocketSelectionRules') as FormArray).length + 1,
         toUse: 'BALANCE',
-        when: {
+        condition: {
           pocket: 'BALANCE',
           comparator: 'ENOUGH',
           value: null
@@ -175,9 +175,9 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     return this.formBuilder.group({
       priority: new FormControl({ value: pocketRule.priority, disabled: !this.currentVersion }, [Validators.required, Validators.min(1)]),
       toUse: new FormControl({ value: pocketRule.toUse, disabled: !this.currentVersion }, [Validators.required]),
-      pocket: new FormControl({ value: pocketRule.when.pocket, disabled: !this.currentVersion }, [Validators.required]),
-      comparator: new FormControl({ value: pocketRule.when.comparator, disabled: !this.currentVersion }, [Validators.required]),
-      value: new FormControl({ value: pocketRule.when.value, disabled: !this.currentVersion }, [Validators.required, this.validatePercentages.bind(this) ])
+      pocket: new FormControl({ value: pocketRule.condition.pocket, disabled: !this.currentVersion }, [Validators.required]),
+      comparator: new FormControl({ value: pocketRule.condition.comparator, disabled: !this.currentVersion }, [Validators.required]),
+      value: new FormControl({ value: pocketRule.condition.value, disabled: !this.currentVersion }, [Validators.required, this.validatePercentages.bind(this) ])
     });
   }
 
@@ -277,7 +277,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
               acc.push({
                 priority: p.priority,
                 toUse: p.toUse,
-                when: {
+                condition: {
                   pocket: p.pocket,
                   comparator: p.comparator,
                   value: p.value
