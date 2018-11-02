@@ -36,29 +36,12 @@ class WalletES {
           }
         }
       }),
+      // Create a new wallet fro the business created
       mergeMap(wallet => WalletDA.createWallet$(wallet)),
-      mergeMap(result => {
-        const updatedWallet = updateOperation.result;
-
-        const alarm = {
-          businessId: businessCreatedEvent.data._id,
-          wallet: {
-            balance: 0,
-            bonus: 0
-          }
-        };
-
-        return eventSourcing.eventStore.emitEvent$(
-          new Event({
-            eventType: 'WalletSpendingForbidden',
-            eventTypeVersion: 1,
-            aggregateType: "Wallet",
-            aggregateId: businessCreatedEvent.data._id,
-            data: alarm,
-            user: 'SYSTEM'
-          })
-        );
-      })
+      //Takes the document inserted
+      map(operationResult => operationResult.ops[0]),
+      //Throws a wallet spending alarm according to the wallet spending state
+      mergeMap(wallet => WalletHelper.throwAlarm$(wallet))
     )
   }
 
@@ -343,9 +326,7 @@ class WalletES {
       //Get wallet of the implied business
       mergeMap(walletTransactionExecuted => WalletDA.getWallet$(walletTransactionExecuted.businessId).pipe(map(wallet => [wallet, walletTransactionExecuted]))),
       //Emit the wallet transaction executed
-      mergeMap(([wallet, walletTransactionExecuted]) => {
-        console.log('wallet => ', wallet);           
-        console.log('walletTransactionExecuted => ', walletTransactionExecuted);           
+      mergeMap(([wallet, walletTransactionExecuted]) => {           
         return eventSourcing.eventStore.emitEvent$(
           new Event({
             eventType: 'WalletTransactionExecuted',
