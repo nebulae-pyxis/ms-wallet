@@ -17,6 +17,7 @@ class WalletES {
   constructor() {
   }
 
+  
 
   /**
    * Receives a business created event and create a wallet for the business
@@ -382,9 +383,9 @@ class WalletES {
 
   /**
    * Handles and persist the errors generated.
-   * @param {*} error Error stack
-   * @param {*} errorType Error type (walletTransactionExecuted, ...)
+   * @param {*} error Error stack   
    * @param {*} event settlementJobTriggered event
+   * @param {*} errorType Error type (walletTransactionExecuted, walletDepositCommitedEvent, ...)
    */
   errorHandler$(event, error, errorType) {
     return of({ error, type: errorType, event }).pipe(

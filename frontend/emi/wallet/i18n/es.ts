@@ -14,7 +14,15 @@ export const locale = {
       BUSINESS_REQUIRED: 'Debe seleccionar el agente al cual desea aplicar el ajuste de saldo',
       TRANSACTION_HISTORY: 'Historial de transacciones',
       BUSINESS: 'Agente:',
-      SELECT_BUSINESS: 'Seleccione agente'
+      SELECT_BUSINESS: 'Seleccione agente',
+      FILTER: 'Filtro',
+      INIT_DATE: 'Fecha inicial',
+      END_DATE: 'Fecha final',
+      TERMINAL_ID: 'ID terminal',
+      TERMINAL_USER_ID: 'ID Usuario',
+      TERMINAL_USERNAME: 'ID terminal',
+      SELECT_TRANSACTION_TYPE: 'Seleccione tipo',
+      SELECT_TRANSACTION_CONCEPT: 'Seleccione concepto',
     }
   }
 };

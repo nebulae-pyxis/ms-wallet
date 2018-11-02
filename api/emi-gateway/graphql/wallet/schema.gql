@@ -12,8 +12,6 @@ type Pocket {
   balance: Float
   "bonus pocket"
   bonus: Float
-  "balance pocket"
-  credit: Float
 }
 
 "Wallet info"
@@ -23,9 +21,14 @@ type Wallet {
   "pocket info"
   pockets: Pocket!
   "Wallet state"
-  state: String
+  spendingState: SpendingStateEnum
   "Business ID"
   businessId: String
+}
+
+enum SpendingStateEnum {
+  ALLOWED
+  FORBIDDEN
 }
 
 "Business info"
@@ -151,5 +154,10 @@ type Mutation {
   "Mutation to create manual balance adjustments"
   makeManualBalanceAdjustment(input: ManualBalanceAdjustmentInput): CommandResponse
   walletUpdateSpendingRule(input: WalletSpendingRuleInput ): CommandResponse
+}
+
+type Subscription {
+  "This events is triggered when a wallet is created or updated"
+  walletUpdated: Wallet
 }
 
