@@ -15,7 +15,6 @@ class WalletHelper {
    * @param {*} event 
    */
   static saveTransactions$(walletTransactionExecuted){
-    console.log('saveTransactions ', JSON.stringify(walletTransactionExecuted));
     return of(walletTransactionExecuted)
     .pipe(
       //Processes each transaction one by one
@@ -106,58 +105,39 @@ class WalletHelper {
   /**
    * Changes the spending state in the wallet and emits an alarm (FORBIDDEN, ALLOWED)
    * 
-   * @param {*} business Business to which the wallet will be updated
+   * @param {*} businessId ID of the Business to which the wallet will be updated
    * @param {*} newSpendingState New spending state that will be applied to the wallet of the business
    * @return {Observable}
    */
-  static changeWalletSpendingState$(business, newSpendingState){
-    return of({business, newSpendingState})
+  static changeWalletSpendingState$(businessId, newSpendingState){
+    return of({businessId, newSpendingState})
     .pipe(
       //Updates the wallet spending state
-      mergeMap(({business, newSpendingState}) => WalletDA.updateWalletSpendingState$(business._id, newSpendingState)),
-      // Emit the wallet spending alarm
-      mergeMap(updateOperation => {
-        console.log('updateWalletSpendingState result => ', updateOperation);
-
-        const updatedWallet = updateOperation.result;
-        const eventType = updatedWallet.spendingState == 'FORBIDDEN' ? 'WalletSpendingForbidden': 'WalletSpendingAllowed';
-
-        const alarm = {
-          businessId: business._id,
-          wallet: {
-            balance: updatedWallet.pockets.balance,
-            bonus: updatedWallet.pockets.bonus
-          }
-        };
-
-        return eventSourcing.eventStore.emitEvent$(
-          new Event({
-            eventType,
-            eventTypeVersion: 1,
-            aggregateType: "Wallet",
-            aggregateId: updatedWallet._id,
-            data: alarm,
-            user: 'SYSTEM'
-          })
-        );
-      })
+      mergeMap(({businessId, newSpendingState}) => WalletDA.updateWalletSpendingState$(businessId, newSpendingState)),
+      //Takes the updated wallet data
+      map(updateOperation => updateOperation.value),
+      //Throws a wallet spending alarm according to the business spending state
+      mergeMap(wallet => this.throwAlarm$(wallet))
     );
   }
 
-  static throwAlarm$(wallet){
-    return of(wallet)
-    .pipe(
-      mergeMap(updateOperation => {
-        console.log('updateWalletSpendingState result => ', updateOperation);
 
-        const updatedWallet = updateOperation.result;
-        const eventType = updatedWallet.spendingState == 'FORBIDDEN' ? 'WalletSpendingForbidden': 'WalletSpendingAllowed';
+  /**
+   * Throws a wallet spending alarm according to the wallet spending state. 
+   * @param {*} walletData Wallet to check
+   */
+  static throwAlarm$(walletData){
+    return of(walletData)
+    .pipe(
+      //Emits the wallet spending alarm
+      mergeMap(wallet => {
+        const eventType = wallet.spendingState == 'FORBIDDEN' ? 'WalletSpendingForbidden': 'WalletSpendingAllowed';
 
         const alarm = {
-          businessId: business._id,
+          businessId: wallet.businessId,
           wallet: {
-            balance: updatedWallet.pockets.balance,
-            bonus: updatedWallet.pockets.bonus
+            balance: wallet.pockets.balance,
+            bonus: wallet.pockets.bonus
           }
         };
 
@@ -166,7 +146,7 @@ class WalletHelper {
             eventType,
             eventTypeVersion: 1,
             aggregateType: "Wallet",
-            aggregateId: updatedWallet._id,
+            aggregateId: wallet._id,
             data: alarm,
             user: 'SYSTEM'
           })
