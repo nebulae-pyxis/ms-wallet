@@ -59,6 +59,17 @@ class MongoDB {
         });
     }
 
+    /**
+   * Drop current DB
+   */
+  dropDB$() {
+    return Rx.Observable.create(async observer => {
+      await this.db.dropDatabase();
+      observer.next(`Database ${this.dbName} dropped`);
+      observer.complete();
+    });
+  }
+
 }
 
 module.exports = {

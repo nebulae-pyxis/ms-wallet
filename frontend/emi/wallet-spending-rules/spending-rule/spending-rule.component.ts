@@ -13,6 +13,7 @@ import { ObservableMedia } from '@angular/flex-layout';
 import { from } from 'rxjs';
 import { locale as english } from '../i18n/en';
 import { locale as spanish } from '../i18n/es';
+import { MyCurrencyFormatterDirective } from '../directives/currency.directive';
 
 
 export interface SpendingRule {
@@ -248,7 +249,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   }
 
   saveSpendingRule() {
-    console.log(this.settingsForm.getRawValue());
+    console.log(this.settingsForm);
     Rx.Observable.of(this.settingsForm.getRawValue())
       .pipe(map(
         ({

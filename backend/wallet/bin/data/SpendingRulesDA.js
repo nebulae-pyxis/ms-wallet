@@ -64,7 +64,6 @@ class SpendingRules {
      * @param {string} responsibleUser user responsible for the edition
      */
     static updateWalletSpendingRule$(spendingRule, responsibleUser, timestamp ) {
-        console.log(spendingRule);
         const collection = mongoDB.db.collection(COLLECTION_NAME);
         return of(spendingRule)
             .pipe(

@@ -200,17 +200,17 @@ class WalletES {
                       .pipe(
                         map(data => {
                           return (data.spendingRule.bonusType == "FIXED")
-                            ? (data.wallet.balance >= data.txAmount)
+                            ? (data.wallet.pockets.balance >= data.txAmount)
                               ? data.spendingRule.bonusValueByBalance
                               : data.spendingRule.bonusValueByCredit
-                            : (data.wallet.balance >= data.txAmount)
-                              ? (data.txAmount / 100) * data.spendingRule.bonusValueByBalance
-                              : (data.txAmount / 100) * data.spendingRule.bonusValueByCredit
+                            : (data.wallet.pockets.balance >= data.txAmount)
+                              ? (data.txAmount * data.spendingRule.bonusValueByBalance) / 100
+                              : (data.txAmount * data.spendingRule.bonusValueByCredit) / 100
                         }),
-                        map(amount => amount.toString()),
+                        map(amount => ((amount * 1000) / 1000 ).toString()),
                         map( amountAsString  => {
-                         const decimals = 2;
-                         return (amountAsString.indexOf('.') !== -1 &&  ( amountAsString.length - amountAsString.indexOf('.') > decimals + 1 ) )
+                          const decimals = 2;
+                          return (amountAsString.indexOf('.') !== -1 &&  ( amountAsString.length - amountAsString.indexOf('.') > decimals + 1 ) )
                             ? Math.floor(parseFloat(amountAsString) * Math.pow(10, decimals)) / Math.pow(10, decimals)
                             : parseFloat(amountAsString);
                         })
@@ -371,7 +371,7 @@ class WalletES {
       mergeMap(([event, business]) => concat(
         WalletHelper.saveTransactions$(event),
         WalletHelper.applyTransactionsOnWallet$(event, business),
-        WalletHelper.checkWalletSpendingAlarms$(business)
+        WalletHelper.checkWalletSpendingAlarms$(business._id)
       )),
       catchError(error => {
         console.log(`An error was generated while a walletTransactionExecuted was being processed: ${error.stack}`);

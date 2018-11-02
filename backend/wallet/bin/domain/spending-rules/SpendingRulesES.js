@@ -1,5 +1,6 @@
 const Rx = require("rxjs");
 const SpendingRulesDA = require("../../data/SpendingRulesDA");
+const WalletHelper = require('../wallet/WalletHelper');
 const { take, mergeMap, catchError, map, tap } = require('rxjs/operators');
 const  { forkJoin, of, interval } = require('rxjs');
 
@@ -46,10 +47,12 @@ class SpendingRulesES {
   }
 
   handleSpendingRuleUpdated$(evt){
-    console.log("############################# commig event ot update the spenbding rule ");
+    console.log(" commig event ot update the spenbding rule ");
     return of(evt.data.input)
     .pipe(
-      mergeMap(spendingRule => SpendingRulesDA.updateWalletSpendingRule$(spendingRule, evt.user, evt.timestamp ))
+      mergeMap(spendingRule => SpendingRulesDA.updateWalletSpendingRule$(spendingRule, evt.user, evt.timestamp )),
+      tap(r => console.log("#################", r)),
+      mergeMap(() => WalletHelper.checkWalletSpendingAlarms$(evt.data.input.businessId) )
     )
   }
 

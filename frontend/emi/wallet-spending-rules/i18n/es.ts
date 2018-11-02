@@ -27,7 +27,7 @@ export const locale = {
     },
     WALLET: {
       SPENDING_RULE: 'Reglas de gastos de billetera',
-      UTILITIES_BY_PRODUCT: 'Utilidades por producto',
+      UTILITIES_BY_PRODUCT: 'Comisión por producto',
       AUTO_WALLET_SELLECTION: 'Selección automática de bolsillo',
       BALANCE: 'Saldo',
       BONUS: 'Comision',
