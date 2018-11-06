@@ -255,11 +255,11 @@ class WalletES {
               default: return throwError('Invalid comparator');
             }
             }),
-            defaultIfEmpty({ toUse: BALANCE_POCKET }),
+            defaultIfEmpty({ pocketToUse: BALANCE_POCKET }),
             first()
           )  
         ),
-        map(({toUse}) =>  toUse),
+        map(({pocketToUse}) =>  pocketToUse),
         map(selectedPocket => {
           return (
             (selectedPocket == BALANCE_POCKET && wallet.pockets[selectedPocket.toLowerCase()] > 0)

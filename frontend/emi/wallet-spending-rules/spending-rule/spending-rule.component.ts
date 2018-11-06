@@ -36,7 +36,7 @@ export interface ProductConfigRule {
 
 export interface AutoPocketRule {
   priority: number;
-  toUse: string;
+  pocketToUse: string;
   condition: { pocket: string, comparator: string, value: number | null };
 }
 
@@ -165,7 +165,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     if (!pocketRule){
       pocketRule = {
         priority : (this.settingsForm.get('autoPocketSelectionRules') as FormArray).length + 1,
-        toUse: 'BALANCE',
+        pocketToUse: 'BALANCE',
         condition: {
           pocket: 'BALANCE',
           comparator: 'ENOUGH',
@@ -175,7 +175,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     }
     return this.formBuilder.group({
       priority: new FormControl({ value: pocketRule.priority, disabled: !this.currentVersion }, [Validators.required, Validators.min(1)]),
-      toUse: new FormControl({ value: pocketRule.toUse, disabled: !this.currentVersion }, [Validators.required]),
+      pocketToUse: new FormControl({ value: pocketRule.pocketToUse, disabled: !this.currentVersion }, [Validators.required]),
       pocket: new FormControl({ value: pocketRule.condition.pocket, disabled: !this.currentVersion }, [Validators.required]),
       comparator: new FormControl({ value: pocketRule.condition.comparator, disabled: !this.currentVersion }, [Validators.required]),
       value: new FormControl({ value: pocketRule.condition.value, disabled: !this.currentVersion }, [Validators.required, this.validatePercentages.bind(this) ])
@@ -277,7 +277,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
             (acc, p) => {
               acc.push({
                 priority: p.priority,
-                toUse: p.toUse,
+                pocketToUse: p.pocketToUse,
                 condition: {
                   pocket: p.pocket,
                   comparator: p.comparator,

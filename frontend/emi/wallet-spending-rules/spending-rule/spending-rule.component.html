@@ -136,7 +136,7 @@
 
               <!-- POCKET TO USE -->
               <mat-form-field class="center-text pr-5 pl-5" fxFlex="70" fxFlex.gt-xs="20">
-                <mat-select formControlName="toUse" placeholder="{{ 'SPENDING_RULE.POCKET' | translate}}">
+                <mat-select formControlName="pocketToUse" placeholder="{{ 'SPENDING_RULE.POCKET' | translate}}">
                   <mat-option  *ngFor="let pocket of ['BALANCE', 'BONUS']" class="center-text" [value]="pocket">
                     {{ 'WALLET.' + pocket | translate}}
                   </mat-option>

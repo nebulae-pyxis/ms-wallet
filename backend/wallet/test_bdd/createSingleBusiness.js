@@ -3,12 +3,18 @@ const assert = require("assert");
 const uuidv4 = require("uuid/v4");
 const expect = require("chai").expect;
 
-const { take, mergeMap, catchError, map, tap, delay } = require('rxjs/operators');
-const  { forkJoin, of, interval, concat } = require('rxjs');
+const { take, mergeMap, catchError, map, tap, delay, toArray } = require('rxjs/operators');
+const  { forkJoin, of, interval, concat, from } = require('rxjs');
 
 //LIBS FOR TESTING
 const MqttBroker = require("../bin/tools/broker/MqttBroker");
 const MongoDB = require("../bin/data/MongoDB").MongoDB;
+
+let BusinessDA = undefined;
+let WalletDA = undefined;
+let WalletTransactionDA = undefined;
+let LogErrorDA = undefined;
+let SpendingRulesDA = undefined;
 
 //
 let mongoDB = undefined;
@@ -54,8 +60,8 @@ describe("E2E - Simple transaction", function() {
   * PREAPARE
   */
   describe("Prepare test DB and backends", function() {
-    it("start acss server", function(done) {
-      this.timeout(3000);
+    it("start wallet server", function(done) {
+      this.timeout(60000);
       Object.keys(environment).forEach(envKey => {
         process.env[envKey] = environment[envKey];
         console.log(`env var set => ${envKey}:${process.env[envKey]}`);
@@ -63,6 +69,11 @@ describe("E2E - Simple transaction", function() {
 
       const eventSourcing = require("../bin//tools/EventSourcing")();
       const eventStoreService = require("../bin//services/event-store/EventStoreService")();
+      BusinessDA = require('../bin/data/BusinessDA');
+      WalletDA = require('../bin/data/WalletDA');
+      WalletTransactionDA = require('../bin/data/WalletTransactionDA');
+      LogErrorDA = require('../bin/data/LogErrorDA');
+      SpendingRulesDA = require('../bin/data/SpendingRulesDA');
       mongoDB = require("../bin//data/MongoDB").singleton();
       
     of({})
@@ -71,6 +82,11 @@ describe("E2E - Simple transaction", function() {
                 eventSourcing.eventStore.start$(),
                 eventStoreService.start$(),
                 mongoDB.start$(),
+                BusinessDA.start$(),
+                WalletDA.start$(),
+                WalletTransactionDA.start$(),
+                LogErrorDA.start$(),
+                SpendingRulesDA.start$(),
             ))
         )
         .subscribe(
@@ -83,50 +99,12 @@ describe("E2E - Simple transaction", function() {
                 return done(error);
             },
             () => {
-                console.log("acss started");
+                console.log("wallet server started");
                 return done();
             }
         )
     }),
-    //   it("start acss-channel server", function(done) {
-    //     this.timeout(3000);
 
-    //     const eventSourcing = require("../../../../ms-acss-channel-afcc-reload/backend/acss-channel-afcc-reload/bin/tools/EventSourcing")();
-    //     const eventStoreService = require("../../../../ms-acss-channel-afcc-reload/backend/acss-channel-afcc-reload/bin/services/event-store/EventStoreService")();
-    //     const mongoDB = require("../../../../ms-acss-channel-afcc-reload/backend/acss-channel-afcc-reload//bin/data/MongoDB").singleton();
-    //     const AfccReloadChannelDA = require("../../../../ms-acss-channel-afcc-reload/backend/acss-channel-afcc-reload/bin/data/AfccReloadChannelDA");
-    //     const AfccReloadsDA = require("../../../../ms-acss-channel-afcc-reload/backend/acss-channel-afcc-reload/bin/data/AfccReloadsDA");
-    //     const TransactionsDA = require("../../../../ms-acss-channel-afcc-reload/backend/acss-channel-afcc-reload/bin/data/TransactionsDA");
-    //     const TransactionsErrorsDA = require("../../../../ms-acss-channel-afcc-reload/backend/acss-channel-afcc-reload/bin/data/TransactionsErrorsDA");
-    //     // const graphQlService = require('./services/gateway/GraphQlService')();
-    //     const Rx = require("rxjs");
-
-    //     Rx.Observable.concat(
-    //       eventSourcing.eventStore.start$(),
-    //       eventStoreService.start$(),
-    //       mongoDB.start$(),
-    //       Rx.Observable.forkJoin(
-    //         AfccReloadChannelDA.start$(),
-    //         AfccReloadsDA.start$(),
-    //         TransactionsDA.start$(),
-    //         TransactionsErrorsDA.start$()
-    //       )
-    //       // graphQlService.start$()
-    //     ).subscribe(
-    //       evt => {
-    //         // console.log(evt)
-    //       },
-    //       error => {
-    //         console.error("Failed to start", error);
-    //         // process.exit(1);
-    //         return done(error);
-    //       },
-    //       () => {
-    //         console.log("acss-channel-afcc-reload started");
-    //         return done();
-    //       }
-    //     );
-    //   }),
       it("start MQTT broker", function(done) {
         broker = new MqttBroker({
           mqttServerUrl: process.env.MQTT_SERVER_URL,
@@ -136,68 +114,418 @@ describe("E2E - Simple transaction", function() {
       });
   });
 
+
+  
+
   /*
   * CREATE BUSINESS UNITS
   */
-//   describe("Create the business units", function() {
-//     it("Create one busines unit", function(done) {
-//       Rx.Observable.from([
-//         {
-//           _id: "123456789_Metro_med",
-//           name: "Metro de Medellin"
-//         },
-//         {
-//           _id: "123456789_Gana",
-//           name: "Gana Medellin"
-//         },
-//         {
-//           _id: "123456789_NebulaE_POS",
-//           name: "NebulaE_POS"
-//         },
-//         {
-//           _id: "123456789_PlaceToPay",
-//           name: "Place to Play"
-//         },
-//         {
-//           _id: "123456789_NebulaE",
-//           name: "NebulaE"
-//         },
-//         {
-//           _id: "123456789_surplus",
-//           name: "surplus collector"
-//         },
-//         {
-//           _id: "123456789_Pasarela",
-//           name: "Pasarela"
-//         }
-//       ])
-//         .delay(10)
-//         .mergeMap(bu =>
-//           broker.send$("Events", "", {
-//             et: "BusinessCreated",
-//             etv: 1,
-//             at: "Business",
-//             aid: bu._id,
-//             data: { generalInfo: bu, _id: bu._id },
-//             user: "esteban.zapata",
-//             timestamp: Date.now(),
-//             av: 164
-//           })
-//         )
-//         .toArray()
-//         .delay(1000)
-//         .subscribe(
-//           evt => console.log(`Message sent to create a business unit: ${evt}`),
-//           error => {
-//             console.error(`sent message failded ${error}`);
-//             return done(error);
-//           },
-//           () => {
-//             return done();
-//           }
-//         );
-//     });
-//   });
+  describe("Create the business units", function () {
+    const businessList = [{ _id: "123456789_Metro_med", name: "Metro de Medellin" }];
+    it("Create one busines unit", function (done) {
+      from(businessList).
+      pipe( 
+        delay(20),
+        mergeMap(bu =>
+          broker.send$("Events", "", {
+            et: "BusinessCreated",
+            etv: 1,
+            at: "Business",
+            aid: bu._id,
+            data: { generalInfo: bu, _id: bu._id },
+            user: "juan.santa",
+            timestamp: Date.now(),
+            av: 164
+          })
+        ),
+        toArray(),
+        delay(1000)
+      )
+      .subscribe(
+        evt => console.log('business unit created'),
+        error => {
+          console.error(`sent message failded ${error}`);
+          return done(error);
+        },
+        () => {
+          return done();
+        }
+      );
+    });
+
+    it("verify its defaults documents", function(done){
+      of({}).pipe(
+        mergeMap(() => forkJoin(
+          BusinessDA.getBusiness$(businessList[0]._id),
+          SpendingRulesDA.getSpendingRule$(businessList[0]._id),
+          WalletDA.getWallet$(businessList[0]._id)
+        )),
+        tap(([business, spendingRule, wallet]) => {
+
+          expect(business).to.be.deep.equal({
+            _id: businessList[0]._id,
+            name: businessList[0].name
+          });
+
+          expect({...spendingRule, id: 0, _id: 0, lastEditionTimestamp: 0}).to.be.deep.equal({
+            _id: 0,
+            id: 0,
+            businessId: businessList[0]._id,
+            businessName: businessList[0].name,
+            minOperationAmount: 0,
+            lastEditionTimestamp: 0,
+            editedBy: 'SYSTEM',
+            productBonusConfigs: [],
+            autoPocketSelectionRules: []
+          });
+          
+          expect(spendingRule.id).to.be.equal(spendingRule.lastEditionTimestamp);
+
+          expect({...wallet, _id: 0}).to.be.deep.equal({
+            _id: 0,
+            businessId: businessList[0]._id,
+            businessName: businessList[0].name,
+            spendingState: 'FORBIDDEN',
+            pockets:{
+              balance: 0,
+              bonus: 0
+            }
+          })
+
+
+        })
+      )
+      .subscribe(
+        ok => {},
+        error => {
+          console.log(error);
+          return done(error);
+        },
+        () => { console.log("Business, spendingRules and wallet documents were checked"); return done();  }
+      )
+      
+    })
+
+  });
+
+
+  /*
+  * EDIT BUSINESS UNITS
+  */
+ describe("Edit the business name", function () {
+
+  const businessList = [{ _id: "123456789_Metro_med", name: "Metro de Medellin_V2" }];
+
+  it("Edit a busines unit", function (done) {
+    from(businessList).
+    pipe( 
+      delay(20),
+      mergeMap(bu =>
+        broker.send$("Events", "", {
+          et: "BusinessGeneralInfoUpdated",
+          etv: 1,
+          at: "Business",
+          aid: bu._id,
+          data: { name: businessList[0].name },
+          user: "juan.santa",
+          timestamp: Date.now(),
+          av: 164
+        })
+      ),
+      toArray(),
+      delay(1000)
+    )
+    .subscribe(
+      evt => {},
+      error => {
+        console.error(`sent message failded ${error}`);
+        return done(error);
+      },
+      () => {
+        return done();
+      }
+    );
+  });
+
+  it("verify its defaults documents", function(done){
+    of({}).pipe(
+      mergeMap(() => forkJoin(
+        BusinessDA.getBusiness$(businessList[0]._id),
+        SpendingRulesDA.getSpendingRule$(businessList[0]._id),
+        WalletDA.getWallet$(businessList[0]._id)
+      )),
+      tap(([business, spendingRule, wallet]) => {
+
+        expect(business).to.be.deep.equal({
+          _id: businessList[0]._id,
+          name: businessList[0].name
+        });
+
+        expect({...spendingRule, id: 0, _id: 0, lastEditionTimestamp: 0}).to.be.deep.equal({
+          _id: 0,
+          id: 0,
+          businessId: businessList[0]._id,
+          businessName: businessList[0].name,
+          minOperationAmount: 0,
+          lastEditionTimestamp: 0,
+          editedBy: 'SYSTEM',
+          productBonusConfigs: [],
+          autoPocketSelectionRules: []
+        });
+        
+        expect(spendingRule.id).to.be.equal(spendingRule.lastEditionTimestamp);
+
+        expect({...wallet, _id: 0}).to.be.deep.equal({
+          _id: 0,
+          businessId: businessList[0]._id,
+          businessName: businessList[0].name,
+          spendingState: 'FORBIDDEN',
+          pockets:{
+            balance: 0,
+            bonus: 0
+          }
+        })
+
+
+      })
+    )
+    .subscribe(
+      ok => {},
+      error => {
+        console.log(error);
+        return done(error);
+      },
+      () => { console.log("Business, spendingRules and wallet documents were checked"); return done();  }
+    )
+
+
+    
+  })
+
+});
+
+
+describe("Update SpendingRule", function(){
+  const businessList = [{ _id: "123456789_Metro_med", name: "Metro de Medellin_V2" }];
+  let beforeSpendingRule = undefined;
+  let afterSpendingRule = undefined;
+
+  it("Update minOperationAmount", function(done){
+    of({})
+    .pipe(
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => beforeSpendingRule = spendingRule),
+      map(({businessId, minOperationAmount, productBonusConfigs, autoPocketSelectionRules }) => {
+        return { businessId,
+                minOperationAmount: -750000,
+                productBonusConfigs, autoPocketSelectionRules 
+        }
+      }),
+      // give a debt capacity to 750.000
+      mergeMap( spendingRuleUpdate => broker.send$("Events", "", {
+        et: "SpendingRuleUpdated",
+        etv: 1,
+        at: "SpendingRule",
+        aid: businessList[0]._id,
+        data: {input: spendingRuleUpdate},
+        user: "juan.santa",
+        timestamp: Date.now(),
+        av: 164
+      })
+      ),
+      delay(1000),
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => afterSpendingRule = spendingRule),
+      tap(() => {
+        expect(beforeSpendingRule.minOperationAmount).to.be.equal(0);
+        expect(afterSpendingRule.minOperationAmount).to.be.equal(-750000);
+        expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
+
+      })
+    )
+    .subscribe( evt => {}, error => done(error), () => done() );
+  }),
+
+  it("Insert a new productBonusConfig", function(done){
+    const productBonusConfigs = [
+      {
+        type: 'VENTA',
+        concept: 'RECARGA_CIVICA',
+        bonusType: 'PERCENTAGE',
+        bonusValueByBalance: 1.38,
+        bonusValueByCredit: 1.17
+      }
+    ];
+
+    of({})
+    .pipe(
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => beforeSpendingRule = spendingRule),
+      map(({ businessId, autoPocketSelectionRules }) => {
+        return { businessId,
+                minOperationAmount: -1250000,
+                productBonusConfigs,
+                autoPocketSelectionRules 
+        }
+      }),
+      // give a debt capacity to 750.000
+      mergeMap( spendingRuleUpdate => broker.send$("Events", "", {
+        et: "SpendingRuleUpdated",
+        etv: 1,
+        at: "SpendingRule",
+        aid: businessList[0]._id,
+        data: {input: spendingRuleUpdate},
+        user: "juan.santa",
+        timestamp: Date.now(),
+        av: 164
+      })
+      ),
+      delay(1000),
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => afterSpendingRule = spendingRule),
+      tap(() => {
+        expect(beforeSpendingRule.minOperationAmount).to.be.equal(-750000);
+        expect(afterSpendingRule.minOperationAmount).to.be.equal(-1250000);
+        expect(afterSpendingRule.productBonusConfigs).to.be.length(1, 'Must to be just one element here');
+        expect(afterSpendingRule.productBonusConfigs[0]).to.be.deep.equal({
+          type: 'VENTA',
+          concept: 'RECARGA_CIVICA',
+          bonusType: 'PERCENTAGE',
+          bonusValueByBalance: 1.38,
+          bonusValueByCredit: 1.17
+        });
+        expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
+
+      })
+    )
+    .subscribe( evt => {}, error => done(error), () => done() );
+  }),
+
+  it("remove all productBonusConfigs items", function(done){
+    const productBonusConfigs = [];
+    of({})
+    .pipe(
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => beforeSpendingRule = spendingRule),
+      map(({ businessId, autoPocketSelectionRules }) => 
+         ({ businessId,
+            minOperationAmount: 0,
+            productBonusConfigs,
+            autoPocketSelectionRules  
+          })
+      ),
+      // give a debt capacity to 750.000
+      mergeMap( spendingRuleUpdate => broker.send$("Events", "", {
+        et: "SpendingRuleUpdated",
+        etv: 1,
+        at: "SpendingRule",
+        aid: businessList[0]._id,
+        data: {input: spendingRuleUpdate},
+        user: "juan.santa",
+        timestamp: Date.now(),
+        av: 164
+      })
+      ),
+      delay(1000),
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => afterSpendingRule = spendingRule),
+      tap(() => {
+        expect(beforeSpendingRule.minOperationAmount).to.be.equal(-1250000);
+        expect(afterSpendingRule.minOperationAmount).to.be.equal(0);
+        expect(afterSpendingRule.productBonusConfigs).to.be.length(0, 'Must to be an empty array');
+        expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
+      })
+    )
+    .subscribe( evt => {}, error => done(error), () => done() );
+  }),
+
+
+  it("Insert a new autoPocketSelectionRules ", function(done){
+    const autoPocketSelectionRules = [
+      {
+        priority: 1,
+        pocketToUse: 'BALANCE',
+        condition:{
+          pocket: 'BALANCE',
+          comparator: 'GTE',
+          value: 250000
+        }
+      }
+    ];
+
+    of({})
+    .pipe(
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => beforeSpendingRule = spendingRule),
+      map(({ businessId, minOperationAmount, productBonusConfigs }) => 
+        ({  businessId,
+            minOperationAmount,
+            productBonusConfigs,
+            autoPocketSelectionRules 
+        })
+      ),
+      mergeMap( spendingRuleUpdate => broker.send$("Events", "", {
+        et: "SpendingRuleUpdated",
+        etv: 1,
+        at: "SpendingRule",
+        aid: businessList[0]._id,
+        data: {input: spendingRuleUpdate},
+        user: "juan.santa",
+        timestamp: Date.now(),
+        av: 164
+      })
+      ),
+      delay(1000),
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => afterSpendingRule = spendingRule),
+      tap(() => {        
+        expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
+        expect(afterSpendingRule.autoPocketSelectionRules).to.be.deep.equal(autoPocketSelectionRules);
+      })
+    )
+    .subscribe( evt => {}, error => done(error), () => done() );
+  }),
+
+  it("delete all autoPocketSelectionRules ", function(done){
+    const autoPocketSelectionRules = [ ];
+
+    of({})
+    .pipe(
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => beforeSpendingRule = spendingRule),
+      map(({ businessId, minOperationAmount, productBonusConfigs }) => 
+        ({  businessId,
+            minOperationAmount,
+            productBonusConfigs,
+            autoPocketSelectionRules 
+        })
+      ),
+      mergeMap( spendingRuleUpdate => broker.send$("Events", "", {
+        et: "SpendingRuleUpdated",
+        etv: 1,
+        at: "SpendingRule",
+        aid: businessList[0]._id,
+        data: {input: spendingRuleUpdate},
+        user: "juan.santa",
+        timestamp: Date.now(),
+        av: 164
+      })
+      ),
+      delay(1000),
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => afterSpendingRule = spendingRule),
+      tap(() => {        
+        expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
+        expect(afterSpendingRule.autoPocketSelectionRules).to.be.deep.equal([]);
+      })
+    )
+    .subscribe( evt => {}, error => done(error), () => done() );
+  })
+
+
+
+})
+
   /*
   * DE-PREAPARE
   */
@@ -240,4 +568,6 @@ describe("E2E - Simple transaction", function() {
       );       
     });
   });
+
+
 });
