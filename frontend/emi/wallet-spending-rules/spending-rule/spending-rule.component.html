@@ -30,13 +30,13 @@
         <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="50">
           <input matInput placeholder="{{ 'SPENDING_RULE.BUSINESS_ID'  | translate }}" formControlName="businessId" required>
         </mat-form-field>
-        <mat-form-field fxFlex="100" fxFlex.gt-xs="50">
+        <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="50">
           <input matInput placeholder="{{ 'SPENDING_RULE.BUSINESS_NAME'  | translate }}" formControlName="businessName"
             required>
         </mat-form-field>
-        <mat-form-field fxFlex="100" fxFlex.gt-xs="50">
-          <input matInput placeholder="{{ 'SPENDING_RULE.MIN_OPERATION_AMOUNT'  | translate }}" formControlName="minOperationAmount"
-            required type="number" value="{{ settingsForm.value.minOperationAmount }}" >
+        <mat-form-field *ngIf="settingsForm.controls['minOperationAmount']" class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="50">
+          <input myCurrencyFormatter matInput placeholder="{{ 'SPENDING_RULE.MIN_OPERATION_AMOUNT'  | translate }}" formControlName="minOperationAmount"
+            required value="{{ settingsForm.value.minOperationAmount }}" >
         </mat-form-field>
         <!-- BASIC SPENDING RULES STTRIBUTES -->
 
@@ -85,15 +85,14 @@
 
               <!-- BONUS VALUE BY BALANCE -->
               <mat-form-field class="pr-5 pl-5" fxFlex="50" fxFlex.gt-xs="20">
-                <input myCurrencyFormatter type="number" matInput formControlName="bonusValueByBalance"
-                placeholder="{{'SPENDING_RULE.PERCETAGE_WITH_BALANCE' | translate}}">
+                <input myCurrencyFormatter matInput formControlName="bonusValueByBalance" placeholder="{{'SPENDING_RULE.PERCETAGE_WITH_BALANCE' | translate}}">
                 <!-- value="{{  }}" -->
               </mat-form-field>
               <!-- BONUS VALUE BY BALANCE -->
 
               <!-- BONUS VALUE BY BALANCE -->
               <mat-form-field class="pr-5 pl-5" fxFlex="50" fxFlex.gt-xs="20">
-                <input type="number" matInput formControlName="bonusValueByCredit" placeholder="{{'SPENDING_RULE.PERCENTAGE_WITH_CREDIT' | translate}}"
+                <input myCurrencyFormatter matInput formControlName="bonusValueByCredit" placeholder="{{'SPENDING_RULE.PERCENTAGE_WITH_CREDIT' | translate}}"
                 >
               </mat-form-field>
               <!-- BONUS VALUE BY BALANCE -->
@@ -172,7 +171,7 @@
               <!-- VALUE -->
               <mat-form-field *ngIf="settingsForm.get('autoPocketSelectionRules')['controls'][i]['value']['comparator'] != 'ENOUGH'"
                 class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="15">
-                <input type="number" matInput formControlName="value" placeholder="{{'SPENDING_RULE.VALUE' | translate}}"
+                <input myCurrencyFormatter matInput formControlName="value" placeholder="{{'SPENDING_RULE.VALUE' | translate}}"
                   [value]="settingsForm.controls['autoPocketSelectionRules']['controls'][i].controls.value.value">
                 <!-- value="{{  }}" -->
               </mat-form-field>

@@ -15,6 +15,7 @@ export class MyCurrencyFormatterDirective implements OnInit {
   }
 
   ngOnInit() {
+    console.log('#############', JSON.stringify(this.el.value) );
     this.el.value = this.currencyPipe.transform(this.el.value);
   }
 

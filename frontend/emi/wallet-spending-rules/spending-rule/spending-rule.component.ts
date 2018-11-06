@@ -13,7 +13,6 @@ import { ObservableMedia } from '@angular/flex-layout';
 import { from } from 'rxjs';
 import { locale as english } from '../i18n/en';
 import { locale as spanish } from '../i18n/es';
-import { MyCurrencyFormatterDirective } from '../directives/currency.directive';
 
 
 export interface SpendingRule {
@@ -57,7 +56,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup = new FormGroup({
     businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
     businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
-    minOperationAmount: new FormControl(null, [ Validators.required ]),
+    // minOperationAmount: new FormControl('', [ Validators.required ]),
     productBonusConfigs: new FormArray([]),
     autoPocketSelectionRules: new FormArray([])
   });
@@ -117,7 +116,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
           tap(sr => {
             this.settingsForm.get('businessName').setValue(sr.businessName);
             this.settingsForm.get('businessId').setValue(sr.businessId);
-            this.settingsForm.get('minOperationAmount').setValue(sr.minOperationAmount);
+            this.settingsForm.addControl('minOperationAmount', new FormControl(sr.minOperationAmount, [ Validators.required ]) );
+            // get('minOperationAmount').setValue(sr.minOperationAmount);
           })
         ),
         Rx.Observable.of(spendingRuleItem)
@@ -187,7 +187,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       productConfig = {
         type: '',
         concept: '',
-        bonusType:'PERCENTAGE',
+        bonusType: 'PERCENTAGE',
         bonusValueByBalance: 0,
         bonusValueByCredit: 0
       };
@@ -303,7 +303,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         this.settingsForm = new FormGroup({
           businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
           businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
-          minOperationAmount: new FormControl(null, [Validators.required]),
+          // minOperationAmount: new FormControl(null, [Validators.required]),
           productBonusConfigs: new FormArray([], [Validators.required]),
           autoPocketSelectionRules: new FormArray([], [Validators.required])
         });
