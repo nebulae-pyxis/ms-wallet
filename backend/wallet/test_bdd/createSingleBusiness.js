@@ -3,8 +3,8 @@ const assert = require("assert");
 const uuidv4 = require("uuid/v4");
 const expect = require("chai").expect;
 
-const { take, mergeMap, catchError, map, tap, delay, toArray } = require('rxjs/operators');
-const  { forkJoin, of, interval, concat, from } = require('rxjs');
+const { take, mergeMap, catchError, map, tap, delay, toArray, reduce } = require('rxjs/operators');
+const  { forkJoin, of, interval, concat, from, observable, bindNodeCallback, defer } = require('rxjs');
 
 //LIBS FOR TESTING
 const MqttBroker = require("../bin/tools/broker/MqttBroker");
@@ -121,11 +121,12 @@ describe("E2E - Simple transaction", function() {
   * CREATE BUSINESS UNITS
   */
   describe("Create the business units", function () {
-    const businessList = [{ _id: "123456789_Metro_med", name: "Metro de Medellin" }];
+    const businessList = [{ _id: "123456789_Metro_med", name: "Metro de Medellin" }]; // busines list demo
     it("Create one busines unit", function (done) {
       from(businessList).
       pipe( 
         delay(20),
+        // send the command to create the business
         mergeMap(bu =>
           broker.send$("Events", "", {
             et: "BusinessCreated",
@@ -156,16 +157,15 @@ describe("E2E - Simple transaction", function() {
     it("verify its defaults documents", function(done){
       of({}).pipe(
         mergeMap(() => forkJoin(
-          BusinessDA.getBusiness$(businessList[0]._id),
-          SpendingRulesDA.getSpendingRule$(businessList[0]._id),
-          WalletDA.getWallet$(businessList[0]._id)
+          BusinessDA.getBusiness$(businessList[0]._id), // fecth the business mapped id vs name
+          SpendingRulesDA.getSpendingRule$(businessList[0]._id), // fecth the spendinRule by default
+          WalletDA.getWallet$(businessList[0]._id) // fect the wallet for the related  business
         )),
         tap(([business, spendingRule, wallet]) => {
-
           expect(business).to.be.deep.equal({
             _id: businessList[0]._id,
             name: businessList[0].name
-          });
+          }, 'The businessId vs businessName expected');
 
           expect({...spendingRule, id: 0, _id: 0, lastEditionTimestamp: 0}).to.be.deep.equal({
             _id: 0,
@@ -177,9 +177,9 @@ describe("E2E - Simple transaction", function() {
             editedBy: 'SYSTEM',
             productBonusConfigs: [],
             autoPocketSelectionRules: []
-          });
+          }, 'Spending rule expected');
           
-          expect(spendingRule.id).to.be.equal(spendingRule.lastEditionTimestamp);
+          expect(spendingRule.id).to.be.equal(spendingRule.lastEditionTimestamp, 'id and lastEditionTimestamp must to be equals');
 
           expect({...wallet, _id: 0}).to.be.deep.equal({
             _id: 0,
@@ -190,7 +190,7 @@ describe("E2E - Simple transaction", function() {
               balance: 0,
               bonus: 0
             }
-          })
+          }, 'Expected wallet by default')
 
 
         })
@@ -209,9 +209,10 @@ describe("E2E - Simple transaction", function() {
   });
 
 
-  /*
-  * EDIT BUSINESS UNITS
-  */
+  /**
+   * EDIT BUSINESS UNITS
+   * rename the business
+   */
  describe("Edit the business name", function () {
 
   const businessList = [{ _id: "123456789_Metro_med", name: "Metro de Medellin_V2" }];
@@ -310,17 +311,17 @@ describe("Update SpendingRule", function(){
   let beforeSpendingRule = undefined;
   let afterSpendingRule = undefined;
 
-  it("Update minOperationAmount", function(done){
+  it("Update minOperationAmount and generate a ALLOWED state for spendingState ", function(done){
     of({})
     .pipe(
       mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
       tap(spendingRule => beforeSpendingRule = spendingRule),
-      map(({businessId, minOperationAmount, productBonusConfigs, autoPocketSelectionRules }) => {
-        return { businessId,
-                minOperationAmount: -750000,
-                productBonusConfigs, autoPocketSelectionRules 
-        }
-      }),
+      map(({businessId, productBonusConfigs, autoPocketSelectionRules }) => 
+        ({  businessId,
+            minOperationAmount: -750000,
+            productBonusConfigs, autoPocketSelectionRules 
+        })
+      ),
       // give a debt capacity to 750.000
       mergeMap( spendingRuleUpdate => broker.send$("Events", "", {
         et: "SpendingRuleUpdated",
@@ -334,12 +335,73 @@ describe("Update SpendingRule", function(){
       })
       ),
       delay(1000),
-      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
-      tap(spendingRule => afterSpendingRule = spendingRule),
-      tap(() => {
+      mergeMap(() => forkJoin(
+        SpendingRulesDA.getSpendingRule$(businessList[0]._id),
+        WalletDA.getWallet$(businessList[0]._id)
+      )), // get the current spendingRule
+      tap(([spendingRule, wallet]) => afterSpendingRule = spendingRule),
+      tap( ([spendingRule, wallet]) => {
         expect(beforeSpendingRule.minOperationAmount).to.be.equal(0);
         expect(afterSpendingRule.minOperationAmount).to.be.equal(-750000);
         expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
+        expect({...wallet, _id: 0}).to.be.deep.equal({
+          _id: 0,
+          businessId: businessList[0]._id,
+          businessName: businessList[0].name,
+          spendingState: 'ALLOWED',
+          pockets: {
+            balance: 0, 
+            bonus: 0
+          }
+        }, 'must to be deep equal with allowed at spendingstate');
+
+      })
+    )
+    .subscribe( evt => {}, error => done(error), () => done() );
+  }),
+
+  it("Update minOperationAmount and generate a FORBIDDEN state for spendingState ", function(done){
+    of({})
+    .pipe(
+      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
+      tap(spendingRule => beforeSpendingRule = spendingRule),
+      map(({businessId, productBonusConfigs, autoPocketSelectionRules }) => 
+        ({  businessId,
+            minOperationAmount: 200000,
+            productBonusConfigs, autoPocketSelectionRules 
+        })
+      ),
+      mergeMap( spendingRuleUpdate => broker.send$("Events", "", {
+        et: "SpendingRuleUpdated",
+        etv: 1,
+        at: "SpendingRule",
+        aid: businessList[0]._id,
+        data: {input: spendingRuleUpdate},
+        user: "juan.santa",
+        timestamp: Date.now(),
+        av: 164
+      })
+      ),
+      delay(1000),
+      mergeMap(() => forkJoin(
+        SpendingRulesDA.getSpendingRule$(businessList[0]._id),
+        WalletDA.getWallet$(businessList[0]._id)
+      )), // get the current spendingRule
+      tap(([spendingRule, wallet]) => afterSpendingRule = spendingRule),
+      tap( ([spendingRule, wallet]) => {
+        expect(beforeSpendingRule.minOperationAmount).to.be.equal(-750000);
+        expect(afterSpendingRule.minOperationAmount).to.be.equal(200000);
+        expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
+        expect({...wallet, _id: 0}).to.be.deep.equal({
+          _id: 0,
+          businessId: businessList[0]._id,
+          businessName: businessList[0].name,
+          spendingState: 'FORBIDDEN',
+          pockets: {
+            balance: 0, 
+            bonus: 0
+          }
+        }, 'must to be deep equal with FORBIDDEN at spendingstate');
 
       })
     )
@@ -361,9 +423,9 @@ describe("Update SpendingRule", function(){
     .pipe(
       mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
       tap(spendingRule => beforeSpendingRule = spendingRule),
-      map(({ businessId, autoPocketSelectionRules }) => {
+      map(({ businessId, minOperationAmount, autoPocketSelectionRules }) => {
         return { businessId,
-                minOperationAmount: -1250000,
+                minOperationAmount,
                 productBonusConfigs,
                 autoPocketSelectionRules 
         }
@@ -381,11 +443,14 @@ describe("Update SpendingRule", function(){
       })
       ),
       delay(1000),
-      mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
-      tap(spendingRule => afterSpendingRule = spendingRule),
-      tap(() => {
-        expect(beforeSpendingRule.minOperationAmount).to.be.equal(-750000);
-        expect(afterSpendingRule.minOperationAmount).to.be.equal(-1250000);
+      mergeMap(() => forkJoin(
+        SpendingRulesDA.getSpendingRule$(businessList[0]._id),
+        WalletDA.getWallet$(businessList[0]._id)
+      )), // get the current spendingRule
+      tap( ([spendingRule, wallet]) => afterSpendingRule = spendingRule),
+      tap( ([spendingRule, wallet]) => {
+        expect(beforeSpendingRule.minOperationAmount).to.be.equal(200000);
+        expect(afterSpendingRule.minOperationAmount).to.be.equal(200000);
         expect(afterSpendingRule.productBonusConfigs).to.be.length(1, 'Must to be just one element here');
         expect(afterSpendingRule.productBonusConfigs[0]).to.be.deep.equal({
           type: 'VENTA',
@@ -395,6 +460,18 @@ describe("Update SpendingRule", function(){
           bonusValueByCredit: 1.17
         });
         expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
+
+        expect({...wallet, _id: 0}).to.be.deep.equal({
+          _id: 0,
+          businessId: businessList[0]._id,
+          businessName: businessList[0].name,
+          spendingState: 'FORBIDDEN',
+          pockets: {
+            balance: 0, 
+            bonus: 0
+          }
+        }, '');
+
 
       })
     )
@@ -407,9 +484,9 @@ describe("Update SpendingRule", function(){
     .pipe(
       mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
       tap(spendingRule => beforeSpendingRule = spendingRule),
-      map(({ businessId, autoPocketSelectionRules }) => 
+      map(({ businessId, minOperationAmount, autoPocketSelectionRules }) => 
          ({ businessId,
-            minOperationAmount: 0,
+            minOperationAmount,
             productBonusConfigs,
             autoPocketSelectionRules  
           })
@@ -430,8 +507,8 @@ describe("Update SpendingRule", function(){
       mergeMap(() => SpendingRulesDA.getSpendingRule$(businessList[0]._id)), // get the current spendingRule
       tap(spendingRule => afterSpendingRule = spendingRule),
       tap(() => {
-        expect(beforeSpendingRule.minOperationAmount).to.be.equal(-1250000);
-        expect(afterSpendingRule.minOperationAmount).to.be.equal(0);
+        expect(beforeSpendingRule.minOperationAmount).to.be.equal(200000);
+        expect(afterSpendingRule.minOperationAmount).to.be.equal(200000);
         expect(afterSpendingRule.productBonusConfigs).to.be.length(0, 'Must to be an empty array');
         expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
       })
@@ -522,7 +599,166 @@ describe("Update SpendingRule", function(){
     .subscribe( evt => {}, error => done(error), () => done() );
   })
 
+})
 
+describe("MAKE A DEPOSIT COMMIT", function(){
+  const businessList = [{ _id: "123456789_Metro_med", name: "Metro de Medellin_V2" }];
+  const date = new Date();
+  let month = date.getMonth() + 1;
+  let year = date.getFullYear() + '';
+  month = (month.length == 1 ? '0': '') + month;
+  year = year.substr(year.length - 2);
+  
+
+
+  it('Make sure the the wallet is with 0 at balancen and bonus', function(done){
+    of({})
+    .pipe(
+      mergeMap(() => WalletDA.getWallet$(businessList[0]._id)),
+      map(({businessId, businessName, spendingState, pockets}) => ({businessId, businessName, spendingState, pockets}) ),
+      tap(wallet => {
+        expect(wallet).to.be.deep.equal({
+          businessId: businessList[0]._id,
+          businessName: businessList[0].name,
+          spendingState: 'FORBIDDEN',
+          pockets: {
+            balance: 0,
+            bonus: 0  
+          }
+        });
+      })
+    )
+    .subscribe( evt => {}, error => done(error), () => done() );
+  })
+
+  it("Make a deposit by 100.000, and with forbidden state for sales", function(done){  
+    const collection = mongoDB.client.db(dbName).collection(`TransactionsHistory_${month}${year}`);  
+    of({})
+    .pipe(
+      mergeMap(() => WalletDA.getWallet$(businessList[0]._id)), // get the current spendingRule
+      tap(wallet => beforeWallet = wallet),
+      map(({businessId }) => 
+        ({ businessId,
+          type: 'DEPOSIT',
+          concept: 'CARGA_SALDO',
+          value: 100000,
+          terminal: {
+            id: '87ki-47hy-98fu-87hy',
+            userId: 'felipe.santa',
+            username: 'pipe.santa'
+          },
+          user: 'Felipe.Santa',
+          notes: 'Este es un pago de 3.500.000 generado en una prueba',
+          location: {
+            type: "Point",
+            coordinates: [125.6, 10.1]
+          },
+         })
+      ),
+      // give a debt capacity to 750.000
+      mergeMap( depositCommit => broker.send$("Events", "", {
+        et: "WalletDepositCommited",
+        etv: 1,
+        at: "Wallet",
+        aid: businessList[0]._id,
+        data: {input: depositCommit},
+        user: "juan.santa",
+        timestamp: Date.now(),
+        av: 164
+      })
+      ),
+      delay(1000),
+      mergeMap(() => forkJoin(
+        WalletDA.getWallet$(businessList[0]._id),
+        bindNodeCallback(collection.find.bind(collection))({})
+        .pipe(
+          mergeMap(cursor => defer(() => MongoDB.extractAllFromMongoCursor$(cursor))),
+          reduce((txs, tx) => { txs.push(tx); return txs; }, [])
+        )
+      )), // get the current spendingRule
+      tap(([wallet, transactions ]) => afterWallet = wallet),
+      tap( ([ wallet, transactions]) => {
+        expect({ ...wallet, _id: 0 }).to.be.deep.equal({
+          _id: 0,
+          businessId: businessList[0]._id,
+          businessName: businessList[0].name,
+          spendingState: 'FORBIDDEN',
+          pockets: {
+            balance: 100000,
+            bonus: 0
+          }
+        });
+
+        expect(transactions).to.be.length(1, 'Must to have just one element');
+      })
+    )
+    .subscribe( evt => {}, error => done(error), () => done() );
+  }),
+
+  it("Make a deposit by 400.000, and make sure the statusForSale is updated to ALLOWED", function(done){    
+    const collection = mongoDB.client.db(dbName).collection(`TransactionsHistory_${month}${year}`);
+    of({})
+    .pipe(
+      mergeMap(() => WalletDA.getWallet$(businessList[0]._id)), // get the current spendingRule
+      tap(wallet => beforeWallet = wallet),
+      map(({businessId }) => 
+        ({ businessId,
+          type: 'DEPOSIT',
+          concept: 'CARGA_SALDO',
+          value: 400000,
+          terminal: {
+            id: '87ki-47hy-98fu-87hy',
+            userId: 'felipe.santa',
+            username: 'pipe.santa'
+          },
+          user: 'Felipe.Santa',
+          notes: 'Este es un pago de 3.500.000 generado en una prueba',
+          location: {
+            type: "Point",
+            coordinates: [125.6, 10.1]
+          },
+         })
+      ),
+      // give a debt capacity to 750.000
+      mergeMap( depositCommit => broker.send$("Events", "", {
+        et: "WalletDepositCommited",
+        etv: 1,
+        at: "Wallet",
+        aid: businessList[0]._id,
+        data: {input: depositCommit},
+        user: "juan.santa",
+        timestamp: Date.now(),
+        av: 164
+      })
+      ),
+      delay(1000),
+      mergeMap(() => forkJoin(
+        WalletDA.getWallet$(businessList[0]._id),
+        bindNodeCallback(collection.find.bind(collection))({})
+        .pipe(
+          mergeMap(cursor => defer(() => MongoDB.extractAllFromMongoCursor$(cursor))),
+          reduce((txs, tx) => { txs.push(tx); return txs; }, [])
+        )
+      )), // get the current spendingRule
+      tap(([wallet, transactions ]) => afterWallet = wallet),
+      tap( ([ wallet, transactions]) => {
+        expect({ ...wallet, _id: 0 }).to.be.deep.equal({
+          _id: 0,
+          businessId: businessList[0]._id,
+          businessName: businessList[0].name,
+          spendingState: 'ALLOWED',
+          pockets: {
+            balance: 500000,
+            bonus: 0
+          }
+        });
+
+        expect(transactions).to.be.length(2);
+
+      })
+    )
+    .subscribe( evt => {}, error => done(error), () => done() );
+  })
 
 })
 

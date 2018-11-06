@@ -283,15 +283,15 @@ class WalletES {
     .pipe(
       //Create wallet execute transaction
       map(({data, user}) => {
-        const uuId = Crosscutting.generateHistoricalUuid(new Date())
+        const uuId = Crosscutting.generateHistoricalUuid(new Date());
         const transactions = {
             id: uuId,
             pocket: 'BALANCE',
-            value: data.value,
-            notes: data.notes,            
-            user,            
+            value: data.input.value,
+            notes: data.input.notes,            
+            user
         };
-        return this.createWalletTransactionExecuted(data.businessId, 'BALANCE_ADJUSTMENT', 'PAYMENT', transactions);
+        return this.createWalletTransactionExecuted(data.input.businessId, 'BALANCE_ADJUSTMENT', 'PAYMENT', transactions);
       }),
       //Get wallet of the implied business
       mergeMap(walletTransactionExecuted => WalletDA.getWallet$(walletTransactionExecuted.businessId).pipe(map(wallet => [wallet, walletTransactionExecuted]))),

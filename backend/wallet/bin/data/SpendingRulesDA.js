@@ -42,7 +42,6 @@ class SpendingRules {
    * @param {string} name  New business name for spending rule
    */
     static updateSpendingRuleBusinessName$(id, name) {
-        console.log(id, name);
         const collection = mongoDB.db.collection(COLLECTION_NAME);
         return of({ id, name })
             .pipe(
