@@ -8,12 +8,13 @@
     <div class="header white-fg" fxLayout="row" fxLayoutAlign="space-between center">
       <!-- APP TITLE -->
       <div fxLayout="row" fxLayoutAlign="start center">
+
+        <button mat-icon-button color="primary">
+          <mat-icon aria-label="back" [routerLink]="['../..']">keyboard_backspace</mat-icon>
+        </button>
         <div fxLayout="column" fxLayoutAlign="start start" *fuseIfOnDom>
           <div class="h2">
             {{'WALLET.SPENDING_RULE' | translate}}
-          </div>
-          <div class="subtitle secondary-text" *ngIf="false">
-            <span>{{'USER.USER_DETAIL' | translate}}</span>
           </div>
         </div>
       </div>
