@@ -27,9 +27,9 @@ class WalletTransactionDA {
    * @param {*} transactionData transaction to create
    */
   static saveTransactionHistory$(transactionData) {
-    console.log('saveTransactionHistory => ', transactionData);
+    // console.log('saveTransactionHistory => ', transactionData);
     const monthYear = transactionData._id.substr(transactionData._id.length - 4)
-    console.log("MES_Y_AÑO ==> ", monthYear);
+    // console.log("MES_Y_AÑO ==> ", monthYear);
     const collection = mongoDB.db.collection(`${COLLECTION_NAME}${monthYear}`);    
     return defer(() => collection.insertOne(transactionData));
   }

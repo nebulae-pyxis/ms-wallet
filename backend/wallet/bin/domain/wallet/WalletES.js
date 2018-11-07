@@ -60,7 +60,7 @@ class WalletES {
   }
   
   handleWalletSpendingCommited$(evt){
-    console.log("handleWalletSpendingCommited$");
+    // console.log("handleWalletSpendingCommited$", evt.data.value);
     return of(evt.data)
     .pipe(
       mergeMap(eventData => forkJoin(
@@ -74,7 +74,7 @@ class WalletES {
       // selects the according productBonusConfig returns => { wallet, productBonusConfig, selectedPocket }
       map(result => ({...result, spendingRule: result.spendingRule.productBonusConfigs.find(e => (e.type == evt.data.type && e.concept == evt.data.concept)) })),      
       mergeMap(result => this.calculateTransactionsToExecute$(evt, result)),
-      tap(r => console.log("PARA PROCESAR", JSON.stringify(r))),
+      // tap(r => console.log("PARA PROCESAR", JSON.stringify(r))),
       map(tx => ({
         wallet: tx.wallet,
         transaction: this.createWalletTransactionExecuted(
@@ -114,7 +114,7 @@ class WalletES {
  * 
  */
   calculateTransactionsToExecute$(evt, result) {
-    console.log("calculateTransactionsToExecute$");
+    // console.log("calculateTransactionsToExecute$");
     const date = new Date();
     return of({
       businessId: evt.data.businessId,
@@ -127,13 +127,16 @@ class WalletES {
           this.calculateMainTransaction$(evt, result.selectedPocket, date ),
           this.calculateBonusTransaction$(evt, result, date)
         )),
-        mergeMap(([basicObj, mainTx, bonusTx]) => {
+        mergeMap(([basicObj, mainTx, bonusTx]) => {          
           if(bonusTx){
             bonusTx.associatedTransactionIds.push(mainTx.id);
             mainTx.associatedTransactionIds.push(bonusTx.id);
           }
           return of({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => (e != null && e != undefined) ) })       
         }),
+        // tap(({transactions}) => {
+        //   transactions.forEach(tx => console.log(tx.value))
+        // } ),
         map(tx => ({transaction: tx, wallet: result.wallet}) )  
       )
   }
@@ -175,7 +178,7 @@ class WalletES {
    * @param {string} result.selectedPocket selected pocket to use 
    */
   calculateBonusTransaction$(evt, result, now) {
-    console.log("calculateBonusTransaction$", result.selectedPocket);
+    // console.log("calculateBonusTransaction$", result.selectedPocket);
     return of({ evt, result })
       .pipe(
         mergeMap(() => {
@@ -232,9 +235,8 @@ class WalletES {
    * @param {number} transactionAmount Transaction amount
    */
   selectPockect$(wallet, spendingRule, transactionAmount) {
-    return of({})
+    return of(spendingRule.autoPocketSelectionRules)
       .pipe(
-        map(() => spendingRule.autoPocketSelectionRules),
         map(rules => rules.sort((a, b) => a.priority - b.priority)),
         mergeMap(rules => 
           from(rules)
@@ -260,14 +262,16 @@ class WalletES {
           )  
         ),
         map(({pocketToUse}) =>  pocketToUse),
-        map(selectedPocket => {
+        map(selectedPocket => {          
           return (
-            (selectedPocket == BALANCE_POCKET && wallet.pockets[selectedPocket.toLowerCase()] > 0)
-            || (selectedPocket == BONUS_POCKET &&  wallet.pockets[selectedPocket.toLowerCase()] > transactionAmount )
+            ( wallet.pockets[selectedPocket.toLowerCase()] >= transactionAmount )
             )
             ? selectedPocket
-            : BALANCE_POCKET
+            : (selectedPocket == BALANCE_POCKET && wallet.pockets.balance < transactionAmount && wallet.pockets.bonus >= transactionAmount )
+              ? BONUS_POCKET
+              : BALANCE_POCKET
         }),
+        // tap(sp => console.log("#### SELECTED POCKET ", sp, " for ", transactionAmount)),
         mergeMap(selectedPocket => of({ wallet, spendingRule, selectedPocket }))
       )
   }
@@ -278,7 +282,7 @@ class WalletES {
    * @param {*} walletDepositCommitedEvent 
    */
   handleWalletDepositCommited$(walletDepositCommitedEvent){
-    console.log('handleWalletDepositCommited => ', walletDepositCommitedEvent);
+    // console.log('handleWalletDepositCommited => ', walletDepositCommitedEvent);
     return of(walletDepositCommitedEvent)
     .pipe(
       //Create wallet execute transaction
@@ -357,7 +361,7 @@ class WalletES {
    * @param {*} walletTransactionExecuted wallet transaction executed event
    */
   handleWalletTransactionExecuted$(walletTransactionExecuted){
-    console.log('handleWalletTransactionExecuted => ', JSON.stringify(walletTransactionExecuted));
+    // console.log('handleWalletTransactionExecuted => ', JSON.stringify(walletTransactionExecuted));
     return of(walletTransactionExecuted)
     .pipe(
       //Check if there are transactions to be processed

@@ -88,7 +88,7 @@ class WalletHelper {
         SpendingRulesDA.getSpendingRule$(businessId)
       )),
       mergeMap(([wallet, spendingRule]) => {
-        console.log('checkWalletSpendingAlarms => ', JSON.stringify([wallet, spendingRule]));
+        // console.log('checkWalletSpendingAlarms => ', JSON.stringify([wallet, spendingRule]));
         const debt = (wallet.pockets.balance || 0) + (wallet.pockets.bonus || 0);
 
         if (debt < spendingRule.minOperationAmount && wallet.spendingState == 'ALLOWED') {
@@ -110,7 +110,7 @@ class WalletHelper {
    * @return {Observable}
    */
   static changeWalletSpendingState$(businessId, newSpendingState){
-    console.log("changeWalletSpendingState$");
+    // console.log("changeWalletSpendingState$");
     return of({businessId, newSpendingState})
     .pipe(
       //Updates the wallet spending state

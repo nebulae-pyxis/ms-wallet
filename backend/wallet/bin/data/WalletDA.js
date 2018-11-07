@@ -80,7 +80,7 @@ class WalletDA {
    * @param {Object} increment.bonus value to be incremented in the bonus pocket
    */
   static updateWalletPockets$(business, increment) {
-    console.log('updateWalletPockets => ', business, increment);
+    // console.log('updateWalletPockets => ', business, increment);
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return of(business)
     .pipe(
@@ -107,7 +107,7 @@ class WalletDA {
    * @param {*} newSpendingState new spending state (ALLOWED, FORBIDDEN)
    */
   static updateWalletSpendingState$(businessId, newSpendingState) {
-    console.log("updateWalletSpendingState$ ==> ", businessId, newSpendingState);
+    // console.log("updateWalletSpendingState$ ==> ", businessId, newSpendingState);
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return of({businessId, newSpendingState})
     .pipe(
