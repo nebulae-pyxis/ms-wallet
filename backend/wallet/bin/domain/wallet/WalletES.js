@@ -182,7 +182,7 @@ class WalletES {
     return of({ evt, result })
       .pipe(
         mergeMap(() => {
-          return (result.selectedPocket != BALANCE_POCKET)
+          return (result.selectedPocket != BALANCE_POCKET || !result.spendingRule )
             ? of(null)
             : of({}).
               pipe(
