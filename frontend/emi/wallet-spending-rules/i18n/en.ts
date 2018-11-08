@@ -27,7 +27,7 @@ export const locale = {
     },
     WALLET: {
       SPENDING_RULE: 'Wallet spending rules',
-      UTILITIES_BY_PRODUCT: 'Utilities by product',
+      UTILITIES_BY_PRODUCT: 'Bonus by product',
       AUTO_WALLET_SELLECTION: 'Auto pocket selection',
       BALANCE: 'Balance',
       BONUS: 'Bonus',

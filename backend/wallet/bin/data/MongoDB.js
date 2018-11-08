@@ -59,6 +59,46 @@ class MongoDB {
         });
     }
 
+    /**
+   * Drop current DB
+   */
+  dropDB$() {
+    return Rx.Observable.create(async observer => {
+      await this.db.dropDatabase();
+      observer.next(`Database ${this.dbName} dropped`);
+      observer.complete();
+    });
+  }
+
+
+    /**
+   * extracts every item in the mongo cursor, one by one
+   * @param {*} cursor 
+   */
+  static extractAllFromMongoCursor$(cursor) {
+    return Rx.Observable.create(async observer => {
+      let obj = await MongoDB.extractNextFromMongoCursor(cursor);
+      while (obj) {
+        observer.next(obj);
+        obj = await MongoDB.extractNextFromMongoCursor(cursor);
+      }
+      observer.complete();
+    });
+  }
+
+    /**
+   * Extracts the next value from a mongo cursos if available, returns undefined otherwise
+   * @param {*} cursor 
+   */
+  static async extractNextFromMongoCursor(cursor) {
+    const hasNext = await cursor.hasNext();
+    if (hasNext) {
+      const obj = await cursor.next();
+      return obj;
+    }
+    return undefined;
+  }
+
 }
 
 module.exports = {

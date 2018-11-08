@@ -27,7 +27,7 @@ export const getSpendingRule = gql`
       }
       autoPocketSelectionRules {
         priority
-        toUse
+        pocketToUse
         condition {
           pocket
           comparator
@@ -55,7 +55,7 @@ export const getSpendingRules = gql`query  WalletGetSpendingRules($page: Int!, $
     }
     autoPocketSelectionRules{
       priority
-      toUse
+      pocketToUse
       condition{
         pocket
         comparator

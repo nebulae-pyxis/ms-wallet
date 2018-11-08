@@ -77,18 +77,18 @@ class WalletHelper {
   /**
    * Checks if an alarm must be generated taking into account the wallet and 
    * the spending rules associated with the indicated business.
-   * @param {*} business Business that will be checked
+   * @param {*} businessId ID of Business that will be checked
    * @return {Observable}
    */
-  static checkWalletSpendingAlarms$(business){
-    return of(business)
+  static checkWalletSpendingAlarms$(businessId){
+    return of(businessId)
     .pipe(
-      mergeMap(business => forkJoin(
-        WalletDA.getWallet$(business._id),
-        SpendingRulesDA.getSpendingRule$(business._id)
+      mergeMap(businessId => forkJoin(
+        WalletDA.getWallet$(businessId),
+        SpendingRulesDA.getSpendingRule$(businessId)
       )),
       mergeMap(([wallet, spendingRule]) => {
-        console.log('checkWalletSpendingAlarms => ', JSON.stringify([wallet, spendingRule]));
+        // console.log('checkWalletSpendingAlarms => ', JSON.stringify([wallet, spendingRule]));
         const debt = (wallet.pockets.balance || 0) + (wallet.pockets.bonus || 0);
 
         if (debt < spendingRule.minOperationAmount && wallet.spendingState == 'ALLOWED') {
@@ -110,7 +110,7 @@ class WalletHelper {
    * @return {Observable}
    */
   static changeWalletSpendingState$(businessId, newSpendingState){
-    console.log("changeWalletSpendingState$");
+    // console.log("changeWalletSpendingState$");
     return of({businessId, newSpendingState})
     .pipe(
       //Updates the wallet spending state

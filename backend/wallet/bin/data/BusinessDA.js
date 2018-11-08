@@ -52,7 +52,7 @@ class BusinessDA {
    * @param {*} business business to create
    */
   static persistBusiness$(business) {
-    console.log("# BUSINES CREATED ==>", business);
+    // console.log("# BUSINES CREATED ==>", business);
     const collection = mongoDB.db.collection(CollectionName);   
     return of(business)
     .pipe(
@@ -68,7 +68,7 @@ class BusinessDA {
    */
   static updateBusinessGeneralInfo$(id, businessGeneralInfo) {
     const collection = mongoDB.db.collection(CollectionName);
-    console.log("####", id, businessGeneralInfo);
+    // console.log("####", id, businessGeneralInfo);
     return defer(() =>
       collection.findOneAndUpdate(
         { _id: id },

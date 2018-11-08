@@ -60,7 +60,7 @@ class WalletES {
   }
   
   handleWalletSpendingCommited$(evt){
-    console.log("handleWalletSpendingCommited$");
+    // console.log("handleWalletSpendingCommited$", evt.data.value);
     return of(evt.data)
     .pipe(
       mergeMap(eventData => forkJoin(
@@ -74,7 +74,7 @@ class WalletES {
       // selects the according productBonusConfig returns => { wallet, productBonusConfig, selectedPocket }
       map(result => ({...result, spendingRule: result.spendingRule.productBonusConfigs.find(e => (e.type == evt.data.type && e.concept == evt.data.concept)) })),      
       mergeMap(result => this.calculateTransactionsToExecute$(evt, result)),
-      tap(r => console.log("PARA PROCESAR", JSON.stringify(r))),
+      // tap(r => console.log("PARA PROCESAR", JSON.stringify(r))),
       map(tx => ({
         wallet: tx.wallet,
         transaction: this.createWalletTransactionExecuted(
@@ -114,7 +114,7 @@ class WalletES {
  * 
  */
   calculateTransactionsToExecute$(evt, result) {
-    console.log("calculateTransactionsToExecute$");
+    // console.log("calculateTransactionsToExecute$");
     const date = new Date();
     return of({
       businessId: evt.data.businessId,
@@ -127,13 +127,16 @@ class WalletES {
           this.calculateMainTransaction$(evt, result.selectedPocket, date ),
           this.calculateBonusTransaction$(evt, result, date)
         )),
-        mergeMap(([basicObj, mainTx, bonusTx]) => {
+        mergeMap(([basicObj, mainTx, bonusTx]) => {          
           if(bonusTx){
             bonusTx.associatedTransactionIds.push(mainTx.id);
             mainTx.associatedTransactionIds.push(bonusTx.id);
           }
-          return of({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => (e != null && e != undefined) ) })       
+          return of({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => e != null ) })       
         }),
+        // tap(({transactions}) => {
+        //   transactions.forEach(tx => console.log(tx.value))
+        // } ),
         map(tx => ({transaction: tx, wallet: result.wallet}) )  
       )
   }
@@ -175,11 +178,11 @@ class WalletES {
    * @param {string} result.selectedPocket selected pocket to use 
    */
   calculateBonusTransaction$(evt, result, now) {
-    console.log("calculateBonusTransaction$", result.selectedPocket);
+    // console.log("calculateBonusTransaction$", result.selectedPocket);
     return of({ evt, result })
       .pipe(
         mergeMap(() => {
-          return (result.selectedPocket != BALANCE_POCKET)
+          return (result.selectedPocket != BALANCE_POCKET || !result.spendingRule )
             ? of(null)
             : of({}).
               pipe(
@@ -201,24 +204,25 @@ class WalletES {
                       .pipe(
                         map(data => {
                           return (data.spendingRule.bonusType == "FIXED")
-                            ? (data.wallet.balance >= data.txAmount)
+                            ? (data.wallet.pockets.balance >= data.txAmount)
                               ? data.spendingRule.bonusValueByBalance
                               : data.spendingRule.bonusValueByCredit
-                            : (data.wallet.balance >= data.txAmount)
-                              ? (data.txAmount / 100) * data.spendingRule.bonusValueByBalance
-                              : (data.txAmount / 100) * data.spendingRule.bonusValueByCredit
+                            : (data.wallet.pockets.balance >= data.txAmount)
+                              ? (data.txAmount * data.spendingRule.bonusValueByBalance) / 100
+                              : (data.txAmount * data.spendingRule.bonusValueByCredit) / 100
                         }),
-                        map(amount => amount.toString()),
+                        map(amount => ((amount * 1000) / 1000 ).toString()),
                         map( amountAsString  => {
-                         const decimals = 2;
-                         return (amountAsString.indexOf('.') !== -1 &&  ( amountAsString.length - amountAsString.indexOf('.') > decimals + 1 ) )
+                          const decimals = 2;
+                          return (amountAsString.indexOf('.') !== -1 &&  ( amountAsString.length - amountAsString.indexOf('.') > decimals + 1 ) )
                             ? Math.floor(parseFloat(amountAsString) * Math.pow(10, decimals)) / Math.pow(10, decimals)
                             : parseFloat(amountAsString);
                         })
                       )
                   )          
                 ),
-                mergeMap(([transaction, transactionValue]) => of({ ...transaction, value: transactionValue, associatedTransactionIds: [] }))
+                mergeMap(([transaction, transactionValue]) => of({ ...transaction, value: transactionValue, associatedTransactionIds: [] })),
+                map(tx => (tx.value == 0) ? null : tx)
               )
         })        
       );
@@ -232,9 +236,8 @@ class WalletES {
    * @param {number} transactionAmount Transaction amount
    */
   selectPockect$(wallet, spendingRule, transactionAmount) {
-    return of({})
+    return of(spendingRule.autoPocketSelectionRules)
       .pipe(
-        map(() => spendingRule.autoPocketSelectionRules),
         map(rules => rules.sort((a, b) => a.priority - b.priority)),
         mergeMap(rules => 
           from(rules)
@@ -255,19 +258,21 @@ class WalletES {
               default: return throwError('Invalid comparator');
             }
             }),
-            defaultIfEmpty({ toUse: BALANCE_POCKET }),
+            defaultIfEmpty({ pocketToUse: BALANCE_POCKET }),
             first()
           )  
         ),
-        map(({toUse}) =>  toUse),
-        map(selectedPocket => {
+        map(({pocketToUse}) =>  pocketToUse),
+        map(selectedPocket => {          
           return (
-            (selectedPocket == BALANCE_POCKET && wallet.pockets[selectedPocket.toLowerCase()] > 0)
-            || (selectedPocket == BONUS_POCKET &&  wallet.pockets[selectedPocket.toLowerCase()] > transactionAmount )
+            ( wallet.pockets[selectedPocket.toLowerCase()] >= transactionAmount )
             )
             ? selectedPocket
-            : BALANCE_POCKET
+            : (selectedPocket == BALANCE_POCKET && wallet.pockets.balance < transactionAmount && wallet.pockets.bonus >= transactionAmount )
+              ? BONUS_POCKET
+              : BALANCE_POCKET
         }),
+        // tap(sp => console.log("#### SELECTED POCKET ", sp, " for ", transactionAmount)),
         mergeMap(selectedPocket => of({ wallet, spendingRule, selectedPocket }))
       )
   }
@@ -278,20 +283,20 @@ class WalletES {
    * @param {*} walletDepositCommitedEvent 
    */
   handleWalletDepositCommited$(walletDepositCommitedEvent){
-    console.log('handleWalletDepositCommited => ', walletDepositCommitedEvent);
+    // console.log('handleWalletDepositCommited => ', walletDepositCommitedEvent);
     return of(walletDepositCommitedEvent)
     .pipe(
       //Create wallet execute transaction
       map(({data, user}) => {
-        const uuId = Crosscutting.generateHistoricalUuid(new Date())
+        const uuId = Crosscutting.generateHistoricalUuid(new Date());
         const transactions = {
             id: uuId,
             pocket: 'BALANCE',
-            value: data.value,
-            notes: data.notes,            
-            user,            
+            value: data.input.value,
+            notes: data.input.notes,            
+            user
         };
-        return this.createWalletTransactionExecuted(data.businessId, 'BALANCE_ADJUSTMENT', 'PAYMENT', transactions);
+        return this.createWalletTransactionExecuted(data.input.businessId, 'BALANCE_ADJUSTMENT', 'PAYMENT', transactions);
       }),
       //Get wallet of the implied business
       mergeMap(walletTransactionExecuted => WalletDA.getWallet$(walletTransactionExecuted.businessId).pipe(map(wallet => [wallet, walletTransactionExecuted]))),
@@ -357,7 +362,7 @@ class WalletES {
    * @param {*} walletTransactionExecuted wallet transaction executed event
    */
   handleWalletTransactionExecuted$(walletTransactionExecuted){
-    console.log('handleWalletTransactionExecuted => ', JSON.stringify(walletTransactionExecuted));
+    // console.log('handleWalletTransactionExecuted => ', JSON.stringify(walletTransactionExecuted));
     return of(walletTransactionExecuted)
     .pipe(
       //Check if there are transactions to be processed
@@ -372,7 +377,7 @@ class WalletES {
       mergeMap(([event, business]) => concat(
         WalletHelper.saveTransactions$(event),
         WalletHelper.applyTransactionsOnWallet$(event, business),
-        WalletHelper.checkWalletSpendingAlarms$(business)
+        WalletHelper.checkWalletSpendingAlarms$(business._id)
       )),
       catchError(error => {
         console.log(`An error was generated while a walletTransactionExecuted was being processed: ${error.stack}`);

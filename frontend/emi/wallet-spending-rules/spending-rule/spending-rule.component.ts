@@ -36,7 +36,7 @@ export interface ProductConfigRule {
 
 export interface AutoPocketRule {
   priority: number;
-  toUse: string;
+  pocketToUse: string;
   condition: { pocket: string, comparator: string, value: number | null };
 }
 
@@ -56,7 +56,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup = new FormGroup({
     businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
     businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
-    minOperationAmount: new FormControl(null, [ Validators.required ]),
+    // minOperationAmount: new FormControl('', [ Validators.required ]),
     productBonusConfigs: new FormArray([]),
     autoPocketSelectionRules: new FormArray([])
   });
@@ -116,7 +116,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
           tap(sr => {
             this.settingsForm.get('businessName').setValue(sr.businessName);
             this.settingsForm.get('businessId').setValue(sr.businessId);
-            this.settingsForm.get('minOperationAmount').setValue(sr.minOperationAmount);
+            this.settingsForm.addControl('minOperationAmount', new FormControl(sr.minOperationAmount, [ Validators.required ]) );
+            // get('minOperationAmount').setValue(sr.minOperationAmount);
           })
         ),
         Rx.Observable.of(spendingRuleItem)
@@ -164,7 +165,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     if (!pocketRule){
       pocketRule = {
         priority : (this.settingsForm.get('autoPocketSelectionRules') as FormArray).length + 1,
-        toUse: 'BALANCE',
+        pocketToUse: 'BALANCE',
         condition: {
           pocket: 'BALANCE',
           comparator: 'ENOUGH',
@@ -174,7 +175,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     }
     return this.formBuilder.group({
       priority: new FormControl({ value: pocketRule.priority, disabled: !this.currentVersion }, [Validators.required, Validators.min(1)]),
-      toUse: new FormControl({ value: pocketRule.toUse, disabled: !this.currentVersion }, [Validators.required]),
+      pocketToUse: new FormControl({ value: pocketRule.pocketToUse, disabled: !this.currentVersion }, [Validators.required]),
       pocket: new FormControl({ value: pocketRule.condition.pocket, disabled: !this.currentVersion }, [Validators.required]),
       comparator: new FormControl({ value: pocketRule.condition.comparator, disabled: !this.currentVersion }, [Validators.required]),
       value: new FormControl({ value: pocketRule.condition.value, disabled: !this.currentVersion }, [Validators.required, this.validatePercentages.bind(this) ])
@@ -186,7 +187,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       productConfig = {
         type: '',
         concept: '',
-        bonusType:'PERCENTAGE',
+        bonusType: 'PERCENTAGE',
         bonusValueByBalance: 0,
         bonusValueByCredit: 0
       };
@@ -248,7 +249,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   }
 
   saveSpendingRule() {
-    console.log(this.settingsForm.getRawValue());
+    console.log(this.settingsForm);
     Rx.Observable.of(this.settingsForm.getRawValue())
       .pipe(map(
         ({
@@ -276,7 +277,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
             (acc, p) => {
               acc.push({
                 priority: p.priority,
-                toUse: p.toUse,
+                pocketToUse: p.pocketToUse,
                 condition: {
                   pocket: p.pocket,
                   comparator: p.comparator,
@@ -302,7 +303,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         this.settingsForm = new FormGroup({
           businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
           businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
-          minOperationAmount: new FormControl(null, [Validators.required]),
+          // minOperationAmount: new FormControl(null, [Validators.required]),
           productBonusConfigs: new FormArray([], [Validators.required]),
           autoPocketSelectionRules: new FormArray([], [Validators.required])
         });
