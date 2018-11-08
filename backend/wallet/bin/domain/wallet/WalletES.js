@@ -132,7 +132,7 @@ class WalletES {
             bonusTx.associatedTransactionIds.push(mainTx.id);
             mainTx.associatedTransactionIds.push(bonusTx.id);
           }
-          return of({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => (e != null && e != undefined) ) })       
+          return of({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => e != null ) })       
         }),
         // tap(({transactions}) => {
         //   transactions.forEach(tx => console.log(tx.value))
@@ -221,7 +221,8 @@ class WalletES {
                       )
                   )          
                 ),
-                mergeMap(([transaction, transactionValue]) => of({ ...transaction, value: transactionValue, associatedTransactionIds: [] }))
+                mergeMap(([transaction, transactionValue]) => of({ ...transaction, value: transactionValue, associatedTransactionIds: [] })),
+                map(tx => (tx.value == 0) ? null : tx)
               )
         })        
       );
