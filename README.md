@@ -31,7 +31,8 @@ _This MicroService is built on top of NebulaE MicroService Framework.  Please se
 ├── deployment                          => Automatic deployment strategies  
 │   ├── compose                         => Docker-Compose environment for local development  
 │   └── gke                             => Google Kubernetes Engine deployment file descriptors  
-│   └── mapi-setup.json                 => Micro-API setup file  
+│   └── emi-mapi-setup.json             => Micro-API EMI setup file  
+│   └── sales-mapi-setup.json           => Micro-API SALES setup file
 ├── .circleci                           => CircleCI v2. config directory
 │   ├── config.yml
 │   └── scripts
@@ -217,7 +218,7 @@ nebulae compose-ui development --shell-type=FUSE2_ANGULAR --shell-repo=https://g
 
 ### 6. Compose the API emi-gateway
 ```
-nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-pyxis/emi-gateway --api-id=emi-gateway --output-dir=FULL_PATH_TO_REPO/ms-wallet/playground/emi-gateway  --setup-file=FULL_PATH_TO_REPO/ms-wallet/etc/mapi-setup.json
+nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-pyxis/emi-gateway --api-id=emi-gateway --output-dir=FULL_PATH_TO_REPO/ms-wallet/playground/emi-gateway  --setup-file=FULL_PATH_TO_REPO/ms-wallet/etc/emi-mapi-setup.json
 ```
 
 ### 7. Set the JWT token 
