@@ -9,6 +9,7 @@ const { forkJoin,of,interval,concat,from,defer,range } = require("rxjs");
 //LIBS FOR TESTING
 const MqttBroker = require("../bin/tools/broker/MqttBroker");
 const MongoDB = require("../bin/data/MongoDB").MongoDB;
+const NumberDecimal = require('mongodb').Decimal128;
 
 let BusinessDA = undefined;
 let WalletDA = undefined;
@@ -318,7 +319,7 @@ describe("E2E - Simple transaction", function() {
       const collection = mongoDB.client.db(dbName).collection("Wallet");
       of({})
       .pipe(
-        mergeMap(() => defer(() => collection.findOneAndUpdate({businessId: businessList[0]._id},{$set:{"pockets.bonus": 500000000}})  )),
+        mergeMap(() => defer(() => collection.findOneAndUpdate({businessId: businessList[0]._id},{$set:{"pockets.bonus": NumberDecimal.fromString('500000000')}})  )),
         tap(r => console.log("###############", r)),
         mergeMap(() => WalletDA.getWallet$(businessList[0]._id) ),
         tap(wallet => {

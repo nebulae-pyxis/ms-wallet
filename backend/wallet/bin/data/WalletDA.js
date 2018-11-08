@@ -2,6 +2,7 @@
 let mongoDB = undefined;
 const COLLECTION_NAME = "Wallet";
 const { CustomError } = require("../tools/customError");
+const NumberDecimal = require('mongodb').Decimal128;
 const { take, mergeMap, catchError, map, tap } = require('rxjs/operators');
 const  { Observable, forkJoin, of, interval, defer } = require('rxjs');
 
@@ -22,11 +23,20 @@ class WalletDA {
   /**
    * get the wallet info by business ID
    * @param {string} businessId Business unit related
+   * new NumberDecimal(wallet.pockets.balance.bytes).toString()
    */
   static getWallet$(businessId) {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return of(businessId).pipe(
-      mergeMap(id => defer(() => collection.findOne({ businessId: id })))
+      mergeMap(id => defer(() => collection.findOne({ businessId: id }))),
+      map(wallet => 
+        ({...wallet, 
+          pockets:{ 
+            balance: parseFloat(new NumberDecimal(wallet.pockets.balance.bytes).toString()),
+            bonus: parseFloat(new NumberDecimal(wallet.pockets.bonus.bytes).toString()) 
+          } 
+        })
+      )
     );
   }
 
@@ -44,8 +54,8 @@ class WalletDA {
           businessName: wallet.businessName,
           spendingState: wallet.spendingState,
           pockets: {
-            balance: wallet.pockets.balance,
-            bonus: wallet.pockets.bonus
+            balance: NumberDecimal.fromString(wallet.pockets.balance.toString()) ,
+            bonus:NumberDecimal.fromString(wallet.pockets.bonus.toString()) 
           }
         };
         return collection.insertOne(walletData);
@@ -87,8 +97,10 @@ class WalletDA {
       mergeMap(business => defer(() => {
         const updateQuery = {
           $inc: {
-            'pockets.balance': increment.balance,
-            'pockets.bonus': increment.bonus
+            // 'pockets.balance': increment.balance,
+            // 'pockets.bonus': increment.bonus
+            'pockets.balance': NumberDecimal.fromString(increment.balance.toString()),
+            'pockets.bonus': NumberDecimal.fromString(increment.bonus.toString())
           },
           $setOnInsert: {
             businessId: business._id,
