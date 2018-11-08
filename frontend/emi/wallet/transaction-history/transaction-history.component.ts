@@ -155,6 +155,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
       transactionType: [null],
       transactionConcept: [null]
     });
+    this.filterForm.disable({emitEvent: false});
   }
 
   /**
@@ -251,6 +252,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
       this.transactionHistoryService.selectedBusinessEvent$,
     )
     .pipe(
+        tap(data => console.log('FILTROS *********** ', data)),
         filter(([filterAndPagination, selectedBusiness]) => filterAndPagination != null && selectedBusiness != null),
         mergeMap(([filterAndPagination, selectedBusiness]) => {
           console.log('[filterAndPagination, selectedBusiness] => ', [filterAndPagination, selectedBusiness]);
@@ -386,6 +388,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
    * @param business  selected business
    */
   onSelectBusinessEvent(business) {
+    console.log('onSelectBusinessEvent => ', business);
     this.transactionHistoryService.selectBusiness(business);
   }
 

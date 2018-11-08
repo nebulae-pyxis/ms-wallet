@@ -51,6 +51,14 @@
             >
             </mat-select>
           </mat-form-field>
+
+
+
+          
+
+
+
+
         </div>
       </div>
       <!-- / SIDENAV HEADER -->
@@ -62,6 +70,42 @@
         *fuseIfOnDom
         [@animate]="{ value: '*', params: { y: '50px' } }"
       >
+      
+      <div class="grey-300-bg p-4"  fxLayout="column" fxLayoutAlign="start center">
+
+          <div fxLayout="row">
+              <div class="px-16 py-12" fxLayout="column" fxLayoutAlign="center" fxLayout.gt-xs="row" fxLayoutAlign.gt-xs="space-between end">
+                  <div fxFlex="0 1 auto">
+                    <div class="h4 secondary-text">Balance</div>
+                    <div class="pt-0 mat-title m-0 font-weight-300 text-nowrap">
+                      <span [ngStyle]="{'color': walletData.pockets.balance >= 0 ? 'green': 'red'}">{{ walletData.pockets.balance | currency}}</span>
+                    </div>
+                  </div>
+                </div>
+  
+                <div class="px-16 py-12" fxLayout="column" fxLayoutAlign="center" fxLayout.gt-xs="row" fxLayoutAlign.gt-xs="space-between end">
+                  <div fxFlex="0 1 auto">
+                    <div class="h4 secondary-text">Bonus</div>
+                    <div class="pt-0 mat-title m-0 font-weight-300 text-nowrap">
+                      <span [ngStyle]="{'color': walletData.pockets.bonus >= 0 ? 'green': 'red'}">{{ walletData.pockets.bonus | currency}}</span>
+                    </div>
+                  </div>
+                </div>
+          </div>
+
+            <div class="px-16 py-12" fxLayout="column" fxLayoutAlign="center" fxLayout.gt-xs="row" fxLayoutAlign.gt-xs="space-between end" *ngIf="false">
+              <div fxFlex="0 1 auto">
+                <div class="h4 secondary-text">Credit</div>
+                <div class="pt-0 mat-title m-0 font-weight-300 text-nowrap">
+                  <span>{{ walletData.pockets.bonus | currency}}</span>
+                </div>
+              </div>
+            </div>
+
+
+        </div>
+
+
         <div class="nav" fxLayout="column">
           <div class="nav-subheader">{{ "WALLET.FILTER" | translate }}</div>
 
@@ -196,6 +240,7 @@
             </button>
           </div>
         </div>
+        
       </div>
       <!-- / SIDENAV CONTENT -->
     </mat-sidenav>
@@ -248,7 +293,7 @@
 
       <!-- CONTENT CARD -->
       <div class="content-card mat-white-bg">
-          <mat-table id="transaction-history-table" class="item-table" #table [dataSource]="dataSource">
+          <mat-table id="transaction-history-table" class="item-table" #table [dataSource]="dataSource" fusePerfectScrollbar>
 
               <!-- Timestamp Column -->
               <ng-container cdkColumnDef="timestamp">
