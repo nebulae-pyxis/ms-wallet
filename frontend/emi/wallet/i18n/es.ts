@@ -23,6 +23,34 @@ export const locale = {
       TERMINAL_USERNAME: 'ID terminal',
       SELECT_TRANSACTION_TYPE: 'Seleccione tipo',
       SELECT_TRANSACTION_CONCEPT: 'Seleccione concepto',
+      TIMESTAMP: 'Fecha',
+      TRANSACTION_TYPE: 'Tipo',
+      TRANSACTION_CONCEPT: 'Concepto',
+      TRANSACTION_USER: 'Usuario',
+      TRANSACTION_VALUE: 'Valor',
+      TRANSACTION_POCKET: 'Bolsa',
+      TRANSACTION_TERMINAL_ID: 'Terminal ID',
+      TRANSACTION_TERMINAL_USER_ID: 'User ID',
+      TRANSACTION_TERMINAL_USERNAME: 'Terminal username',
+      TRANSACTION_TIMESTAMP: 'Fecha',
+      TRANSACTION_ID: 'ID transacción',
+      BALANCE: 'Saldo',
+      BONUS: 'Comisión',
+      RESET_FILTER: 'Limpiar filtro',
+      TYPES: {
+        SALES: 'Venta',
+        BALANCE_ADJUSTMENT: 'Ajuste de saldo'
+      },
+      CONCEPTS: {
+        RECARGA_CIVICA: 'Recarga civica',
+        PAYMENT: 'Pago'
+      },
+      TRANSACTION_HISTORY_DETAIL: 'Detalle de transacción',
+      INFO: 'Información',
+      TERMINAL: 'Terminal',
+      ID: 'ID:',
+      USER_ID: 'ID Usuario:',
+      USERNAME: 'Nombre de usuario:'
     }
   }
 };

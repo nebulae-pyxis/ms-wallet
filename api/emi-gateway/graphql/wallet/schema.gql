@@ -26,6 +26,55 @@ type Wallet {
   businessId: String
 }
 
+"Wallet transaction info"
+type WalletTransaction {
+  "Wallet ID"
+  _id: ID!
+  "Timestamp where the transaction was created"
+  timestamp: BigInt!
+  "ID of the business associated with the transaction"
+  businessId: String!
+  "Transaction type"
+  type: String!
+  "Transaction concept"
+  concept: String!
+  "Indicates which was the used pocket"
+  pocket: String!
+  "Value associated to the transaction"
+  value: Float!
+  "User that performs the operation that create the transaction"
+  user: String!  
+  "Notes"
+  notes: String
+  "Location where the operation was performed"
+  location: Location
+  "Terminal data (Additional info useful to identify where the operation was performed)"
+  terminal: Terminal
+  "IDs of the wallet transactions associated with this one"
+  associatedTransactiondIds: [String]
+}
+
+"Location with GeoJson format"
+type Location {
+  "Geojson"
+  geojson: GeoJson!
+}
+
+"GeoJSON format"
+type GeoJson {
+  "Geojson type E.g: Point, LineString"
+  type: String!
+  "Geojson coordinates"
+  coordinates: [String]!
+}
+
+"Terminal data"
+type Terminal {
+  id: String
+  userId: String
+  username: String
+}
+
 enum SpendingStateEnum {
   ALLOWED
   FORBIDDEN
@@ -71,6 +120,39 @@ input ManualBalanceAdjustmentInput {
 input LocationInput {
   latitude: String!
   longitude: String!
+}
+
+input PaginationInput {
+  "Page"
+  page: Int!
+  "Count"
+  count: Int!
+  "Sort, default: ASC"
+  sort: Int
+}
+
+input FilterInput {
+  "ID of the business with which the information will be filter"
+  businessId: String!
+  "Init date"
+  initDate: BigInt!
+  "End date"
+  endDate: BigInt!
+  "Transaction type"
+  transactionType: String
+  "Transaction concept"
+  transactionConcept: String
+  "Terminal"
+  terminal: TerminalInput
+}
+
+input TerminalInput {
+  "Terminal ID"
+  id: String
+  "Terminal User ID"
+  userId: String
+  "Terminal username"
+  username: String
 }
 
 enum ComparatorEnum {
@@ -135,9 +217,16 @@ type Query {
   getWalletBusiness: Business
   "Get businesses"
   getWalletBusinesses: [Business]
+  "Get business by id"
+  getWalletBusinessById(id: ID!): Business
   "Get wallet info of the business"
   getWallet(businessId: String!): Wallet
-
+  "Get the transactions history according to the filter and the pagination"
+  getWalletTransactionsHistory(filterInput: FilterInput!, paginationInput: PaginationInput!): [WalletTransaction]
+  "Get a transaction history by id"
+  getWalletTransactionsHistoryById(id: ID!): WalletTransaction
+  "Get a transaction history by id"
+  getAssociatedTransactionsHistoryByTransactionHistoryId(id: ID!): [WalletTransaction]
   "Fetch spending of the buiness given as parameter"
   WalletGetSpendingRule(businessId: String): WalletSpendingRule
   "Get all businesses filtered"

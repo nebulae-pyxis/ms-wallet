@@ -28,7 +28,7 @@ class BusinessCQRS {
       "wallet",
       "getWalletBusiness$",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner"]
+      ["SYSADMIN"]
       ).pipe(
         mergeMap(roles => {
           const isSysAdmin = roles.SYSADMIN;
@@ -69,6 +69,28 @@ class BusinessCQRS {
         return this.handleError$(err);
       })
     );
+  }
+
+  /**
+   * Gets the business by its id
+   *
+   * @param {*} args args that contain the business filter
+   * @param {*} args.id id of the business.
+   */
+  getWalletBusinessById$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "wallet",
+      "getWalletBusinessById$()",
+      PERMISSION_DENIED_ERROR,
+      ["SYSADMIN", "business-owner"]
+    ).pipe(
+      mergeMap(val => BusinessDA.getBusiness$(args.id)),
+      mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+      catchError(err => {
+        return this.handleError$(err);
+      })
+    )      
   }
 
   //#region  mappers for API responses

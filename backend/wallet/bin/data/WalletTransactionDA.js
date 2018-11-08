@@ -1,7 +1,10 @@
 "use strict";
 
 let mongoDB = undefined;
-const  { defer, Observable } = require('rxjs');
+const  { defer, Observable, of } = require('rxjs');
+const { mergeMap, map, tap } = require('rxjs/operators');
+const Crosscutting = require("../tools/Crosscutting");
+
 const COLLECTION_NAME = `TransactionsHistory_`;
 
 class WalletTransactionDA {
@@ -27,13 +30,126 @@ class WalletTransactionDA {
    * @param {*} transactionData transaction to create
    */
   static saveTransactionHistory$(transactionData) {
-    console.log('saveTransactionHistory => ', transactionData);
-    const monthYear = transactionData._id.substr(transactionData._id.length - 4)
-    console.log("MES_Y_AÑO ==> ", monthYear);
+    const monthYear = transactionData._id.substr(transactionData._id.length - 4);
     const collection = mongoDB.db.collection(`${COLLECTION_NAME}${monthYear}`);    
     return defer(() => collection.insertOne(transactionData));
   }
 
+
+  /**
+   * Gets transaction history by id.
+   * @param {*} businessId ID of the business to filter
+   * @param {*} transactionHistoryId ID of the transaction history
+   */
+  static getTransactionHistoryById$(businessId, transactionHistoryId) {
+    console.log('getTransactionHistory => ', businessId, transactionHistoryId);
+    const monthYear = transactionHistoryId.substr(transactionHistoryId.length - 4);
+    const collection = mongoDB.db.collection(`${COLLECTION_NAME}${monthYear}`);
+    return of({businessId, transactionHistoryId})
+    .pipe(
+      map(filter => {
+        let query = {
+          _id: transactionHistoryId
+        };
+        if(filter.businessId){
+          query.businessId = filter.businessID;
+        }
+        return query;
+      }),
+      mergeMap(query => defer(() => collection.findOne(query)))
+    );
+  }
+
+    /**
+   * Gets transaction history by id.
+   * @param {*} transactionHistoryIds ID of the transaction history
+   */
+  static getTransactionsHistoryByIds$(id, transactionHistoryIds, businessId) {
+    console.log('getTransactionsHistoryByIds => ', transactionHistoryIds);
+    const monthYear = id.substr(id.length - 4);
+    const collection = mongoDB.db.collection(`${COLLECTION_NAME}${monthYear}`);
+    return of(transactionHistoryIds)
+    .pipe(
+      map(data => {
+        let query = {
+          _id: {$in: transactionHistoryIds},
+          businessId: businessId
+        };
+        return query;
+      }),
+      mergeMap(query => defer(() => collection.find(query).limit(10).toArray()))
+    );
+  }
+
+/**
+ * Gets transaction hsitory from a business according to the filters and the pagination.
+ * 
+ * @param {*} filter Filter data
+ * @param {*} filter.businessId ID of the business to filter
+ * @param {*} filter.initDate start date range 
+ * @param {*} filter.endDate End date range 
+ * @param {*} filter.transactionType Transaction type filter
+ * @param {*} filter.transactionConcept Transaction concept filter
+ * @param {*} filter.terminal Terminal object
+ * @param {*} filter.terminal.id Id of the terminal to filter
+ * @param {*} filter.terminal.userId Id of the terminal user to filter
+ * @param {*} filter.terminal.username username of the terminal user to filter
+ * @param {*} pagination Pagination data
+ * @param {*} pagination.page Page of the data to return
+ * @param {*} pagination.count Count of records to return
+ * @param {*} pagination.sortTimestamp Indicates if the info should be sorted asc or desc according to the timestamp.
+ */
+  static getTransactionsHistory$(filter, pagination) {
+    console.log('getTransactionHistory => ', filter, pagination);
+
+    return Observable.create(async observer => {
+      const initDateFormat = new Date(filter.initDate);
+      const monthYear = Crosscutting.getMonthYear(initDateFormat);
+      const collection = mongoDB.db.collection(`${COLLECTION_NAME}${monthYear}`);
+      console.log('collection name => ', `${COLLECTION_NAME}${monthYear}`);
+      const query = {
+        businessId: filter.businessId,
+      };
+
+      if(filter.initDate){
+        query.timestamp = query.timestamp || {};
+        query.timestamp['$gte'] = filter.initDate;
+      }
+
+      if(filter.endDate){
+        query.timestamp = query.timestamp || {};
+        query.timestamp['$lt'] = filter.endDate;
+      }
+
+      if(filter.terminal && filter.terminal.id){
+        query.type = {
+          'terminal.id' : filter.terminal.id
+        }
+      }
+
+      if(filter.terminal && filter.terminal.userId){
+        query.type = {
+          'terminal.userId' : filter.terminal.userId
+        }
+      }
+
+      if(filter.terminal && filter.terminal.username){
+        query.type = {
+          'terminal.username' : filter.terminal.username
+        }
+      }
+
+      console.log('QUery => ', JSON.stringify(query));
+      const cursor = collection.find(query).skip(pagination.count * pagination.page).limit(pagination.count).sort({timestamp: pagination.sort});
+      let obj = await this.extractNextFromMongoCursor(cursor);
+      while (obj) {
+        observer.next(obj);
+        obj = await this.extractNextFromMongoCursor(cursor);
+      }
+
+      observer.complete();
+    });
+  }
 
 
     /**

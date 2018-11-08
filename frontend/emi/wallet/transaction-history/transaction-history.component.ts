@@ -25,9 +25,11 @@ import {
   filter,
   tap,
   takeUntil,
-  startWith
+  startWith,
+  debounceTime,
+  distinctUntilChanged,
 } from "rxjs/operators";
-import { Subject } from "rxjs";
+import { Subject, fromEvent, of, forkJoin } from "rxjs";
 
 //////////// ANGULAR MATERIAL ///////////
 import {
@@ -48,13 +50,21 @@ import { locale as spanish } from "../i18n/es";
 import { KeycloakService } from "keycloak-angular";
 import { WalletService } from "./../wallet.service";
 import { TransactionHistoryService } from "./transaction-history.service";
-import { Observable } from "apollo-link";
+
+import {MAT_MOMENT_DATE_FORMATS, MomentDateAdapter} from '@angular/material-moment-adapter';
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import * as moment from 'moment';
 
 @Component({
   selector: "app-transaction-history",
   templateUrl: "./transaction-history.component.html",
   styleUrls: ["./transaction-history.component.scss"],
-  animations: fuseAnimations
+  animations: fuseAnimations,
+  // providers: [
+  //   {provide: MAT_DATE_LOCALE, useValue: 'ja-JP'},
+  //   {provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE]},
+  //   {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
+  // ]
 })
 export class TransactionHistoryComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject();
@@ -63,15 +73,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   // Table data
   dataSource = new MatTableDataSource();
   // Columns to show in the table
-  displayedColumns = [
-    "timestamp",
-    "transactionType",
-    "transactionConcept",
-    "value",
-    "pocket",
-    "user",
-    "terminalUser"
-  ];
+  displayedColumns = ['timestamp', 'type', 'concept', 'value', 'pocket', 'user' ];
 
   transactionTypes: any = [];
   transactionConcepts: any = [];
@@ -80,22 +82,36 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   myBusiness: any = null;
   allBusiness: any = [];
   selectedBusinessData: any = null;
+  selectedTransactionHistory: any = null;
   isSystemAdmin: Boolean = false;
+
+  walletData: any = {
+    spendingState: '',
+    pockets: {
+      balance: 0,
+      bonus: 0
+    }
+  };
+
+  terminalIdInput: any;
+  terminalUserId: any;
+  terminalUsername: any;
+  transactionType: any;
 
   // Table values
   @ViewChild(MatPaginator)
   paginator: MatPaginator;
-  @ViewChild("filter")
+  @ViewChild('filter')
   filter: ElementRef;
   @ViewChild(MatSort)
   sort: MatSort;
   tableSize: number;
   page = 0;
   count = 10;
-  filterText = "";
+  filterText = '';
   sortColumn = null;
   sortOrder = null;
-  itemPerPage = "";
+  itemPerPage = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -106,28 +122,38 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     private activatedRouter: ActivatedRoute,
     private keycloakService: KeycloakService,
     private walletService: WalletService,
-    private transactionHistoryService: TransactionHistoryService
+    private transactionHistoryService: TransactionHistoryService,
+    private adapter: DateAdapter<any>
   ) {
     this.translationLoader.loadTranslations(english, spanish);
   }
 
   ngOnInit() {
     this.buildFilterForm();
+    this.detectFilterAndPaginatorChanges();
     this.loadRoleData();
     this.loadBusinessData();
+    this.loadWalletData();
     this.refreshTransactionHistoryTable();
   }
 
+  test(){
+    console.log('setLocale ES');
+    this.adapter.setLocale('es');
+  }
+
   buildFilterForm() {
+    const startOfMonth = moment().startOf('month');
+    const endOfMonth   = moment().endOf('month');
     // Reactive Form
     this.filterForm = this.formBuilder.group({
-      initDate: [""],
-      endDate: [""],
-      terminalId: [""],
-      terminalUserId: [""],
-      terminalUsername: [""],
-      transactionType: [""],
-      transactionConcept: [""]
+      initDate: [startOfMonth],
+      endDate: [endOfMonth],
+      terminalId: [null],
+      terminalUserId: [null],
+      terminalUsername: [null],
+      transactionType: [null],
+      transactionConcept: [null]
     });
   }
 
@@ -138,47 +164,116 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     return this.paginator.page.pipe(startWith({ pageIndex: 0, pageSize: 10 }));
   }
 
+  /**
+   * get the wallet data according to the selected business
+   */
+  loadWalletData(){
+    this.transactionHistoryService.selectedBusinessEvent$
+    .pipe(
+      tap(data => console.log('selected business wallet  => ', data)),
+      filter(selectedBusiness => selectedBusiness != null),
+      mergeMap((selectedBusiness: any) => this.walletService.getWallet$(selectedBusiness._id)),
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      filter((resp: any) => !resp.errors || resp.errors.length === 0),
+      map(result => result.data.getWallet),
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe(wallet => {
+      this.walletData = wallet;
+    });
+  }
+
+  /**
+   *
+   * @param element Element HTML
+   */
+  getFormChanges$(){
+    return this.filterForm.valueChanges
+    .pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      startWith({ initDate: this.filterForm.get('initDate').value, endDate: this.filterForm.get('endDate').value })
+    );
+  }
+
+  resetFilter(){
+    this.filterForm.reset();
+    this.paginator.pageIndex = 0;
+
+
+    const startOfMonth = moment().startOf('month');
+    const endOfMonth   = moment().endOf('month');
+    this.filterForm.patchValue({
+      initDate: [startOfMonth],
+      endDate: [endOfMonth]
+    });
+  }
+
+  detectFilterAndPaginatorChanges(){
+    Rx.Observable.combineLatest(
+      this.getFormChanges$(),
+      this.getPaginator$(),
+    ).pipe(
+      map(([formChanges, paginator]) => {
+        console.log('formChanges => ', formChanges);
+        console.log('paginator => ', paginator);
+        return {
+          filter: {
+            initDate: formChanges.initDate,
+            endDate: formChanges.endDate,
+            transactionType: formChanges.transactionType,
+            transactionConcept: formChanges.transactionConcept,
+            terminal: {
+              id: formChanges.terminalId,
+              userId: formChanges.terminalUserId,
+              username: formChanges.terminalUsername
+            }
+          },
+          pagination: {
+            page: paginator.pageIndex,
+            count: paginator.pageSize,
+            sort: 1
+          }
+        };
+      }),
+      tap(filterAndPagination => this.transactionHistoryService.addFilterAndPaginatorData(filterAndPagination)),
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe(data => {
+      console.log('TEST$ => ', data);
+    });
+  }
+
+  /**
+   * Refreshes the table data according to the filters and the paginator.
+   */
   refreshTransactionHistoryTable() {
     Rx.Observable.combineLatest(
-      this.getPaginator$(),
-      this.transactionHistoryService.selectedBusinessEvent$
+      this.transactionHistoryService.filterAndPaginator$,
+      this.transactionHistoryService.selectedBusinessEvent$,
     )
-      .pipe(
-        mergeMap(([paginator, selectedBusiness]) => {
-          return this.transactionHistoryService.getTransactionHistory$(
-            paginator.pageIndex,
-            paginator.pageSize,
-            selectedBusiness._id
+    .pipe(
+        filter(([filterAndPagination, selectedBusiness]) => filterAndPagination != null && selectedBusiness != null),
+        mergeMap(([filterAndPagination, selectedBusiness]) => {
+          console.log('[filterAndPagination, selectedBusiness] => ', [filterAndPagination, selectedBusiness]);
+
+          const filterInput = filterAndPagination.filter;
+          filterInput.initDate = filterInput.initDate ? filterInput.initDate.valueOf():null;
+          filterInput.endDate = filterInput.endDate ? filterInput.endDate.valueOf():null;
+          filterInput.businessId = selectedBusiness._id;
+          const paginationInput = filterAndPagination.pagination;
+
+          return this.transactionHistoryService.getTransactionsHistory$(
+            filterInput,
+            paginationInput
           );
         }),
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
         takeUntil(this.ngUnsubscribe)
       )
-      .subscribe(([businessData, settlements, selectedBusiness]) => {
-        this.isSystemAdmin = businessData[0];
-        this.myBusiness = businessData[1];
-        this.allBusiness = businessData[2];
-        this.selectedBusinessData = selectedBusiness;
+      .subscribe(transactionsHistory => {
+        console.log('transactionsHistory list => ', transactionsHistory);
 
-        this.dataSource.data = settlements;
-
-        if (!this.isSystemAdmin) {
-          this.displayedColumns = [
-            "timestamp",
-            "from",
-            "to",
-            "amount",
-            "state"
-          ];
-        } else {
-          this.displayedColumns = [
-            "timestamp",
-            "from",
-            "to",
-            "amount",
-            "fromBusinessState",
-            "toBusinessState"
-          ];
-        }
+        this.dataSource.data = transactionsHistory.data.getWalletTransactionsHistory;
       });
   }
 
@@ -205,7 +300,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
    */
   checkIfUserIsAdmin$() {
     return Rx.Observable.of(this.keycloakService.getUserRoles(true)).pipe(
-      map(userRoles => userRoles.some(role => role === "SYSADMIN"))
+      map(userRoles => userRoles.some(role => role === 'SYSADMIN'))
     );
   }
 
@@ -232,10 +327,10 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     return this.checkIfUserIsAdmin$()
       .pipe(
         mergeMap(hasSysAdminRole => {
-          return Rx.Observable.forkJoin(
-            Observable.of(hasSysAdminRole),
+          return forkJoin(
+            of(hasSysAdminRole),
             this.getBusiness$(),
-            hasSysAdminRole ? this.getAllBusiness$() : Rx.Observable.of([])
+            hasSysAdminRole ? this.getAllBusiness$() : of([])
           );
         }),
         takeUntil(this.ngUnsubscribe)
@@ -279,11 +374,79 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Receives the selected transaction history
+   * @param transactionHistory selected transaction history
+   */
+  selectTransactionHistoryRow(transactionHistory){
+    this.selectedTransactionHistory = transactionHistory;
+  }
+
+  /**
    * Listens when a new business have been selected
    * @param business  selected business
    */
   onSelectBusinessEvent(business) {
     this.transactionHistoryService.selectBusiness(business);
+  }
+
+  graphQlAlarmsErrorHandler$(response){
+    return Rx.Observable.of(JSON.parse(JSON.stringify(response)))
+    .pipe(
+      tap((resp: any) => {
+        this.showSnackBarError(resp);
+        return resp;
+      })
+    );
+  }
+
+    /**
+   * Shows an error snackbar
+   * @param response
+   */
+  showSnackBarError(response){
+    if (response.errors){
+
+      if (Array.isArray(response.errors)) {
+        response.errors.forEach(error => {
+          if (Array.isArray(error)) {
+            error.forEach(errorDetail => {
+              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
+            });
+          }else{
+            response.errors.forEach(error => {
+              this.showMessageSnackbar('ERRORS.' + error.message.code);
+            });
+          }
+        });
+      }
+    }
+  }
+
+  /**
+   * Shows a message snackbar on the bottom of the page
+   * @param messageKey Key of the message to i18n
+   * @param detailMessageKey Key of the detail message to i18n
+   */
+  showMessageSnackbar(messageKey, detailMessageKey?){
+    const translationData = [];
+    if (messageKey){
+      translationData.push(messageKey);
+    }
+
+    if (detailMessageKey){
+      translationData.push(detailMessageKey);
+    }
+
+    this.translate.get(translationData)
+    .subscribe(data => {
+      this.snackBar.open(
+        messageKey ? data[messageKey] : '',
+        detailMessageKey ? data[detailMessageKey] : '',
+        {
+          duration: 2000
+        }
+      );
+    });
   }
 
   ngOnDestroy() {

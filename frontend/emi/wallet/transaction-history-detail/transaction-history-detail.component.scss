@@ -1,0 +1,22 @@
+.summary {
+  font-size: 15px;
+
+  .label {
+      color: rgba(0, 0, 0, 0.54);
+      text-align: left;
+      padding-right: 16px;
+  }
+
+  .value {
+      color: rgba(0, 0, 0, 1);
+  }
+
+  .code {
+      font-size: 35px;
+      font-weight: 300;
+
+      td {
+          padding-bottom: 32px;
+      }
+  }
+}

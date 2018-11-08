@@ -155,8 +155,24 @@ class GraphQlService {
         messageType: "emigateway.graphql.query.getWalletBusinesses"
       },
       {
+        aggregateType: "Business",
+        messageType: "emigateway.graphql.query.getWalletBusinessById"
+      },
+      {
         aggregateType: "Wallet",
         messageType: "emigateway.graphql.query.getWallet"
+      },
+      {
+        aggregateType: "Wallet",
+        messageType: "emigateway.graphql.query.getWalletTransactionsHistory"
+      },
+      {
+        aggregateType: "Wallet",
+        messageType: "emigateway.graphql.query.getWalletTransactionsHistoryById"
+      },
+      {
+        aggregateType: "Wallet",
+        messageType: "emigateway.graphql.query.getAssociatedTransactionsHistoryByTransactionHistoryId"
       },
       {
         aggregateType: "Wallet",
@@ -192,8 +208,24 @@ class GraphQlService {
         fn: business.cqrs.getWalletBusinesses$,
         obj: business.cqrs
       },
+      'emigateway.graphql.query.getWalletBusinessById': {
+        fn: business.cqrs.getWalletBusinessById$,
+        obj: business.cqrs
+      },
       "emigateway.graphql.query.getWallet": {
         fn: wallet.cqrs.getWallet$,
+        obj: wallet.cqrs
+      },
+      "emigateway.graphql.query.getWalletTransactionsHistory": {
+        fn: wallet.cqrs.getWalletTransactionHistory$,
+        obj: wallet.cqrs
+      },
+      "emigateway.graphql.query.getWalletTransactionsHistoryById": {
+        fn: wallet.cqrs.getWalletTransactionHistoryById$,
+        obj: wallet.cqrs
+      },
+      "emigateway.graphql.query.getAssociatedTransactionsHistoryByTransactionHistoryId": {
+        fn: wallet.cqrs.getAssociatedTransactionsHistoryByTransactionHistoryId$,
         obj: wallet.cqrs
       },
       "emigateway.graphql.mutation.makeManualBalanceAdjustment": {

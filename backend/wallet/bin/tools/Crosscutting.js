@@ -12,14 +12,29 @@ class Crosscutting{
      * @param {*} date Date with which will be generated the suffix of the uuid.
      */
     static generateHistoricalUuid(date){
+        const sufixUuid = this.getMonthYear(date);
+        const uuId = `${uuidv4()}-${sufixUuid}`;
+        return uuId;
+    }
+
+    /**
+     * Generates a suffix (MMyy) according to the date.
+     * Format: MMyy
+     * 
+     * @example
+     * month: 06
+     * year: 2018
+     * // returns 0618
+     * 
+     * @param {*} date 
+     */
+    static getMonthYear(date){
         let month = date.getMonth()+1;
         let year = date.getFullYear() + '';
         month = (month.length == 1 ? '0': '') + month;
         year = year.substr(year.length - 2)
 
-        const sufixUuid = `-${month}${year}`;
-        const uuId = `${uuidv4()}${sufixUuid}`;
-        return uuId;
+        return `${month}${year}`;
     }
 
 }

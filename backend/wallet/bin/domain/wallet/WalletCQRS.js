@@ -5,6 +5,8 @@ const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
 const MATERIALIZED_VIEW_TOPIC = "emi-materialized-view-updates";
 const uuidv4 = require("uuid/v4");
+const WalletDA = require("../../data/WalletDA");
+const WalletTransactionDA = require("../../data/WalletTransactionDA");
 const RoleValidator = require("../../tools/RoleValidator");
 const { CustomError, DefaultError } = require("../../tools/customError");
 const {
@@ -23,11 +25,12 @@ class WalletCQRS {
    * @param {*} args args
    */
   getWallet$({ args }, authToken) {
+    console.log('query getWallet');
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "WALLET",
       "getWallet",
-      PERMISSION_DENIED_ERROR_CODE,
+      PERMISSION_DENIED_ERROR,
       ["SYSADMIN", "business-owner"]
     ).pipe(
       mergeMap(roles => {
@@ -39,9 +42,97 @@ class WalletCQRS {
               method
             );
           }
-          return Rx.Observable.of(roles);
+          return of(roles);
       }),
-      mergeMap(val => BusinessDA.getBusiness$(args.businessId)),
+      mergeMap(val => WalletDA.getWallet$(args.businessId)),
+      mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+      catchError(err => this.handleError$(err))
+    );
+  }
+
+    /**
+   * Gets the wallet transaction history of a business
+   *
+   * @param {*} args args
+   */
+  getWalletTransactionHistory$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "WALLET",
+      "getWalletTransactionHistory",
+      PERMISSION_DENIED_ERROR,
+      ["SYSADMIN", "business-owner"]
+    ).pipe(
+      mergeMap(roles => {
+        const isSysAdmin = roles.SYSADMIN;
+        //If an user does not have the role to get the transaction history from other business, we must return an error
+          if (!isSysAdmin && authToken.businessId != args.businessId) {
+            return this.createCustomError$(
+              PERMISSION_DENIED_ERROR,
+              method
+            );
+          }
+          return of(roles);
+      }),
+      mergeMap(val => WalletTransactionDA.getTransactionsHistory$(args.filterInput, args.paginationInput)),
+      toArray(),
+      mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+      catchError(err => this.handleError$(err))
+    );
+  }
+
+      /**
+   * Gets the wallet transaction history of a business
+   *
+   * @param {*} args args
+   */
+  getWalletTransactionHistoryById$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "WALLET",
+      "getWalletTransactionHistoryById",
+      PERMISSION_DENIED_ERROR,
+      ["SYSADMIN", "business-owner"]
+    ).pipe(
+      mergeMap(roles => {
+        const isSysAdmin = roles.SYSADMIN;
+        //If an user does not have the role to get the transaction history from other business, the query must be filtered with the businessId of the user
+        const businessId = !isSysAdmin? (authToken.businessId || ''): null;
+        return WalletTransactionDA.getTransactionHistoryById$(businessId, args.id);
+      }),
+      mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+      catchError(err => this.handleError$(err))
+    );
+  }
+
+  /**
+   * Gets the associated transactions history by transaction history id
+   *
+   * @param {*} args args
+   */
+  getAssociatedTransactionsHistoryByTransactionHistoryId$({ args }, authToken) {    
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "WALLET",
+      "getAssociatedTransactionsHistoryByTransactionHistoryId",
+      PERMISSION_DENIED_ERROR,
+      ["SYSADMIN", "business-owner"]
+    ).pipe(
+      mergeMap(roles => {
+        const isSysAdmin = roles.SYSADMIN;
+        //If an user does not have the role to get the transaction history from other business, the query must be filtered with the businessId of the user
+        const businessId = !isSysAdmin? (authToken.businessId || ''): null;
+        return WalletTransactionDA.getTransactionHistoryById$(businessId, args.id);
+      }),
+      mergeMap(transactionHistory => {
+        console.log('getAssociatedTransactionsHistoryByTransactionHistoryId1 => ', transactionHistory);
+        transactionHistory.associatedTransactionIds = [transactionHistory._id];
+        if(transactionHistory && transactionHistory.associatedTransactionIds && transactionHistory.associatedTransactionIds.length > 0){
+          return WalletTransactionDA.getTransactionsHistoryByIds$(args.id, transactionHistory.associatedTransactionIds, transactionHistory.businessId)
+        }else{
+          return of([])
+        }    
+      }),
       mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
       catchError(err => this.handleError$(err))
     );
@@ -54,7 +145,6 @@ class WalletCQRS {
    * @param {string} authToken JWT token
    */
   makeManualBalanceAdjustment$(data, authToken) {
-    console.log('makeManualBalanceAdjustment =>  ', data);
     const manualBalanceAdjustment = !data.args ? undefined : data.args.input;
     manualBalanceAdjustment._id = uuidv4();
     return RoleValidator.checkPermissions$(

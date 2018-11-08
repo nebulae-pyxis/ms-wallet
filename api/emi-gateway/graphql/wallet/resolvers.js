@@ -52,6 +52,93 @@ module.exports = {
   //// QUERY ///////
 
   Query: {
+    getWalletTransactionsHistory(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        CONTEXT_NAME,
+        "getWalletTransactionsHistory",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["SYSADMIN", "business-owner"]
+      )
+        .mergeMap(response => {
+          return broker.forwardAndGetReply$(
+            "Wallet",
+            "emigateway.graphql.query.getWalletTransactionsHistory",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "getWalletTransactionsHistory"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    getWalletTransactionsHistoryById(root, args, context) {
+      console.log('getWalletTransactionsHistoryById *** ', args);
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        CONTEXT_NAME,
+        "getWalletTransactionsHistoryById",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["SYSADMIN", "business-owner"]
+      )
+        .mergeMap(response => {
+          return broker.forwardAndGetReply$(
+            "Wallet",
+            "emigateway.graphql.query.getWalletTransactionsHistoryById",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "getWalletTransactionsHistoryById"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    getAssociatedTransactionsHistoryByTransactionHistoryId(root, args, context) {
+      console.log('getAssociatedTransactionsHistoryByTransactionHistoryId *** ', args);
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        CONTEXT_NAME,
+        "getAssociatedTransactionsHistoryByTransactionHistoryId",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["SYSADMIN", "business-owner"]
+      )
+        .mergeMap(response => {
+          return broker.forwardAndGetReply$(
+            "Wallet",
+            "emigateway.graphql.query.getAssociatedTransactionsHistoryByTransactionHistoryId",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "getAssociatedTransactionsHistoryByTransactionHistoryId"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+      getWallet(root, args, context) {
+        console.log('getWallet *** ', args);
+        return RoleValidator.checkPermissions$(
+          context.authToken.realm_access.roles,
+          CONTEXT_NAME,
+          "getWallet",
+          PERMISSION_DENIED_ERROR_CODE,
+          "Permission denied",
+          ["SYSADMIN", "business-owner"]
+        )
+          .mergeMap(response => {
+            return broker.forwardAndGetReply$(
+              "Wallet",
+              "emigateway.graphql.query.getWallet",
+              { root, args, jwt: context.encodedToken },
+              2000
+            );
+          })
+          .catch(err => handleError$(err, "getWallet"))
+          .mergeMap(response => getResponseFromBackEnd$(response))
+          .toPromise();
+      },
       getWalletBusiness(root, args, context) {
             return RoleValidator.checkPermissions$(
               context.authToken.realm_access.roles,
@@ -59,7 +146,7 @@ module.exports = {
               "getWalletBusiness",
               PERMISSION_DENIED_ERROR_CODE,
               "Permission denied",
-              ["SYSADMIN"]
+              ["SYSADMIN", "business-owner"]
             )
               .mergeMap(response => {
                 return broker.forwardAndGetReply$(
@@ -94,6 +181,27 @@ module.exports = {
               .mergeMap(response => getResponseFromBackEnd$(response))
               .toPromise();
         },
+        getWalletBusinessById(root, args, context) {
+          return RoleValidator.checkPermissions$(
+            context.authToken.realm_access.roles,
+            CONTEXT_NAME,
+            "getWalletBusinessById",
+            PERMISSION_DENIED_ERROR_CODE,
+            "Permission denied",
+            ["SYSADMIN", "business-owner"]
+          )
+            .mergeMap(response => {
+              return broker.forwardAndGetReply$(
+                "Business",
+                "emigateway.graphql.query.getWalletBusinessById",
+                { root, args, jwt: context.encodedToken },
+                2000
+              );
+            })
+            .catch(err => handleError$(err, "getWalletBusinessById"))
+            .mergeMap(response => getResponseFromBackEnd$(response))
+            .toPromise();
+      },
     WalletGetSpendingRule(root, args, context) {
       return RoleValidator.checkPermissions$(
         context.authToken.realm_access.roles,

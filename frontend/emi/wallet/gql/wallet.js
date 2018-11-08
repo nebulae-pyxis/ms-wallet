@@ -22,6 +22,15 @@ export const getWalletBusinesses = gql`
   }
 `;
 
+export const getWalletBusinessById = gql`
+  query getWalletBusinessById($id: ID!)  {
+    getWalletBusinessById(id: $id) {
+      _id
+      name
+    }
+  }
+`;
+
 export const getWallet = gql`
   query getWallet($businessId: String!) {
     getWallet(businessId: $businessId) {
@@ -29,10 +38,90 @@ export const getWallet = gql`
       pockets {
         balance
         bonus
-        credit
       }
-      state
+      spendingState
       businessId
+    }
+  }
+`;
+
+export const getWalletTransactionsHistory = gql`
+  query getWalletTransactionsHistory($filterInput: FilterInput!, $paginationInput: PaginationInput!) {
+    getWalletTransactionsHistory(filterInput: $filterInput, paginationInput: $paginationInput) {
+      _id
+      timestamp
+      businessId
+      type
+      concept
+      pocket
+      value
+      user
+      notes
+      terminal {
+        id
+        userId
+        username
+      }
+      location {
+        geojson {
+          type
+          coordinates
+        }
+      }
+    }
+  }
+`;
+
+export const getWalletTransactionsHistoryById = gql`
+  query getWalletTransactionsHistoryById($id: ID!) {
+    getWalletTransactionsHistoryById(id: $id) {
+      _id
+      timestamp
+      businessId
+      type
+      concept
+      pocket
+      value
+      user
+      notes
+      terminal {
+        id
+        userId
+        username
+      }
+      location {
+        geojson {
+          type
+          coordinates
+        }
+      }
+    }
+  }
+`;
+
+export const getAssociatedTransactionsHistoryByTransactionHistoryId = gql`
+  query getAssociatedTransactionsHistoryByTransactionHistoryId($id: ID!) {
+    getAssociatedTransactionsHistoryByTransactionHistoryId(id: $id) {
+      _id
+      timestamp
+      businessId
+      type
+      concept
+      pocket
+      value
+      user
+      notes
+      terminal {
+        id
+        userId
+        username
+      }
+      location {
+        geojson {
+          type
+          coordinates
+        }
+      }
     }
   }
 `;

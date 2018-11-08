@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
-import * as Rx from "rxjs";
 import { Observable, BehaviorSubject } from "rxjs";
 import { GatewayService } from "../../../api/gateway.service";
 import {
   getWalletBusiness,
   getWalletBusinesses,
   getWallet,
+  getWalletBusinessById,
   walletHelloWorldSubscription
 } from "./gql/wallet";
 
@@ -13,6 +13,24 @@ import {
 export class WalletService {
 
   constructor(private gateway: GatewayService) {}
+
+
+  /**
+   * get the business by id
+   *
+   * @returns {Observable}
+   */
+  getBusinessById$(id) {
+    return this.gateway.apollo
+      .query<any>({
+        query: getWalletBusinessById,
+        variables: {
+          id: id
+        },
+        fetchPolicy: 'network-only',
+        errorPolicy: 'all'
+      });
+  }
 
   /**
    * get the business which the user belongs
@@ -42,15 +60,15 @@ export class WalletService {
 
   /**
    * get wallet info of a business
-   *   
-   * @param business business filter
+   *
+   * @param businessId ID of business to filter
    * @returns {Observable}
    */
-  getWallet$(business) {
+  getWallet$(businessId) {
     return this.gateway.apollo.query<any>({
       query: getWallet,
       variables: {
-        businessId: business._id
+        businessId: businessId
       },
       fetchPolicy: "network-only",
       errorPolicy: "all"
