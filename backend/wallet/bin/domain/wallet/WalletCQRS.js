@@ -178,11 +178,20 @@ class WalletCQRS {
   }
 
   getTypesAndConceptsValues$() {
+    console.log("getTypesAndConceptsValues$()");
     return of(process.env.WALLET_TRANSACTION_TYPES_CONCEPTS)
       .pipe(
         map(typesAndConcepts => JSON.parse(typesAndConcepts)),
         map(typesAndConceptsObj => Object.entries(typesAndConceptsObj)),
-        reduce((acc, item) => { acc.push({type: item[0], concepts: item[1]}); return acc; }, []),
+        map(typesAndConcepts => 
+          typesAndConcepts.reduce((acc, item) => { 
+            acc.push({
+              type:  item[0],
+              concepts: item[1]
+            });
+            return acc; 
+          }, []),
+        ),
         mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
         catchError(error => this.handleError$(error))
       )

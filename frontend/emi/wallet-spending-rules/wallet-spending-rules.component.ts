@@ -66,7 +66,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     private translationLoader: FuseTranslationLoaderService,
     private translatorService: TranslateService
   ) {
-    this.translationLoader.loadTranslations(english, spanish);   
+    this.translationLoader.loadTranslations(english, spanish);
   }
 
   ngOnInit() {
@@ -96,7 +96,7 @@ export class WalletComponent implements OnInit, OnDestroy {
             spendingRules => (this.spendingRulesDataSource.data = spendingRules)
           )
         )
-        .subscribe( r => console.log(r), e => console.log(e), () => {} )
+        .subscribe( r => {}, e => console.log(e), () => {} )
     );
   }
 

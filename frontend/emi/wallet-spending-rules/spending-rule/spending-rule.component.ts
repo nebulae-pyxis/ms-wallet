@@ -89,19 +89,26 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     this.observableMedia.asObservable()
       .map(change => grid.get(change.mqAlias))
       .startWith(start)
-      .subscribe((e: number) => { this.screenMode = e; console.log(e); }, err => console.log(err));
+      .subscribe((e: number) => { this.screenMode = e; }, err => console.log(err));
 
     this.route.params
     .pipe(
       filter(params => params['buId']),
       map(params => params['buId']),
-      tap(r => console.log('Business Id: ', r)),
       mergeMap(buId => this.walletSpendingRuleService.getSpendinRule$(buId)),
       map(rule => JSON.parse(JSON.stringify(rule))),
       tap(spendingRule => this.selectedSpendingRule = spendingRule),
       mergeMap(spendingRule => this.loadSpendingRule$(spendingRule))
     )
-    .subscribe(p => console.log('Query params', p), e => console.log(e), () => console.log('Completed'));
+    .subscribe(p => {}, e => console.log(e), () => console.log('Completed'));
+
+    this.walletSpendingRuleService.getTypeAndConcepts$()
+    .pipe(
+      tap(r => console.log(r))
+    )
+    .subscribe(p => {}, e => console.log(e), () => console.log('Completed'));
+
+
   }
 
   /**
@@ -109,7 +116,6 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
    * @param businesId Business id to search its spending rule
    */
   loadSpendingRule$(spendingRule: any){
-    console.log('Spending RUle ==> ', spendingRule);
     return Rx.Observable.of(spendingRule)
     .pipe(
       mergeMap((spendingRuleItem: SpendingRule) => Rx.Observable.forkJoin(
@@ -150,12 +156,10 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   addProductSetting(productConfig?: ProductConfigRule ): void {
     const items = this.settingsForm.get('productBonusConfigs') as FormArray;
     items.push(this.createProductSetting( productConfig ));
-    console.log(this.settingsForm);
   }
   addAutoPocketSelectionRule(autoPocketRule?: AutoPocketRule ): void {
     const items = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
     items.push(this.createAutoPocketRule( autoPocketRule ));
-    console.log(this.settingsForm);
   }
 
   deleteControl(formType: string, index: number){
@@ -216,10 +220,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   }
 
   updateProductBonusConfig(index){
-    console.log('updateProductBonusConfig(index)', index);
     const productBonusConfigs = this.settingsForm.get('productBonusConfigs') as FormArray;
-    console.log(productBonusConfigs.controls[index].get('bonusValueByBalance').value);
-    productBonusConfigs.controls[index].get('bonusValueByBalance').updateValueAndValidity();
+    // productBonusConfigs.controls[index].get('bonusValueByBalance').updateValueAndValidity();
   }
 
 
@@ -260,7 +262,6 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   }
 
   saveSpendingRule() {
-    console.log(this.settingsForm);
     Rx.Observable.of(this.settingsForm.getRawValue())
       .pipe(map(
         ({
@@ -321,7 +322,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       }),
       mergeMap(() => this.loadSpendingRule$(this.selectedSpendingRule) )
     )
-    .subscribe(r => console.log(), e => console.log(e), () => console.log('Completed') );
+    .subscribe(r => {}, e => console.log(e), () => console.log('Completed') );
   }
 
   ngOnDestroy() {

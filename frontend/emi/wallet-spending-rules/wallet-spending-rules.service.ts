@@ -13,6 +13,7 @@ import {
 @Injectable()
 export class WalletSpendingRuleService {
 
+  typesVsConcepts: { type: string, concepts: string[] }[];
 
   constructor(private gateway: GatewayService) {
 
@@ -27,9 +28,7 @@ export class WalletSpendingRuleService {
         query: getTypeAndConcepts,
         fetchPolicy: 'network-only'
       })
-      .valueChanges.map(
-        resp => resp.data.getTypeAndConcepts.sn
-      );
+      .valueChanges.map(resp => resp.data.typeAndConcepts);
   }
 
   /**
@@ -83,7 +82,7 @@ getSpendinRules$(page: number, count: number, filter: string, sortColumn: string
           sortOrder: sortOrder
         }
       })
-      .valueChanges.map(r => { console.log(r.data); return r; });
+      .valueChanges;
 }
 
 updateSpendingRule$(spendingRuleInput: any){

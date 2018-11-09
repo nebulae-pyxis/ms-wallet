@@ -143,37 +143,37 @@ describe("E2E - Simple transaction", function() {
     const businessList = [
       { _id: "123456789_Metro_med", name: "Metro de Medellin" }
     ]; // busines list demo
-    // it("Create one busines unit", function(done) {
-    //   from(businessList)
-    //     .pipe(
-    //       delay(20),
-    //       // send the command to create the business
-    //       mergeMap(bu =>
-    //         broker.send$("Events", "", {
-    //           et: "BusinessCreated",
-    //           etv: 1,
-    //           at: "Business",
-    //           aid: bu._id,
-    //           data: { generalInfo: bu, _id: bu._id },
-    //           user: "juan.santa",
-    //           timestamp: Date.now(),
-    //           av: 164
-    //         })
-    //       ),
-    //       toArray(),
-    //       delay(1000)
-    //     )
-    //     .subscribe(
-    //       evt => console.log("business unit created"),
-    //       error => {
-    //         console.error(`sent message failded ${error}`);
-    //         return done(error);
-    //       },
-    //       () => {
-    //         return done();
-    //       }
-    //     );
-    // });
+    it("Create one busines unit", function(done) {
+      from(businessList)
+        .pipe(
+          delay(20),
+          // send the command to create the business
+          mergeMap(bu =>
+            broker.send$("Events", "", {
+              et: "BusinessCreated",
+              etv: 1,
+              at: "Business",
+              aid: bu._id,
+              data: { generalInfo: bu, _id: bu._id },
+              user: "juan.santa",
+              timestamp: Date.now(),
+              av: 164
+            })
+          ),
+          toArray(),
+          delay(1000)
+        )
+        .subscribe(
+          evt => console.log("business unit created"),
+          error => {
+            console.error(`sent message failded ${error}`);
+            return done(error);
+          },
+          () => {
+            return done();
+          }
+        );
+    });
 
     it("verify its defaults documents", function(done) {
       of({})

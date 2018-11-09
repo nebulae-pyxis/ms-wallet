@@ -18,7 +18,6 @@ export class MyCurrencyFormatterDirective implements OnInit {
 
   ngOnInit() {
     this.el.value = this.currencyPipe.transform(this.el.value, 2, this.myCurrencyFormatter);
-    console.log('myCurrencyFormatter ==> ', this.myCurrencyFormatter);
   }
 
   @HostListener('input', ['$event']) onInput(event) {
