@@ -234,6 +234,18 @@ module.exports = {
           .mergeMap(response => getResponseFromBackEnd$(response))
           .toPromise();
       },
+      typeAndConcepts(root, args, context) {     
+        return broker
+          .forwardAndGetReply$(
+            "Wallet",
+            "emigateway.graphql.query.getTypeAndConcepts",
+            { root, args, jwt: context.encodedToken },
+            2000
+          )
+          .mergeMap(response => getResponseFromBackEnd$(response))
+          .toPromise();
+      },
+
   },
 
   //// MUTATIONS ///////

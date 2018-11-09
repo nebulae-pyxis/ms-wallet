@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import * as Rx from 'rxjs';
 import { GatewayService } from '../../../api/gateway.service';
 import {
-  getHelloWorld,
+  getTypeAndConcepts,
   getSpendingRule,
   getSpendingRules,
   walletHelloWorldSubscription,
@@ -21,14 +21,14 @@ export class WalletSpendingRuleService {
   /**
    * Hello World sample, please remove
    */
-  getHelloWorld$() {
+  getTypeAndConcepts$() {
     return this.gateway.apollo
       .watchQuery<any>({
-        query: getHelloWorld,
+        query: getTypeAndConcepts,
         fetchPolicy: 'network-only'
       })
       .valueChanges.map(
-        resp => resp.data.getHelloWorldFromwallet.sn
+        resp => resp.data.getTypeAndConcepts.sn
       );
   }
 

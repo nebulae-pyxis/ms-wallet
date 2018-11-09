@@ -12,7 +12,8 @@ const WalletDA = require('./data/WalletDA');
 const WalletTransactionDA = require('./data/WalletTransactionDA');
 const LogErrorDA = require('./data/LogErrorDA');
 const SpendingRulesDA = require('./data/SpendingRulesDA');
-const graphQlService = require('./services/emi-gateway/GraphQlService')();
+const graphQlService_emi = require('./services/emi-gateway/GraphQlService')();
+const graphQlService_sales = require('./services/sales-gateway/GraphQlService')();
 const Rx = require('rxjs');
 
 const start = () => {
@@ -25,7 +26,8 @@ const start = () => {
         WalletTransactionDA.start$(),
         LogErrorDA.start$(),
         SpendingRulesDA.start$(),
-        graphQlService.start$()
+        graphQlService_emi.start$(),
+        graphQlService_sales.start$()
     ).subscribe(
         (evt) => {
             // console.log(evt)

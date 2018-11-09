@@ -52,10 +52,12 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   @Input() currentVersion = true;
   selectedSpendingRule: SpendingRule;
   screenMode = 0;
+  alertBorderAtProductBonusConfig: -1;
+  alertBorderAtAutopocketSelectionRule: -1;
 
   settingsForm: FormGroup = new FormGroup({
-    businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
-    businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
+    businessId: new FormControl('', [Validators.required]),
+    businessName: new FormControl('', [Validators.required]),
     // minOperationAmount: new FormControl('', [ Validators.required ]),
     productBonusConfigs: new FormArray([]),
     autoPocketSelectionRules: new FormArray([])
@@ -193,8 +195,10 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       };
     }
     return this.formBuilder.group({
-      type: new FormControl( { value: productConfig.type, disabled: !this.currentVersion }, [Validators.required]),
-      concept: new FormControl({ value: productConfig.concept, disabled: !this.currentVersion }, [Validators.required]),
+      type: new FormControl( { value: productConfig.type, disabled: !this.currentVersion },
+        [Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
+      concept: new FormControl({ value: productConfig.concept, disabled: !this.currentVersion },
+        [ Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
       bonusType: new FormControl({ value: productConfig.bonusType, disabled: !this.currentVersion }, [Validators.required]),
       bonusValueByBalance: new FormControl({ value: productConfig.bonusValueByBalance, disabled: !this.currentVersion }, [
           Validators.required,
@@ -209,6 +213,13 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       ]
     )
     });
+  }
+
+  updateProductBonusConfig(index){
+    console.log('updateProductBonusConfig(index)', index);
+    const productBonusConfigs = this.settingsForm.get('productBonusConfigs') as FormArray;
+    console.log(productBonusConfigs.controls[index].get('bonusValueByBalance').value);
+    productBonusConfigs.controls[index].get('bonusValueByBalance').updateValueAndValidity();
   }
 
 
@@ -263,8 +274,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
           productBonusConfigs: productBonusConfigs.reduce(
             (acc, p) => {
               acc.push({
-                type: p.type,
-                concept: p.concept,
+                type: p.type.toUpperCase(),
+                concept: p.concept.toUpperCase(),
                 bonusType: p.bonusType,
                 bonusValueByBalance: p.bonusValueByBalance,
                 bonusValueByCredit: p.bonusValueByCredit

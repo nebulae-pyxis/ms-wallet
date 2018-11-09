@@ -1,9 +1,11 @@
-import { Directive, HostListener, ElementRef, OnInit } from '@angular/core';
+import { Directive, HostListener, ElementRef, OnInit, Input } from '@angular/core';
 import { MyCurrencyPipe } from './currency.pipe';
 
 // tslint:disable-next-line:directive-selector
 @Directive({ selector: '[myCurrencyFormatter]' })
 export class MyCurrencyFormatterDirective implements OnInit {
+
+  @Input() myCurrencyFormatter: string;
 
   private el: HTMLInputElement;
 
@@ -15,18 +17,23 @@ export class MyCurrencyFormatterDirective implements OnInit {
   }
 
   ngOnInit() {
-    console.log('#############', JSON.stringify(this.el.value) );
-    this.el.value = this.currencyPipe.transform(this.el.value);
+    this.el.value = this.currencyPipe.transform(this.el.value, 2, this.myCurrencyFormatter);
+    console.log('myCurrencyFormatter ==> ', this.myCurrencyFormatter);
+  }
+
+  @HostListener('input', ['$event']) onInput(event) {
+    this.el.value = this.el.value.replace(/[^\d.-]/g, '');
   }
 
   @HostListener('focus', ['$event.target.value'])
   onFocus(value) {
-    this.el.value = this.currencyPipe.parse(value); // opossite of transform
+    this.el.value = this.currencyPipe.parse(value, 2,  this.myCurrencyFormatter); // opossite of transform
   }
 
   @HostListener('blur', ['$event.target.value'])
   onBlur(value) {
-    this.el.value = this.currencyPipe.transform(value);
+    this.el.value = this.currencyPipe.transform(value, 2, this.myCurrencyFormatter);
   }
+
 
 }

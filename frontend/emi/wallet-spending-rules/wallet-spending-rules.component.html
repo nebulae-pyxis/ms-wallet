@@ -42,8 +42,8 @@
 
         <!-- BUSINESS UNIT ID -->
         <ng-container cdkColumnDef="businessId">
-          <mat-header-cell fxFlex="20" *cdkHeaderCellDef>{{ 'TABLE.BU_ID' | translate }}</mat-header-cell>
-          <mat-cell fxFlex="20" *cdkCellDef="let spendingRule">
+          <mat-header-cell fxFlex="27" fxFlex.gt-sm="20" *cdkHeaderCellDef>{{ 'TABLE.BU_ID' | translate }}</mat-header-cell>
+          <mat-cell fxFlex="27" fxFlex.gt-sm="20" *cdkCellDef="let spendingRule">
             <div class="margin_right_left_5">
               <span>{{spendingRule.businessId}}</span>
             </div>
@@ -53,8 +53,8 @@
 
         <!-- BUSINESS UNIT NAME -->
         <ng-container cdkColumnDef="businessName">
-          <mat-header-cell fxFlex="20" *cdkHeaderCellDef> {{ 'TABLE.BU_NAME' | translate }} </mat-header-cell>
-          <mat-cell fxFlex="20" *cdkCellDef="let spendingRule">
+          <mat-header-cell fxFlex="27" fxFlex.gt-sm="20" *cdkHeaderCellDef> {{ 'TABLE.BU_NAME' | translate }} </mat-header-cell>
+          <mat-cell fxFlex="27" fxFlex.gt-sm="20" *cdkCellDef="let spendingRule">
             <div class="margin_right_left_5">
               <span>{{spendingRule.businessName}}</span>
             </div>
@@ -64,9 +64,9 @@
 
         <!-- MIN AMOUNT REQUIRED TO OPERATE -->
         <ng-container cdkColumnDef="minOperationAmount">
-          <mat-header-cell fxFlex="20" *cdkHeaderCellDef>{{'TABLE.MIN_AMOUNT_ALLOWED' | translate }}</mat-header-cell>
-          <mat-cell fxFlex="20" *cdkCellDef="let spendingRule">
-            <div  class="margin_right_left_5">
+          <mat-header-cell fxFlex="27" fxFlex.gt-sm="20" *cdkHeaderCellDef>{{'TABLE.MIN_AMOUNT_ALLOWED' | translate }}</mat-header-cell>
+          <mat-cell fxFlex="27" fxFlex.gt-sm="20" *cdkCellDef="let spendingRule">
+            <div class="margin_right_left_5">
               <span>{{spendingRule.minOperationAmount | currency}}</span>
             </div>
           </mat-cell>
@@ -75,9 +75,9 @@
 
         <!-- LAST SPENDING RULE EDITION -->
         <ng-container cdkColumnDef="lastEditionTimestamp">
-          <mat-header-cell fxFlex="20" *cdkHeaderCellDef>{{'TABLE.LAST_EDITION' | translate }}</mat-header-cell>
-          <mat-cell fxFlex="20" *cdkCellDef="let spendingRule">
-            <div  class="margin_right_left_5">
+          <mat-header-cell fxFlex="27" fxFlex.gt-sm="20" fxFlex.gt-sm="20" *cdkHeaderCellDef>{{'TABLE.LAST_EDITION' | translate }}</mat-header-cell>
+          <mat-cell fxFlex="27" fxFlex.gt-sm="20" *cdkCellDef="let spendingRule">
+            <div class="margin_right_left_5">
               <span>{{ spendingRule.lastEditionTimestamp | date }}</span>
             </div>
           </mat-cell>

@@ -9,6 +9,7 @@ import { SpendingRuleComponent } from './spending-rule/spending-rule.component';
 import { WalletSpendingRuleService } from './wallet-spending-rules.service';
 import { MyCurrencyFormatterDirective } from './directives/currency.directive';
 import { MyCurrencyPipe } from './directives/currency.pipe';
+import { UpperCaseDirective } from './directives/upperCase.directive';
 
 const routes: Routes = [
   {
@@ -28,7 +29,7 @@ const routes: Routes = [
     FuseWidgetModule
   ],
   declarations: [
-    WalletComponent, SpendingRuleComponent, MyCurrencyFormatterDirective
+    WalletComponent, SpendingRuleComponent, MyCurrencyFormatterDirective, UpperCaseDirective
   ],
   providers: [ WalletSpendingRuleService, DatePipe, MyCurrencyPipe]
 })

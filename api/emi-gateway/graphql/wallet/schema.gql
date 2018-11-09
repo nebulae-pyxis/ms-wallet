@@ -211,6 +211,11 @@ input WalletSpendingRuleInput {
   autoPocketSelectionRules: [WalletPocketSelectionRuleInput]
 }
 
+type TypeVsConcepts{
+  type: String
+  concepts: [String]
+}
+
 
 type Query {
   "Get business"
@@ -237,6 +242,8 @@ type Query {
     sortColumn: String
     sortOrder: String
   ): [WalletSpendingRule]
+  "Get the diferents products and concepts types combinations"
+  typeAndConcepts: [TypeVsConcepts]
 }
 
 type Mutation {

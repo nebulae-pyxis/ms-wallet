@@ -4,7 +4,9 @@ const COLLECTION_NAME = "Wallet";
 const { CustomError } = require("../tools/customError");
 const NumberDecimal = require('mongodb').Decimal128;
 const { take, mergeMap, catchError, map, tap } = require('rxjs/operators');
-const  { Observable, forkJoin, of, interval, defer } = require('rxjs');
+const  { Observable, forkJoin, of, interval, defer, throwError } = require('rxjs');
+
+const WALLET_NO_FOUND_ERROR = new CustomError('Wallet no found', 'getWallet$', 170005, 'Wallet not found with the businessId given');
 
 class WalletDA {
   static start$(mongoDbInstance) {
@@ -29,6 +31,8 @@ class WalletDA {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return of(businessId).pipe(
       mergeMap(id => defer(() => collection.findOne({ businessId: id }))),
+      // map(r => { console.log(felipe); return r; }),
+      mergeMap(wallet => wallet ? of(wallet) : throwError(WALLET_NO_FOUND_ERROR) ),
       map(wallet => 
         ({...wallet, 
           pockets:{ 
