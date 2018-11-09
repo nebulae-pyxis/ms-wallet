@@ -2,27 +2,28 @@ export const locale = {
   lang: 'en',
   data: {
     WALLET: {
+      CREDIT: 'Credit',
       MANUAL_BALANCE_ADJUSTMENT: 'Manual balance adjustment',
       VALUE: 'Value',
       NOTES: 'Notes',
       ACCREDIT: 'Accredit',
       DEBIT: 'Debit',
-      SELECT_AGENT: 'Select agent:',
+      SELECT_AGENT: 'Select business:',
       MAX_CHARACTER_NOTES: 'Max 200 characters',
       VALUE_REQUIRED: 'Value required',
       NOTES_REQUIRED: 'Notes required',
       BUSINESS_REQUIRED: 'You should select the agent to which you want to make a manual balance adjustment.',
       TRANSACTION_HISTORY: 'Transaction history',
       BUSINESS: 'Agent:',
-      SELECT_BUSINESS: 'Select an agent',
+      SELECT_BUSINESS: 'Select an business',
       FILTER: 'Filter',
       INIT_DATE: 'Init date',
       END_DATE: 'End date',
       TERMINAL_ID: 'Terminal ID',
-      TERMINAL_USER_ID: 'User ID',
-      TERMINAL_USERNAME: 'Username',
-      SELECT_TRANSACTION_TYPE: 'Select type',
-      SELECT_TRANSACTION_CONCEPT: 'Select concept',
+      TERMINAL_USER_ID: 'Terminal user ID',
+      TERMINAL_USERNAME: 'Terminal username',
+      SELECT_TRANSACTION_TYPE: 'Transaction type',
+      SELECT_TRANSACTION_CONCEPT: 'Transaction concept',
       TIMESTAMP: 'Date',
       TRANSACTION_TYPE: 'Type',
       TRANSACTION_CONCEPT: 'Concept',
@@ -38,7 +39,7 @@ export const locale = {
       BONUS: 'Bonus',
       RESET_FILTER: 'Reset filter',
       TYPES: {
-        SALES: 'Sales',
+        SALE: 'Sale',
         BALANCE_ADJUSTMENT: 'Balance adjustment'
       },
       CONCEPTS: {
@@ -50,7 +51,8 @@ export const locale = {
       TERMINAL: 'Terminal',
       ID: 'ID:',
       USER_ID: 'User ID:',
-      USERNAME: 'Username:'
+      USERNAME: 'Username:',
+      NONE: 'None'
     }
   }
 };

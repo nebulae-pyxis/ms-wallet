@@ -28,6 +28,7 @@ import {
   startWith,
   debounceTime,
   distinctUntilChanged,
+  take
 } from "rxjs/operators";
 import { Subject, fromEvent, of, forkJoin } from "rxjs";
 
@@ -51,15 +52,22 @@ import { KeycloakService } from "keycloak-angular";
 import { WalletService } from "./../wallet.service";
 import { TransactionHistoryService } from "./transaction-history.service";
 
-import {MAT_MOMENT_DATE_FORMATS, MomentDateAdapter} from '@angular/material-moment-adapter';
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
-import * as moment from 'moment';
+import {
+  MAT_MOMENT_DATE_FORMATS,
+  MomentDateAdapter
+} from "@angular/material-moment-adapter";
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE
+} from "@angular/material/core";
+import * as moment from "moment";
 
 @Component({
   selector: "app-transaction-history",
   templateUrl: "./transaction-history.component.html",
   styleUrls: ["./transaction-history.component.scss"],
-  animations: fuseAnimations,
+  animations: fuseAnimations
   // providers: [
   //   {provide: MAT_DATE_LOCALE, useValue: 'ja-JP'},
   //   {provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE]},
@@ -73,11 +81,17 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   // Table data
   dataSource = new MatTableDataSource();
   // Columns to show in the table
-  displayedColumns = ['timestamp', 'type', 'concept', 'value', 'pocket', 'user' ];
+  displayedColumns = [
+    "timestamp",
+    "type",
+    "concept",
+    "value",
+    "pocket",
+    "user"
+  ];
 
-  transactionTypes: any = [];
-  transactionConcepts: any = [];
-
+  transactionTypes: any = ["SALE", "BALANCE_ADJUSTMENT"];
+  transactionConcepts: any = ["RECARGA_CIVICA", "PAYMENT"];
 
   myBusiness: any = null;
   allBusiness: any = [];
@@ -86,10 +100,11 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   isSystemAdmin: Boolean = false;
 
   walletData: any = {
-    spendingState: '',
+    spendingState: "",
     pockets: {
       balance: 0,
-      bonus: 0
+      bonus: 0,
+      credit: 0
     }
   };
 
@@ -101,17 +116,17 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   // Table values
   @ViewChild(MatPaginator)
   paginator: MatPaginator;
-  @ViewChild('filter')
+  @ViewChild("filter")
   filter: ElementRef;
   @ViewChild(MatSort)
   sort: MatSort;
   tableSize: number;
   page = 0;
   count = 10;
-  filterText = '';
+  filterText = "";
   sortColumn = null;
   sortOrder = null;
-  itemPerPage = '';
+  itemPerPage = "";
 
   constructor(
     private formBuilder: FormBuilder,
@@ -130,6 +145,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.buildFilterForm();
+    this.loadDataInForm();
     this.detectFilterAndPaginatorChanges();
     this.loadRoleData();
     this.loadBusinessData();
@@ -137,110 +153,183 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     this.refreshTransactionHistoryTable();
   }
 
-  test(){
-    console.log('setLocale ES');
-    this.adapter.setLocale('es');
-  }
-
   buildFilterForm() {
-    const startOfMonth = moment().startOf('month');
-    const endOfMonth   = moment().endOf('month');
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment();
     // Reactive Form
     this.filterForm = this.formBuilder.group({
       initDate: [startOfMonth],
       endDate: [endOfMonth],
-      terminalId: [null],
-      terminalUserId: [null],
-      terminalUsername: [null],
+      terminalId: [""],
+      terminalUserId: [""],
+      terminalUsername: [""],
       transactionType: [null],
       transactionConcept: [null]
     });
-    this.filterForm.disable({emitEvent: false});
+    this.filterForm.disable({
+      onlySelf: true,
+      emitEvent: false
+    });
+  }
+
+  compareIds(business1: any, business2: any): boolean {
+    return business1 && business2 ? business1._id === business2._id : business1 === business2;
+}
+
+  loadDataInForm() {
+    Rx.Observable.combineLatest(
+      this.transactionHistoryService.filterAndPaginator$,
+      this.transactionHistoryService.selectedBusinessEvent$
+    )
+      .pipe(take(1))
+      .subscribe(([filterAndPaginator, selectedBusiness]) => {
+        console.log('filterAndPaginator ==>>> ', filterAndPaginator);
+        console.log('selectedBusiness ==>>> ', selectedBusiness);
+        if (filterAndPaginator) {
+          if(filterAndPaginator.filter){
+            const filter: any = filterAndPaginator.filter;
+            const terminal:any = filterAndPaginator.filter.terminal || {};
+            this.filterForm.patchValue({
+              initDate: filter.initDate,
+              endDate: filter.endDate,
+              terminalId:  terminal.id,
+              terminalUserId: terminal.userId,
+              terminalUsername: terminal.username,
+              transactionType: filter.transactionType,
+              transactionConcept: filter.transactionConcept
+            });
+          }
+
+          if(filterAndPaginator.pagination){
+            this.page = filterAndPaginator.pagination.page,
+            this.count = filterAndPaginator.pagination.count;
+          }
+        }
+
+        if (selectedBusiness) {
+          this.selectedBusinessData = selectedBusiness;
+        }
+        console.log('filterForm.enable')
+        this.filterForm.enable({ onlySelf: false, emitEvent: true});
+        this.filterForm.updateValueAndValidity({ onlySelf: false, emitEvent: true});
+      });
   }
 
   /**
    * Paginator of the table
    */
   getPaginator$() {
-    return this.paginator.page.pipe(startWith({ pageIndex: 0, pageSize: 10 }));
+    return this.paginator.page
+    .pipe(startWith({ pageIndex: 0, pageSize: 10 }));
   }
 
   /**
    * get the wallet data according to the selected business
    */
-  loadWalletData(){
+  loadWalletData() {
     this.transactionHistoryService.selectedBusinessEvent$
-    .pipe(
-      tap(data => console.log('selected business wallet  => ', data)),
-      filter(selectedBusiness => selectedBusiness != null),
-      mergeMap((selectedBusiness: any) => this.walletService.getWallet$(selectedBusiness._id)),
-      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      filter((resp: any) => !resp.errors || resp.errors.length === 0),
-      map(result => result.data.getWallet),
-      takeUntil(this.ngUnsubscribe)
-    ).subscribe(wallet => {
-      this.walletData = wallet;
-    });
+      .pipe(
+        //tap(data => console.log('selected business wallet  => ', data)),
+        filter(selectedBusiness => selectedBusiness != null),
+        mergeMap((selectedBusiness: any) =>
+          this.walletService.getWallet$(selectedBusiness._id)
+        ),
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        map(result => result.data.getWallet),
+        map(wallet => {
+          let credit = 0;
+          if(wallet.pockets.balance < 0){
+            credit += wallet.pockets.balance;
+          }
+
+          if(wallet.pockets.bonus < 0){
+            credit += wallet.pockets.bonus;
+          }
+          const walletCopy = {
+            ...wallet,
+            pockets: {
+              balance: wallet.pockets.balance < 0 ? 0 : wallet.pockets.balance,
+              bonus: wallet.pockets.bonus < 0 ? 0 : wallet.pockets.bonus,
+              credit: credit,
+            }
+          };
+          console.log('walletCopy => ', walletCopy);
+          return walletCopy;
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(wallet => {
+        this.walletData = wallet;
+      });
   }
 
   /**
    *
    * @param element Element HTML
    */
-  getFormChanges$(){
-    return this.filterForm.valueChanges
-    .pipe(
+  getFormChanges$() {
+    return this.filterForm.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),
-      startWith({ initDate: this.filterForm.get('initDate').value, endDate: this.filterForm.get('endDate').value })
+      tap(val => console.log('getFormChanges$'))
+      //startWith({ initDate: this.filterForm.get('initDate').value, endDate: this.filterForm.get('endDate').value })
     );
   }
 
-  resetFilter(){
+  resetFilter() {
     this.filterForm.reset();
     this.paginator.pageIndex = 0;
+    this.page = 0;
+    this.count = 10;
 
-
-    const startOfMonth = moment().startOf('month');
-    const endOfMonth   = moment().endOf('month');
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment().endOf("month");
     this.filterForm.patchValue({
-      initDate: [startOfMonth],
-      endDate: [endOfMonth]
+      initDate: startOfMonth,
+      endDate: endOfMonth
     });
   }
 
-  detectFilterAndPaginatorChanges(){
-    Rx.Observable.combineLatest(
-      this.getFormChanges$(),
-      this.getPaginator$(),
-    ).pipe(
-      map(([formChanges, paginator]) => {
-        console.log('formChanges => ', formChanges);
-        console.log('paginator => ', paginator);
-        return {
-          filter: {
-            initDate: formChanges.initDate,
-            endDate: formChanges.endDate,
-            transactionType: formChanges.transactionType,
-            transactionConcept: formChanges.transactionConcept,
-            terminal: {
-              id: formChanges.terminalId,
-              userId: formChanges.terminalUserId,
-              username: formChanges.terminalUsername
+  detectFilterAndPaginatorChanges() {
+    Rx.Observable.combineLatest(this.getFormChanges$(), this.getPaginator$())
+      .pipe(
+        filter(data => {
+          console.log("form state: ", this.filterForm.enabled);
+          return this.filterForm.enabled;
+        }),
+        map(([formChanges, paginator]) => {
+          // console.log('formChanges => ', formChanges);
+          // console.log('paginator => ', paginator);
+          return {
+            filter: {
+              initDate: formChanges.initDate,
+              endDate: formChanges.endDate,
+              transactionType: formChanges.transactionType,
+              transactionConcept: formChanges.transactionConcept,
+              terminal: {
+                id: formChanges.terminalId,
+                userId: formChanges.terminalUserId,
+                username: formChanges.terminalUsername
+              }
+            },
+            pagination: {
+              page: paginator.pageIndex,
+              count: paginator.pageSize,
+              sort: 1
             }
-          },
-          pagination: {
-            page: paginator.pageIndex,
-            count: paginator.pageSize,
-            sort: 1
-          }
-        };
-      }),
-      tap(filterAndPagination => this.transactionHistoryService.addFilterAndPaginatorData(filterAndPagination)),
-      takeUntil(this.ngUnsubscribe)
-    ).subscribe(data => {
-      console.log('TEST$ => ', data);
-    });
+          };
+        }),
+        tap(filterAndPagination =>
+          this.transactionHistoryService.addFilterAndPaginatorData(
+            filterAndPagination
+          )
+        ),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(data => {
+        //console.log('TEST$ => ', data);
+      });
   }
 
   /**
@@ -249,17 +338,26 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   refreshTransactionHistoryTable() {
     Rx.Observable.combineLatest(
       this.transactionHistoryService.filterAndPaginator$,
-      this.transactionHistoryService.selectedBusinessEvent$,
+      this.transactionHistoryService.selectedBusinessEvent$
     )
-    .pipe(
-        tap(data => console.log('FILTROS *********** ', data)),
-        filter(([filterAndPagination, selectedBusiness]) => filterAndPagination != null && selectedBusiness != null),
+      .pipe(
+        filter(([filterAndPagination, selectedBusiness]) =>{
+          console.log('refreshTable => ', ([filterAndPagination, selectedBusiness]));
+          return filterAndPagination != null && selectedBusiness != null;
+        }),
         mergeMap(([filterAndPagination, selectedBusiness]) => {
-          console.log('[filterAndPagination, selectedBusiness] => ', [filterAndPagination, selectedBusiness]);
+          console.log("[1filterAndPagination, selectedBusiness] => ", [
+            filterAndPagination,
+            selectedBusiness
+          ]);
 
-          const filterInput = filterAndPagination.filter;
-          filterInput.initDate = filterInput.initDate ? filterInput.initDate.valueOf():null;
-          filterInput.endDate = filterInput.endDate ? filterInput.endDate.valueOf():null;
+          const filterInput: any = filterAndPagination.filter;
+          filterInput.initDate = filterInput.initDate
+            ? filterInput.initDate.valueOf()
+            : null;
+          filterInput.endDate = filterInput.endDate
+            ? filterInput.endDate.valueOf()
+            : null;
           filterInput.businessId = selectedBusiness._id;
           const paginationInput = filterAndPagination.pagination;
 
@@ -273,9 +371,10 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(transactionsHistory => {
-        console.log('transactionsHistory list => ', transactionsHistory);
+        console.log("transactionsHistory list => ", transactionsHistory);
 
-        this.dataSource.data = transactionsHistory.data.getWalletTransactionsHistory;
+        this.dataSource.data =
+          transactionsHistory.data.getWalletTransactionsHistory;
       });
   }
 
@@ -302,25 +401,9 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
    */
   checkIfUserIsAdmin$() {
     return Rx.Observable.of(this.keycloakService.getUserRoles(true)).pipe(
-      map(userRoles => userRoles.some(role => role === 'SYSADMIN'))
+      map(userRoles => userRoles.some(role => role === "SYSADMIN"))
     );
   }
-
-  // /**
-  //  * Loads business data
-  //  */
-  // loadBusinessData$() {
-  //   return this.checkIfUserIsAdmin$()
-  //   .pipe(
-  //     mergeMap(hasSysAdminRole => {
-  //       return Rx.Observable.forkJoin(
-  //         Rx.Observable.of(hasSysAdminRole),
-  //         this.getBusiness$(),
-  //         hasSysAdminRole ? this.getAllBusiness$() : Rx.Observable.of([])
-  //       );
-  //     })
-  //   );
-  // }
 
   /**
    * Loads business data
@@ -379,7 +462,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
    * Receives the selected transaction history
    * @param transactionHistory selected transaction history
    */
-  selectTransactionHistoryRow(transactionHistory){
+  selectTransactionHistoryRow(transactionHistory) {
     this.selectedTransactionHistory = transactionHistory;
   }
 
@@ -388,13 +471,12 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
    * @param business  selected business
    */
   onSelectBusinessEvent(business) {
-    console.log('onSelectBusinessEvent => ', business);
+    // console.log('onSelectBusinessEvent => ', business);
     this.transactionHistoryService.selectBusiness(business);
   }
 
-  graphQlAlarmsErrorHandler$(response){
-    return Rx.Observable.of(JSON.parse(JSON.stringify(response)))
-    .pipe(
+  graphQlAlarmsErrorHandler$(response) {
+    return Rx.Observable.of(JSON.parse(JSON.stringify(response))).pipe(
       tap((resp: any) => {
         this.showSnackBarError(resp);
         return resp;
@@ -402,22 +484,21 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     );
   }
 
-    /**
+  /**
    * Shows an error snackbar
    * @param response
    */
-  showSnackBarError(response){
-    if (response.errors){
-
+  showSnackBarError(response) {
+    if (response.errors) {
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {
           if (Array.isArray(error)) {
             error.forEach(errorDetail => {
-              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
+              this.showMessageSnackbar("ERRORS." + errorDetail.message.code);
             });
-          }else{
+          } else {
             response.errors.forEach(error => {
-              this.showMessageSnackbar('ERRORS.' + error.message.code);
+              this.showMessageSnackbar("ERRORS." + error.message.code);
             });
           }
         });
@@ -430,21 +511,20 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
    * @param messageKey Key of the message to i18n
    * @param detailMessageKey Key of the detail message to i18n
    */
-  showMessageSnackbar(messageKey, detailMessageKey?){
+  showMessageSnackbar(messageKey, detailMessageKey?) {
     const translationData = [];
-    if (messageKey){
+    if (messageKey) {
       translationData.push(messageKey);
     }
 
-    if (detailMessageKey){
+    if (detailMessageKey) {
       translationData.push(detailMessageKey);
     }
 
-    this.translate.get(translationData)
-    .subscribe(data => {
+    this.translate.get(translationData).subscribe(data => {
       this.snackBar.open(
-        messageKey ? data[messageKey] : '',
-        detailMessageKey ? data[detailMessageKey] : '',
+        messageKey ? data[messageKey] : "",
+        detailMessageKey ? data[detailMessageKey] : "",
         {
           duration: 2000
         }

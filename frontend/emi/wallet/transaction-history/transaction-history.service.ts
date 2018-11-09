@@ -4,6 +4,7 @@ import {
   startWith
 } from "rxjs/operators";
 import { GatewayService } from "../../../../api/gateway.service";
+import * as moment from "moment";
 import {
   getWalletTransactionsHistory
 } from "../gql/wallet";
@@ -12,8 +13,16 @@ import {
 export class TransactionHistoryService {
 
   private selectedBusinessSubject$ = new BehaviorSubject(null);
-
-  private _filterAndPaginator$ = new BehaviorSubject(null);
+  private _filterAndPaginator$ = new BehaviorSubject({
+    filter: { 
+      initDate: moment().startOf("month"), 
+      endDate: moment(),
+      terminal: {}
+    },
+    pagination: {
+      page: 0, count: 10, sort: 1
+    },    
+  });
 
   private transactionsHistoryFilter = {
     initDate: undefined,
@@ -36,11 +45,12 @@ export class TransactionHistoryService {
   constructor(private gateway: GatewayService) {}
 
   addFilterAndPaginatorData(filterAndPaginator) {
+    console.log('addFilterAndPaginatorData => ', filterAndPaginator);
     this._filterAndPaginator$.next(filterAndPaginator);
   }
 
   /**
-   * 
+   * @returns {Observable<any>}
    */
   get filterAndPaginator$() {
     return this._filterAndPaginator$.asObservable()
