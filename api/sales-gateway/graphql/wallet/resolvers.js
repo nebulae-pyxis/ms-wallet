@@ -13,12 +13,13 @@ const INTERNAL_SERVER_ERROR_CODE = 16001;
 const USERS_PERMISSION_DENIED_ERROR_CODE = 16002;
 
 function getResponseFromBackEnd$(response) {  
+  console.log(response);
   return Rx.Observable.of(response).map(resp => {
     if (resp.result.code != 200) {      
       const err = new Error();
       err.name = "Error";
       err.message = resp.result.error;
-      Error.captureStackTrace(err, "Error");
+     // Error.captureStackTrace(err, "Error");
       throw err;
     }
     return resp.data;
@@ -53,26 +54,42 @@ function handleError$(err, methodName) {
 module.exports = {
   //// QUERY ///////
   Query: {
-    getToken(root, args, context){
-      return Rx.Observable.of({})
-      .mergeMap(response => {
-        return broker.forwardAndGetReply$(
-          "Token",
-          "salesgateway.graphql.query.getToken",
-          { root, args, jwt: context.encodedToken },
-          2000
-        );
-      })
-      .catch(err => handleError$(err, "getToken"))
-      .mergeMap(response => getResponseFromBackEnd$(response))
-      .toPromise();
-    },
-    wallet(root, args, context){
+    Wallet(root, args, context){
+      console.log("return {spendingState: 'ALLOWED', pockets:{ balance: 150000, bonus: 5700 }};");
+      // return {spendingState: "ALLOWED", pockets:{ balance: 150000, bonus: 5700 }};
       return Rx.Observable.of({})
       .mergeMap(() =>
         broker.forwardAndGetReply$(
           "Wallet",
           "salesgateway.graphql.query.getWallet",
+          { root, args, jwt: context.encodedToken },
+          2000
+        )
+      )
+      .catch(err => handleError$(err, "getWallet"))
+      .mergeMap(response => getResponseFromBackEnd$(response))      
+      .toPromise();
+    },    
+    WalletTransactionsHistoryById(root, args, context){
+      return Rx.Observable.of({})
+      .mergeMap(() =>
+        broker.forwardAndGetReply$(
+          "Wallet",
+          "salesgateway.graphql.query.getWalletTransaction",
+          { root, args, jwt: context.encodedToken },
+          2000
+        )
+      )
+      .catch(err => handleError$(err, "getWallet"))
+      .mergeMap(response => getResponseFromBackEnd$(response))
+      .toPromise();
+    },
+    WalletTransactionsHistory(root, args, context){
+      return Rx.Observable.of({})
+      .mergeMap(() =>
+        broker.forwardAndGetReply$(
+          "Wallet",
+          "salesgateway.graphql.query.getWalletTransaction",
           { root, args, jwt: context.encodedToken },
           2000
         )

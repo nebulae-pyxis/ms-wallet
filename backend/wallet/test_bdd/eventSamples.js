@@ -1,5 +1,5 @@
 // para crear una unidad de negocio
-const tocreate = {
+const tocreateBusiness = {
   "id": "b45621e6-b998-445c-b9bf-cec3a5ca4ae2",
   "data": {
     "et": "BusinessCreated",
@@ -17,6 +17,7 @@ const tocreate = {
   },
   "attributes": { "senderId": "6496d1ce-a520-4d0e-9a67-e516dc1153cd" }
 };
+
 // para actualizar una unidad de negocio
 const toEdit = {
   "id": "b45621e6-b998-445c-b9bf-cec3a5ca4ae2",

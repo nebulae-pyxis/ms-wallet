@@ -1,5 +1,5 @@
-const { mergeMap, catchError, map, toArray } = require('rxjs/operators');
-const { of } = require('rxjs');
+const { mergeMap, catchError, map, toArray, tap } = require('rxjs/operators');
+const { of, throwError } = require('rxjs');
 const broker = require("../../tools/broker/BrokerFactory")();
 const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
@@ -177,15 +177,20 @@ class WalletCQRS {
     );
   }
 
-  getWalletwalletForThirdsParties$(){
-    return of()
+  //#region method for third parties
+
+  getWalletwalletForThirdsParties$({args}, authToken){
+    return of(authToken.businessId)
     .pipe(
-      mergeMap((businessId) => WalletDA.getWallet$(businessId)),
-      map(({spendingState, pockets}) => ({spendingState, pockets}) )      
+      mergeMap(businessId => businessId 
+        ? WalletDA.getWallet$(businessId) 
+        : throwError(new CustomError("businessId required", "getWalletwalletForThirdsParties", 17006, "Business ID required" ) )),
+      map(({businessId, spendingState, pockets}) => ({businessId, spendingState, pockets}) ),
+      mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+      catchError(ex => this.handleError$(ex) )      
     )
   }
-
-
+  //#endregion
 
 
   //#region  mappers for API responses
