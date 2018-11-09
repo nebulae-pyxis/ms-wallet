@@ -66,7 +66,21 @@ module.exports = {
       .catch(err => handleError$(err, "getToken"))
       .mergeMap(response => getResponseFromBackEnd$(response))
       .toPromise();
-    }
+    },
+    wallet(root, args, context){
+      return Rx.Observable.of({})
+      .mergeMap(() =>
+        broker.forwardAndGetReply$(
+          "Wallet",
+          "salesgateway.graphql.query.getWallet",
+          { root, args, jwt: context.encodedToken },
+          2000
+        )
+      )
+      .catch(err => handleError$(err, "getWallet"))
+      .mergeMap(response => getResponseFromBackEnd$(response))
+      .toPromise();
+    },
     
   },
 

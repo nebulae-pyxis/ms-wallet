@@ -9,7 +9,18 @@ type TokenResponse {
   refreshExpiresIn: Int  
 }
 
+type WalletPockets{
+  balance: Float
+  bonus: Float
+}
+
+type WalletStatus{
+  spendingState: String
+  pockets: WalletPockets
+}
+
 type Query {
   "Gets token to make operations that require authentication. If the refresh token is passed as a parameter, we'll try to refresh the access token; otherwise, we will generate a new access token with the user and password."
   getToken(username: String, password: String, refreshToken: String): TokenResponse
+  wallet:  WalletStatus
 }

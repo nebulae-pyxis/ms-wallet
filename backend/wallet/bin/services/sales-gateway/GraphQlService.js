@@ -6,14 +6,12 @@ const jsonwebtoken = require("jsonwebtoken");
 const { map, mergeMap, catchError, tap } = require('rxjs/operators');
 const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, "\n");
 const spendingRules = require('../../domain/spending-rules');
-const business = require("../../domain/business/");
 const wallet = require("../../domain/wallet/");
 
 
 let instance;
 
 class GraphQlService {
-
 
   constructor() {
     this.functionMap = this.generateFunctionMap();
@@ -119,7 +117,7 @@ class GraphQlService {
    return Rx.of(msg).pipe(mergeMap(
     ({ response, correlationId, replyTo }) =>
       replyTo
-        ? broker.send$(replyTo, "emigateway.graphql.Query.response", response, {
+        ? broker.send$(replyTo, "salesgateway.graphql.Query.response", response, {
             correlationId
           })
         : Rx.of(undefined)
@@ -147,8 +145,8 @@ class GraphQlService {
     console.log("GraphQl Service starting ...");
     return [
       {
-        aggregateType: "Business",
-        messageType: "emigateway.graphql.query.getWalletBusiness"
+        aggregateType: "Wallet",
+        messageType: "salesgateway.graphql.query.getWallet"
       }
 
     ];
@@ -160,9 +158,9 @@ class GraphQlService {
    */
   generateFunctionMap() {    
     return {
-      "emigateway.graphql.query.getWalletBusiness": {
-        fn: business.cqrs.getWalletBusiness$,
-        obj: business.cqrs
+      "salesgateway.graphql.query.getWallet": {
+        fn: wallet.cqrs.getWalletwalletForThirdsParties$,
+        obj: wallet.cqrs
       }
     };
   }

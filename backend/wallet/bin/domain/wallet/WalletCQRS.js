@@ -177,6 +177,17 @@ class WalletCQRS {
     );
   }
 
+  getWalletwalletForThirdsParties$(){
+    return of()
+    .pipe(
+      mergeMap((businessId) => WalletDA.getWallet$(businessId)),
+      map(({spendingState, pockets}) => ({spendingState, pockets}) )      
+    )
+  }
+
+
+
+
   //#region  mappers for API responses
   handleError$(err) {
     console.log("Handle error => ", err);
