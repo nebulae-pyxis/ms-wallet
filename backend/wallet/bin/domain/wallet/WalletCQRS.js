@@ -1,5 +1,5 @@
-const { mergeMap, catchError, map, toArray, tap } = require('rxjs/operators');
-const { of, throwError } = require('rxjs');
+const { mergeMap, catchError, map, toArray, tap, reduce } = require('rxjs/operators');
+const { of, throwError, from } = require('rxjs');
 const broker = require("../../tools/broker/BrokerFactory")();
 const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
@@ -175,6 +175,17 @@ class WalletCQRS {
       mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
       catchError(err => this.handleError$(err))
     );
+  }
+
+  getTypesAndConceptsValues$() {
+    return of(process.env.WALLET_TRANSACTION_TYPES_CONCEPTS)
+      .pipe(
+        map(typesAndConcepts => JSON.parse(typesAndConcepts)),
+        map(typesAndConceptsObj => Object.entries(typesAndConceptsObj)),
+        reduce((acc, item) => { acc.push({type: item[0], concepts: item[1]}); return acc; }, []),
+        mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+        catchError(error => this.handleError$(error))
+      )
   }
 
   //#region method for third parties

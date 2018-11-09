@@ -178,6 +178,7 @@ describe("E2E - Simple transaction", function() {
     it("verify its defaults documents", function(done) {
       of({})
         .pipe(
+          delay(1000),
           mergeMap(() =>
             forkJoin(
               BusinessDA.getBusiness$(businessList[0]._id), // fecth the business mapped id vs name
@@ -359,9 +360,7 @@ describe("E2E - Simple transaction", function() {
    * Create spending rule
    */
   describe("Create SpendingRule", function() {
-    const businessList = [
-      { _id: "123456789_Metro_med", name: "Metro de Medellin_V2" }
-    ];
+    const businessList = [{ _id: "123456789_Metro_med", name: "Metro de Medellin_V2" }];
     let beforeSpendingRule = undefined;
     let afterSpendingRule = undefined;
 
@@ -382,7 +381,6 @@ describe("E2E - Simple transaction", function() {
               autoPocketSelectionRules
             })
           ),
-          // give a debt capacity to 750.000
           mergeMap(spendingRuleUpdate =>
             broker.send$("Events", "", {
               et: "SpendingRuleUpdated",

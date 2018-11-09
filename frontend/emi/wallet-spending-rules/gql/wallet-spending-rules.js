@@ -3,12 +3,13 @@ import gql from "graphql-tag";
 // We use the gql tag to parse our query string into a query document
 
 //Hello world sample, please remove
-export const getHelloWorld = gql`
-  query getHelloWorldFromwallet {
-    getHelloWorldFromwallet {
-      sn
-    }
+export const getTypeAndConcepts = gql`
+  query typeAndConcepts {
+  typeAndConcepts{
+    type
+    concepts
   }
+}
 `;
 
 export const getSpendingRule = gql`
@@ -68,6 +69,8 @@ export const getSpendingRules = gql`query  WalletGetSpendingRules($page: Int!, $
   }
 }
 `;
+
+
 
 export const updateSpendingRule = gql`
   mutation updateSpendingRule($input: WalletSpendingRuleInput) {

@@ -190,6 +190,11 @@ class GraphQlService {
         aggregateType: "SpendingRule",
         messageType: "emigateway.graphql.mutation.updateSpendingRule"
       },
+      {
+        aggregateType: "Wallet",
+        messageType: "emigateway.graphql.query.getTypeAndConcepts"
+        
+      }
 
     ];
   }
@@ -244,6 +249,10 @@ class GraphQlService {
         fn: spendingRules.cqrs.updateSpendingRule$,
         obj: spendingRules.cqrs
       },
+      "emigateway.graphql.query.getTypeAndConcepts": {
+        fn: wallet.cqrs.getTypesAndConceptsValues$,
+        obj: wallet.cqrs
+      }
     };
   }
 }
