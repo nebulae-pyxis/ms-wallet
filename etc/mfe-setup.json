@@ -34,8 +34,8 @@
                 "id": "manual-wallet-adjustments",
                 "icon": "adjust",
                 "translate": {
-                    "en": "Ajustes manuales de saldo",
-                    "es": "Manual balance adjustments"
+                    "es": "Ajustes manuales de saldo",
+                    "en": "Manual balance adjustments"
                 },
                 "navURL": "/wallet/manual-pocket-adjustment",
                 "path": "wallet",
@@ -69,8 +69,8 @@
                 "id": "wallet-spending-rules",
                 "icon": "dashboard",
                 "translate": {
-                    "en": "Reglas de billetera",
-                    "es": "Wallet spending rules"
+                    "es": "Reglas de billetera",
+                    "en": "Wallet spending rules"
                 },
                 "navURL": "/wallet-spending-rules",
                 "path": "wallet-spending-rules",

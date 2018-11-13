@@ -94,7 +94,6 @@ export class TransactionHistoryDetailComponent implements OnInit, OnDestroy {
   loadTransactionHistory() {
     this.activatedRouter.params
       .pipe(
-        tap(params => console.log("New params => ", params)),
         mergeMap(params =>
           this.transactionHistoryDetailService
             .getTransactionHistoryById$(params.id)
@@ -140,7 +139,6 @@ export class TransactionHistoryDetailComponent implements OnInit, OnDestroy {
           userId: this.selectedTransactionHistory.terminal.userId || " ",
           username: this.selectedTransactionHistory.terminal.username || " "
         };
-        console.log("transactionHistory => ", this.selectedTransactionHistory);
         this.selectedBusiness = business;
         this.dataSource.data = associatedTransactionIds;
       });

@@ -4,6 +4,15 @@ import gql from "graphql-tag";
 
 // QUERIES
 
+export const getBusinessByFilter = gql`
+  query getBusinessByFilter($filterText: String, $limit: Int) {
+    getBusinessByFilter(filterText: $filterText, limit: $limit) {
+      _id
+      name
+    }
+  }
+`;
+
 export const getWalletBusiness = gql`
   query getWalletBusiness {
     getWalletBusiness {
@@ -122,6 +131,15 @@ export const getAssociatedTransactionsHistoryByTransactionHistoryId = gql`
           coordinates
         }
       }
+    }
+  }
+`;
+
+export const getTypesAndConcepts = gql`
+  query getTypesAndConcepts  {
+    typeAndConcepts{
+      type
+      concepts
     }
   }
 `;

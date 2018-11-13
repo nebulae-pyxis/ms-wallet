@@ -30,7 +30,7 @@ import {
   distinctUntilChanged,
   take
 } from "rxjs/operators";
-import { Subject, fromEvent, of, forkJoin } from "rxjs";
+import { Subject, fromEvent, of, forkJoin, Observable } from "rxjs";
 
 //////////// ANGULAR MATERIAL ///////////
 import {
@@ -77,6 +77,7 @@ import * as moment from "moment";
 export class TransactionHistoryComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject();
 
+  businessFilterCtrl: FormControl;
   filterForm: FormGroup;
   // Table data
   dataSource = new MatTableDataSource();
@@ -92,12 +93,15 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
 
   transactionTypes: any = ["SALE", "BALANCE_ADJUSTMENT"];
   transactionConcepts: any = ["RECARGA_CIVICA", "PAYMENT"];
+  typesAndConceptsList: any = null;
 
   myBusiness: any = null;
   allBusiness: any = [];
   selectedBusinessData: any = null;
   selectedTransactionHistory: any = null;
   isSystemAdmin: Boolean = false;
+
+  businessQueryFiltered$: Observable<any[]>;
 
   walletData: any = {
     spendingState: "",
@@ -112,6 +116,9 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   terminalUserId: any;
   terminalUsername: any;
   transactionType: any;
+
+  maxEndDate: any = null;
+  minEndDate: any = null;  
 
   // Table values
   @ViewChild(MatPaginator)
@@ -141,10 +148,13 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     private adapter: DateAdapter<any>
   ) {
     this.translationLoader.loadTranslations(english, spanish);
+    this.businessFilterCtrl = new FormControl();
   }
 
   ngOnInit() {
     this.buildFilterForm();
+    this.loadTypesAndConcepts();
+    this.loadBusinessFilter();
     this.loadDataInForm();
     this.detectFilterAndPaginatorChanges();
     this.loadRoleData();
@@ -156,6 +166,8 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   buildFilterForm() {
     const startOfMonth = moment().startOf("month");
     const endOfMonth = moment();
+    this.minEndDate = startOfMonth;
+    this.maxEndDate = endOfMonth;
     // Reactive Form
     this.filterForm = this.formBuilder.group({
       initDate: [startOfMonth],
@@ -175,6 +187,11 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   compareIds(business1: any, business2: any): boolean {
     return business1 && business2 ? business1._id === business2._id : business1 === business2;
 }
+
+displayFn(business) {
+  return (business || {}).name;
+}
+
 
   loadDataInForm() {
     Rx.Observable.combineLatest(
@@ -208,8 +225,8 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
 
         if (selectedBusiness) {
           this.selectedBusinessData = selectedBusiness;
+          this.businessFilterCtrl.setValue(this.selectedBusinessData);
         }
-        console.log('filterForm.enable')
         this.filterForm.enable({ onlySelf: false, emitEvent: true});
         this.filterForm.updateValueAndValidity({ onlySelf: false, emitEvent: true});
       });
@@ -221,6 +238,17 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   getPaginator$() {
     return this.paginator.page
     .pipe(startWith({ pageIndex: 0, pageSize: 10 }));
+  }
+
+  loadTypesAndConcepts() {
+    this.transactionHistoryService.getTypesAndConcepts$()
+    .pipe(
+      map(result => result.data.typeAndConcepts),
+      takeUntil(this.ngUnsubscribe)
+    )
+    .subscribe(data => {
+      this.typesAndConceptsList = data;
+    })
   }
 
   /**
@@ -254,7 +282,6 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
               credit: credit,
             }
           };
-          console.log('walletCopy => ', walletCopy);
           return walletCopy;
         }),
         takeUntil(this.ngUnsubscribe)
@@ -277,6 +304,38 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     );
   }
 
+  onInitDateChange() {
+    const start = this.filterForm.get('initDate').value;
+    const end = this.filterForm.get('endDate').value;
+
+    const startMonth = start.month();
+    const startYear = start.year();
+    const startMonthYear = startMonth+'-'+startYear;
+
+    const endMonth = end.month();
+    const endYear = end.year();
+    const endMonthYear = endMonth+'-'+endYear;
+    
+    this.minEndDate = moment(start);
+    if(startMonthYear != endMonthYear){
+      console.log('Select last day of month or current date');
+      this.filterForm.patchValue({
+        endDate: start.endOf("month")
+      });
+      this.maxEndDate = start.endOf("month"); 
+    }else{
+      console.log('Same month');
+    }
+    
+    console.log('minEndDate => ', this.minEndDate.format('MMMM Do YYYY, h:mm:ss a'));
+    console.log('maxEndDate => ', this.maxEndDate.format('MMMM Do YYYY, h:mm:ss a'));
+  }
+
+  onEndDateChange() {
+    // const start = this.filterForm.get('initDate').value;
+    // this.minEndDate = moment(start);
+  }
+
   resetFilter() {
     this.filterForm.reset();
     this.paginator.pageIndex = 0;
@@ -295,12 +354,9 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     Rx.Observable.combineLatest(this.getFormChanges$(), this.getPaginator$())
       .pipe(
         filter(data => {
-          console.log("form state: ", this.filterForm.enabled);
           return this.filterForm.enabled;
         }),
         map(([formChanges, paginator]) => {
-          // console.log('formChanges => ', formChanges);
-          // console.log('paginator => ', paginator);
           return {
             filter: {
               initDate: formChanges.initDate,
@@ -359,8 +415,11 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
             ? filterInput.endDate.valueOf()
             : null;
           filterInput.businessId = selectedBusiness._id;
-          const paginationInput = filterAndPagination.pagination;
 
+          filterInput.transactionType = filterInput.transactionType ? filterInput.transactionType.type : undefined;
+
+          const paginationInput = filterAndPagination.pagination;
+          console.log('filterInput => ', filterInput);
           return this.transactionHistoryService.getTransactionsHistory$(
             filterInput,
             paginationInput
@@ -371,8 +430,6 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(transactionsHistory => {
-        console.log("transactionsHistory list => ", transactionsHistory);
-
         this.dataSource.data =
           transactionsHistory.data.getWalletTransactionsHistory;
       });
@@ -429,6 +486,29 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
           this.onSelectBusinessEvent(this.myBusiness);
         }
       });
+  }
+
+  loadBusinessFilter(){
+    this.businessQueryFiltered$ =
+      this.businessFilterCtrl.valueChanges.pipe(
+        startWith(undefined),
+        debounceTime(500),
+        distinctUntilChanged(),
+        mergeMap((filterText:String) => {
+          return this.getBusinessFiltered(filterText, 10);
+        })
+      );
+  }
+
+  getBusinessFiltered(filterText: String, limit: number): Observable<any[]> {
+    return this.walletService
+      .getBusinessByFilter(filterText, limit)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter(resp => !resp.errors),
+        mergeMap(result => Observable.from(result.data.getBusinessByFilter)),
+        toArray()
+      );
   }
 
   /**

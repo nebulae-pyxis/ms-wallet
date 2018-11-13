@@ -20,3 +20,16 @@
       }
   }
 }
+
+.form-field {
+    font-size: 18px;
+    padding-bottom: 16px;
+
+    .title {
+        color: rgba(0, 0, 0, 0.54);
+    }
+
+    .value {
+        padding-left: 6px;
+    }
+}

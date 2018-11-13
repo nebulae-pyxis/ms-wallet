@@ -6,7 +6,8 @@ import {
 import { GatewayService } from "../../../../api/gateway.service";
 import * as moment from "moment";
 import {
-  getWalletTransactionsHistory
+  getWalletTransactionsHistory,
+  getTypesAndConcepts
 } from "../gql/wallet";
 
 @Injectable()
@@ -54,26 +55,6 @@ export class TransactionHistoryService {
    */
   get filterAndPaginator$() {
     return this._filterAndPaginator$.asObservable()
-    // .pipe(
-    //   startWith({
-    //     filter: {
-    //       initDate: new Date(),
-    //       endDate: new Date(),
-    //       transactionType: undefined,
-    //       transactionConcept: undefined,
-    //       terminal: {
-    //         id: undefined,
-    //         userId: undefined,
-    //         username: undefined
-    //       }
-    //     },
-    //     pagination: {
-    //       page: 0,
-    //       count: 10,
-    //       sort: 1
-    //     }
-    //   })
-    // );
   }
 
   /**
@@ -104,6 +85,19 @@ export class TransactionHistoryService {
         filterInput: filterInput,
         paginationInput: paginationInput
       },
+      fetchPolicy: "network-only",
+      errorPolicy: "all"
+    });
+  }
+
+  /**
+   * Gets the transactions types and concepts
+   * 
+   * @returns {Observable}
+   */
+  getTypesAndConcepts$() {
+    return this.gateway.apollo.query<any>({
+      query: getTypesAndConcepts,
       fetchPolicy: "network-only",
       errorPolicy: "all"
     });

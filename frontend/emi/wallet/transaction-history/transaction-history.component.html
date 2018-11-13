@@ -42,16 +42,10 @@
           *fuseIfOnDom
           [@animate]="{ value: '*', params: { delay: '300ms' } }"
         >
-          <div class="title">John Doe</div>
 
-          <mat-form-field floatPlaceholder="never">
-            <mat-select
-              class="account-selection"
-              placeholder="Mail Selection"
-              [ngModel]="selectedAccount"
-            >
-            </mat-select>
-          </mat-form-field>
+          <span class="mat-title my-20">
+              {{'WALLET.WALLET' | translate}}
+            </span>
         </div>
       </div>
       <!-- / SIDENAV HEADER -->
@@ -154,32 +148,38 @@
                   [matDatepicker]="pickerInitDate"
                   placeholder="{{'WALLET.INIT_DATE' | translate}}"
                   formControlName="initDate"
+                  (dateChange)="onInitDateChange()"
                 />
                 <mat-datepicker-toggle
                   matSuffix
                   [for]="pickerInitDate"
                 ></mat-datepicker-toggle>
                 <mat-datepicker
+                  twelveHour="false"
                   type="datetime"
-                  clockStep="5"
+                  clockStep="1"
                   #pickerInitDate
                 ></mat-datepicker>
               </mat-form-field>
 
               <mat-form-field>
                 <input
+                  [min]="minEndDate"
+                  [max]="maxEndDate"
                   matInput
                   [matDatepicker]="pickerEndDate"
                   placeholder="{{'WALLET.END_DATE' | translate}}"
                   formControlName="endDate"
+                  (dateChange)="onEndDateChange()"
                 />
                 <mat-datepicker-toggle
                   matSuffix
                   [for]="pickerEndDate"
                 ></mat-datepicker-toggle>
                 <mat-datepicker
+                  twelveHour="true"
                   type="datetime"
-                  clockStep="5"
+                  clockStep="1"
                   #pickerEndDate
                 ></mat-datepicker>
               </mat-form-field>
@@ -188,26 +188,26 @@
                 <mat-select
                   placeholder="{{'WALLET.SELECT_TRANSACTION_TYPE' | translate}}"
                   formControlName="transactionType"
-                  id="transactionType"
+                  id="transactionType" (selectionChange)="filterForm.get('transactionConcept').reset()"
                 >
                   <mat-option>{{ "WALLET.NONE" | translate }}</mat-option>
                   <mat-option
-                    *ngFor="let transactionType of transactionTypes"
+                    *ngFor="let transactionType of typesAndConceptsList"
                     [value]="transactionType"
                   >
-                    {{ "WALLET.TYPES." + transactionType | translate }}
+                    {{ "WALLET.TYPES." + transactionType.type | translate }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
 
-              <mat-form-field fxFlex="100">
+              <mat-form-field fxFlex="100" *ngIf="filterForm.get('transactionType').value">
                 <mat-select
                   placeholder="{{'WALLET.SELECT_TRANSACTION_CONCEPT' | translate}}"
                   formControlName="transactionConcept"
                 >
                   <mat-option>{{ "WALLET.NONE" | translate }}</mat-option>
                   <mat-option
-                    *ngFor="let transactionConcept of transactionConcepts"
+                    *ngFor="let transactionConcept of filterForm.get('transactionType').value.concepts"
                     [value]="transactionConcept"
                   >
                     {{ "WALLET.CONCEPTS." + transactionConcept | translate }}
@@ -221,6 +221,7 @@
                   placeholder="{{'WALLET.TERMINAL_ID' | translate}}"
                   formControlName="terminalId"
                   id="terminalId"
+                  maxlength="20"
                 />
               </mat-form-field>
 
@@ -230,6 +231,7 @@
                   placeholder="{{'WALLET.TERMINAL_USER_ID' | translate}}"
                   formControlName="terminalUserId"
                   id="terminalUserId"
+                  maxlength="20"
                 />
               </mat-form-field>
 
@@ -239,6 +241,7 @@
                   placeholder="{{'WALLET.TERMINAL_USERNAME' | translate}}"
                   formControlName="terminalUsername"
                   id="terminalUsername"
+                  maxlength="20"
                 />
               </mat-form-field>
 
@@ -318,10 +321,9 @@
             
 
               <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" [matAutocomplete]="auto"
-                fxFlex>
-              <mat-autocomplete #auto="matAutocomplete" (optionSelected)='onSelectBusinessEvent($event.option.value)'>
-                <mat-option
-                *ngFor="let business of allBusiness"
+              [(value)]="selectedBusinessData" [formControl]="businessFilterCtrl" fxFlex>
+              <mat-autocomplete #auto="matAutocomplete" (optionSelected)='onSelectBusinessEvent($event.option.value)' [displayWith]="displayFn">
+                <mat-option *ngFor="let business of businessQueryFiltered$ | async"                
                 [value]="business">
                 {{ business.name }} (ID: {{ business._id }})
               </mat-option>
@@ -382,7 +384,9 @@
               "WALLET.TRANSACTION_VALUE" | translate
             }}</mat-header-cell>
             <mat-cell *cdkCellDef="let transaction">
-              <p class="text-truncate">{{ transaction.value | currency }}</p>
+              <p class="text-truncate" [ngClass]="{'green-fg':transaction.value > 0, 'red-fg':transaction.value < 0}">
+                {{ transaction.value | currency }}
+              </p>
             </mat-cell>
           </ng-container>
 

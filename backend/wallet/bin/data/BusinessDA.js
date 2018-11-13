@@ -21,6 +21,33 @@ class BusinessDA {
     });
   }
 
+    /**
+     * gets Business according to the filter
+     * @param {string} type 
+     */
+    static getBusinessByFilter$(filterText, limit) {
+      let filter = {};
+      if(filterText){
+          filter['$or'] = [ { id: {$regex: filterText, $options: 'i'} }, { name: {$regex: filterText, $options: 'i'} } ];
+      }
+
+      return Observable.create(async observer => {
+          const collection = mongoDB.db.collection(CollectionName);
+          const cursor = collection.find(filter);
+          if (limit) {
+              cursor.limit(limit);
+          }
+
+          let obj = await this.extractNextFromMongoCursor(cursor);
+          while (obj) {
+              observer.next(obj);
+              obj = await this.extractNextFromMongoCursor(cursor);
+          }
+
+          observer.complete();
+      });
+    }
+
  /**
    * Gets business by id
    * @param {String} id business ID

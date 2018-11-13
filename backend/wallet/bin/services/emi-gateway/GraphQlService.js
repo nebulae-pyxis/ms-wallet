@@ -148,6 +148,10 @@ class GraphQlService {
     return [
       {
         aggregateType: "Business",
+        messageType: "emigateway.graphql.query.getBusinessByFilter"
+      },
+      {
+        aggregateType: "Business",
         messageType: "emigateway.graphql.query.getWalletBusiness"
       },
       {
@@ -205,6 +209,10 @@ class GraphQlService {
    */
   generateFunctionMap() {    
     return {
+      "emigateway.graphql.query.getBusinessByFilter": {
+        fn: business.cqrs.getBusinessByFilter$,
+        obj: business.cqrs
+      },
       "emigateway.graphql.query.getWalletBusiness": {
         fn: business.cqrs.getWalletBusiness$,
         obj: business.cqrs

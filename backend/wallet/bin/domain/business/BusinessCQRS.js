@@ -16,6 +16,30 @@ let instance;
 class BusinessCQRS {
   constructor() {}
 
+
+ /**
+   * Gets the business where the user that is performing the request belong
+   *
+   * @param {*} args args
+   * @param {*} args.businessId business ID
+   */
+  getBusinessByFilter$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "wallet",
+      "getBusinessByFilter$",
+      PERMISSION_DENIED_ERROR,
+      ["SYSADMIN"]
+      ).pipe(
+          mergeMap(roles => BusinessDA.getBusinessByFilter$(args.filterText, args.limit)),
+          toArray(),
+          mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+          catchError(err => {
+            return this.handleError$(err);
+          })
+      );
+  }
+
   /**
    * Gets the business where the user that is performing the request belong
    *

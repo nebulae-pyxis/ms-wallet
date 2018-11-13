@@ -40,11 +40,12 @@ export const locale = {
       RESET_FILTER: 'Limpiar filtro',
       TYPES: {
         SALE: 'Venta',
-        BALANCE_ADJUSTMENT: 'Ajuste de saldo'
+        MOVEMENT: 'Movimiento'
       },
       CONCEPTS: {
         RECARGA_CIVICA: 'Recarga civica',
-        PAYMENT: 'Pago'
+        DEBIT: 'Débito',
+        CREDIT: 'Crédito'
       },
       TRANSACTION_HISTORY_DETAIL: 'Detalle de transacción',
       INFO: 'Información',
@@ -52,7 +53,10 @@ export const locale = {
       ID: 'ID:',
       USER_ID: 'ID Usuario:',
       USERNAME: 'Nombre de usuario:',
-      NONE: 'Ninguno'
+      NONE: 'Ninguno',
+      ASSOCIATED_TRANSACTIONS: 'Transacciones asociadas',
+      TRANSACTION: 'Transacción ',
+      WALLET: 'Billetero'
     }
   }
 };

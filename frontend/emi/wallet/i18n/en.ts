@@ -40,11 +40,12 @@ export const locale = {
       RESET_FILTER: 'Reset filter',
       TYPES: {
         SALE: 'Sale',
-        BALANCE_ADJUSTMENT: 'Balance adjustment'
+        MOVEMENT: 'Movement'
       },
       CONCEPTS: {
         RECARGA_CIVICA: 'Civic recharge card',
-        PAYMENT: 'Payment'
+        DEBIT: 'Debit',
+        CREDIT: 'Credit'
       },
       TRANSACTION_HISTORY_DETAIL: 'Transaction detail',
       INFO: 'Info',
@@ -52,7 +53,10 @@ export const locale = {
       ID: 'ID:',
       USER_ID: 'User ID:',
       USERNAME: 'Username:',
-      NONE: 'None'
+      NONE: 'None',
+      ASSOCIATED_TRANSACTIONS: 'Assocated transactions',
+      TRANSACTION: 'Transaction ',
+      WALLET: 'Wallet'
     }
   }
 };

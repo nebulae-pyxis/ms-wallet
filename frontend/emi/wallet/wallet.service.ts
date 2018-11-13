@@ -6,6 +6,7 @@ import {
   getWalletBusinesses,
   getWallet,
   getWalletBusinessById,
+  getBusinessByFilter,
   walletHelloWorldSubscription
 } from "./gql/wallet";
 
@@ -14,6 +15,19 @@ export class WalletService {
 
   constructor(private gateway: GatewayService) {}
 
+
+    getBusinessByFilter(filterText: String, limit: number): Observable<any> {
+      return this.gateway.apollo
+        .query<any>({
+          query: getBusinessByFilter,
+          variables: {
+            filterText: filterText,
+            limit: limit
+          },
+          fetchPolicy: 'network-only',
+          errorPolicy: 'all'
+        });
+    }
 
   /**
    * get the business by id

@@ -139,6 +139,27 @@ module.exports = {
           .mergeMap(response => getResponseFromBackEnd$(response))
           .toPromise();
       },
+      getBusinessByFilter(root, args, context) {
+        return RoleValidator.checkPermissions$(
+          context.authToken.realm_access.roles,
+          CONTEXT_NAME,
+          "getBusinessByFilter",
+          PERMISSION_DENIED_ERROR_CODE,
+          "Permission denied",
+          ["SYSADMIN"]
+        )
+          .mergeMap(response => {
+            return broker.forwardAndGetReply$(
+              "Business",
+              "emigateway.graphql.query.getBusinessByFilter",
+              { root, args, jwt: context.encodedToken },
+              2000
+            );
+          })
+          .catch(err => handleError$(err, "getBusinessByFilter"))
+          .mergeMap(response => getResponseFromBackEnd$(response))
+          .toPromise();
+    },
       getWalletBusiness(root, args, context) {
             return RoleValidator.checkPermissions$(
               context.authToken.realm_access.roles,

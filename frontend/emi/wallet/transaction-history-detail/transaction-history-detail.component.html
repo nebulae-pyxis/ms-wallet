@@ -43,37 +43,64 @@
 
             <div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
 
-                <form name="transactionHistoryForm" *ngIf="selectedTransactionHistory" class="transaction_history w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24">
+                <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                    <mat-icon class="m-0 mr-16">attach_money</mat-icon>
+                    <div class="h2 secondary-text">{{'WALLET.TRANSACTION' | translate}}(ID: {{selectedTransactionHistory._id}})</div>
+                </div>
 
-                  <mat-form-field class="w-100-p">
-                    <input matInput disabled placeholder="{{'WALLET.TRANSACTION_ID' | translate}}" value="{{selectedTransactionHistory._id}}">
-                  </mat-form-field>
+                <div class="w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24">                  
 
-                  <mat-form-field class="w-100-p">
-                    <input matInput disabled placeholder="{{'WALLET.TRANSACTION_TIMESTAMP' | translate}}" value="{{selectedTransactionHistory.timestamp}}">
-                  </mat-form-field>
+                    <div class="form-field" fxLayout="row" fxLayoutAlign="start center">
+                        <span class="title">{{'WALLET.TIMESTAMP' | translate}}</span>
+                        <span class="value">{{selectedTransactionHistory.timestamp | date: "dd/MM/y HH:mm:ss"}}</span>
+                    </div>                    
 
-                  <mat-form-field class="w-100-p">
-                      <input matInput disabled placeholder="{{'WALLET.TRANSACTION_TYPE' | translate}}" value="{{selectedTransactionHistory.type}}">
-                    </mat-form-field>
+                  <div fxLayout="row">
 
-                    <mat-form-field class="w-100-p">
-                        <input matInput disabled placeholder="{{'WALLET.TRANSACTION_CONCEPT' | translate}}" value="{{selectedTransactionHistory.concept}}">
-                    </mat-form-field>
+                      <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                          <span class="title">{{'WALLET.TRANSACTION_TYPE' | translate}}:</span>
+                          <span class="value">{{'WALLET.TYPES.' +selectedTransactionHistory.type | translate}}</span>
+                      </div>
+    
+                      <div class="form-field" fxLayout="row" fxLayoutAlign="start center">
+                          <span class="title">{{'WALLET.TRANSACTION_CONCEPT' | translate}}:</span>
+                          <span class="value">{{'WALLET.CONCEPTS.' +selectedTransactionHistory.concept | translate}}</span>
+                      </div>
 
-                    <mat-form-field class="w-100-p" *ngIf="selectedTransactionHistory.terminal">
-                        <input matInput disabled placeholder="{{'WALLET.TRANSACTION_TERMINAL_ID' | translate}}" value="{{selectedTransactionHistory.terminal.id}}">
-                    </mat-form-field>
+                  </div>
 
-                    <mat-form-field class="w-100-p" *ngIf="selectedTransactionHistory.terminal">
-                        <input matInput disabled placeholder="{{'WALLET.TRANSACTION_TERMINAL_USER_ID' | translate}}" value="{{selectedTransactionHistory.terminal.userId}}">
-                    </mat-form-field>
+                  <div class="form-field" fxLayout="row" fxLayoutAlign="start center">
+                      <span class="title">{{'WALLET.TRANSACTION_VALUE' | translate}}:</span>
+                      <span class="value" [ngClass]="{'green-fg':selectedTransactionHistory.value > 0, 'red-fg':selectedTransactionHistory.value < 0}">{{selectedTransactionHistory.value | currency}}</span>
+                  </div>
 
-                    <mat-form-field class="w-100-p" *ngIf="selectedTransactionHistory.terminal">
-                        <input matInput disabled placeholder="{{'WALLET.TRANSACTION_TERMINAL_USERNAME' | translate}}" value="{{selectedTransactionHistory.terminal.username}}">
-                    </mat-form-field>
+                  <div class="form-field" fxLayout="row" fxLayoutAlign="start center" *ngIf="selectedTransactionHistory.terminal">
+                      <span class="title">{{'WALLET.TRANSACTION_TERMINAL_ID' | translate}}:</span>
+                      <span class="value">{{selectedTransactionHistory.terminal.id}}</span>
+                  </div>
 
-                </form>
+                  <div class="form-field" fxLayout="row" fxLayoutAlign="start center" *ngIf="selectedTransactionHistory.terminal">
+                      <span class="title">{{'WALLET.TRANSACTION_TERMINAL_USER_ID' | translate}}:</span>
+                      <span class="value">{{selectedTransactionHistory.terminal.userId}}</span>
+                  </div>
+
+                  <div class="form-field" fxLayout="row" fxLayoutAlign="start center" *ngIf="selectedTransactionHistory.terminal">
+                      <span class="title">{{'WALLET.TRANSACTION_TERMINAL_USERNAME' | translate}}:</span>
+                      <span class="value">{{selectedTransactionHistory.terminal.username}}</span>
+                  </div>
+
+                  <div class="form-field" fxLayout="row" fxLayoutAlign="start center">
+                      <span class="title">{{'WALLET.TRANSACTION_USER' | translate}}:</span>
+                      <span class="value">{{selectedTransactionHistory.user}}</span>
+                  </div>
+
+
+                </div>
+
+                <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                    <mat-icon class="m-0 mr-16">grain</mat-icon>
+                    <div class="h2 secondary-text">{{'WALLET.ASSOCIATED_TRANSACTIONS' | translate}}</div>
+                </div>
 
                 <mat-table id="associated-transactions-history-table" class="item-table p-24 mr-24 mb-24"  #table [dataSource]="dataSource">
 
@@ -105,7 +132,7 @@
                     <ng-container cdkColumnDef="value">
                       <mat-header-cell *cdkHeaderCellDef>{{'WALLET.TRANSACTION_VALUE' | translate}}</mat-header-cell>
                       <mat-cell *cdkCellDef="let transaction">
-                        <p class="text-truncate">{{transaction.value | currency}}</p>
+                        <p class="text-truncate" [ngClass]="{'green-fg':transaction.value > 0, 'red-fg':transaction.value < 0}">{{transaction.value | currency}}</p>
                       </mat-cell>
                     </ng-container>
 
