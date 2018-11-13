@@ -285,11 +285,11 @@ describe("E2E - Simple transaction", function() {
 
       const timesToSendEvent = 100;
       const delayToSendEachPackage = 200;
-      const valuesInTest_ = [...Array(100)].map(e => {
-        const randomNumner = Math.floor(Math.random() * 50000);
-        return randomNumner - (randomNumner % 50);
-      });
-      console.log(JSON.stringify(valuesInTest_));
+      // const valuesInTest_ = [...Array(100)].map(e => {
+      //   const randomNumner = Math.floor(Math.random() * 50000);
+      //   return randomNumner - (randomNumner % 50);
+      // });
+      // console.log(JSON.stringify(valuesInTest_));
 
       of({})
         .pipe(
@@ -311,7 +311,7 @@ describe("E2E - Simple transaction", function() {
           toArray()          
         )
         .subscribe(
-          () => console.log( "##### WALLET SPENDING COMMITS SENT WITHVALUES ==> ", valuesInTest ),
+          () => console.log( "##### WALLET SPENDING COMMITS SENT WITHVALUES ==> ", JSON.stringify(valuesInTest) ),
           error => {
             console.log(error);
             return done(error);

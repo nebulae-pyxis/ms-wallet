@@ -173,13 +173,13 @@ enum ComparatorEnum {
 type WalletPocketSelectionRuleCondition {
   pocket: String
   comparator: ComparatorEnum
-  value: Int
+  value: Float
 }
 
 input WalletPocketSelectionRuleConditionInput {
   pocket: String
   comparator: ComparatorEnum
-  value: Int 
+  value: Float 
 }
 
 type WalletPocketSelectionRule {

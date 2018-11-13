@@ -13,7 +13,7 @@ import { locale as english } from './i18n/en';
 import { locale as spanish } from './i18n/es';
 // tslint:disable-next-line:import-blacklist
 import * as Rx from 'rxjs/Rx';
-import { MatTableDataSource } from '@angular/material';
+import { MatTableDataSource, MatPaginator } from '@angular/material';
 import {
   debounceTime,
   startWith,
@@ -42,6 +42,7 @@ export interface SpendingRule {
 export class WalletComponent implements OnInit, OnDestroy {
   @ViewChild('filter')
   filter: ElementRef;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   spendingRulesDataSource = new MatTableDataSource();
   allSubscriptions = [];
@@ -82,23 +83,69 @@ export class WalletComponent implements OnInit, OnDestroy {
           filter(() => this.filter.nativeElement),
           map(() => this.filter.nativeElement.value.trim()),
           tap(filterText => (this.filterText = filterText)),
-          mergeMap(() =>
-            this.walletSpendingService.getSpendinRules$(
-              this.page,
-              this.count,
-              this.filterText,
-              this.sortColumn,
-              this.sortOrder
-            )
-          ),
-          map(response => response.data.WalletGetSpendingRules),
-          tap(
-            spendingRules => (this.spendingRulesDataSource.data = spendingRules)
-          )
+          mergeMap( () => this.refreshDataTable(this.page, this.count, this.filterText))
         )
-        .subscribe( r => {}, e => console.log(e), () => {} )
+        .subscribe( r => {  }, e => console.log(e), () => {} )
+    );
+
+     // Creates an observable for listen the events when the paginator of the table is modified
+     this.allSubscriptions.push(
+      this.paginator.page.subscribe(pageChanged => {
+        this.page = pageChanged.pageIndex;
+        this.count = pageChanged.pageSize;
+        this.refreshDataTable(
+          pageChanged.pageIndex,
+          pageChanged.pageSize,
+          this.filterText
+        );
+      })
     );
   }
 
-  ngOnDestroy() {}
+
+
+    /**
+   * Finds the users and updates the table data
+   * @param page page number
+   * @param count Max amount of users that will be return.
+   * @param searchFilter Search filter
+   */
+  refreshDataTable(page, count, searchFilter) {
+    return this.walletSpendingService
+      .getSpendinRules$(page, count, searchFilter, this.sortColumn, this.sortOrder)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        map(response => response.data.WalletGetSpendingRules),
+        tap(spendingRules => (this.spendingRulesDataSource.data = spendingRules))
+      );
+  }
+
+   /**
+   * Handles the Graphql errors and show a message to the user
+   * @param response
+   */
+  graphQlAlarmsErrorHandler$(response){
+    return Rx.Observable.of(JSON.parse(JSON.stringify(response)))
+    .pipe(
+      tap((resp: any) => {
+        this.showSnackBarError(resp);
+        return resp;
+      })
+    );
+  }
+
+    /**
+   * Shows an error snackbar
+   * @param response
+   */
+  showSnackBarError(response){
+    if (response.errors){
+      console.log(response.errors);
+    }
+  }
+
+  ngOnDestroy() {
+
+  }
 }

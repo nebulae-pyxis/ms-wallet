@@ -24,7 +24,7 @@
 
     <!-- CONTENT CARD -->
     <div id="content" class="content-card mat-white-bg">
-      <form style="overflow: auto;" name="manualBalanceAdjustmentsForm" [formGroup]="settingsForm" class=" user w-100-p"
+      <form style="overflow: auto;" name="settingsForm" [formGroup]="settingsForm" class=" user w-100-p"
         fxLayout="row wrap" class="mat-white-bg p-24 m-24">
 
         <!-- BASIC SPENDING RULES STTRIBUTES -->
@@ -38,6 +38,9 @@
         <mat-form-field *ngIf="settingsForm.controls['minOperationAmount']" class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="50">
           <input [myCurrencyFormatter]="'FIXED'"  matInput placeholder="{{ 'SPENDING_RULE.MIN_OPERATION_AMOUNT'  | translate }}" formControlName="minOperationAmount"
             required value="{{ settingsForm.value.minOperationAmount }}" >
+          <mat-error>
+            {{'WALLET.MIN_OPERATION_AMOUNT_VALUE_REQUIRED' | translate}}
+          </mat-error>
         </mat-form-field>
         <!-- BASIC SPENDING RULES STTRIBUTES -->
 
@@ -69,8 +72,7 @@
               </mat-form-field> -->
               <mat-form-field *ngIf="typeAndConcepts" class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
                 <mat-select formControlName="type" placeholder="{{'SPENDING_RULE.TYPE' | translate}}">
-                  <mat-option *ngFor="let productType of typeAndConcepts" [value]="productType"
-                  (onSelectionChange)="updateProductBonusConfig(i)" >
+                  <mat-option *ngFor="let productType of typeAndConcepts" [value]="productType" >
                     {{ 'WALLET.' + productType.type | translate}}
                   </mat-option>
                 </mat-select>
@@ -86,8 +88,7 @@
                 class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
                 <mat-select formControlName="concept" placeholder="{{'SPENDING_RULE.CONCEPT' | translate}}">
                   <mat-option *ngFor="let concept of settingsForm.controls['productBonusConfigs']['controls'][i].controls.type.value.concepts"
-                  [value]="concept"
-                  (onSelectionChange)="updateProductBonusConfig(i)" >
+                  [value]="concept" >
                     {{ 'WALLET.' + concept | translate}}
                   </mat-option>
                 </mat-select>
@@ -98,8 +99,7 @@
               <!-- BONUS TYPE -->
               <mat-form-field class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
                 <mat-select formControlName="bonusType" placeholder="{{'SPENDING_RULE.BONUS_TYPE' | translate}}">
-                  <mat-option *ngFor="let bonusType of ['PERCENTAGE', 'FIXED']" [value]="bonusType"
-                  (onSelectionChange)="updateProductBonusConfig(i)" >
+                  <mat-option *ngFor="let bonusType of ['PERCENTAGE', 'FIXED']" [value]="bonusType" (onSelectionChange)="updatePercentageValidations(i)" >
                     {{ 'WALLET.' + bonusType | translate}}
                   </mat-option>
                 </mat-select>

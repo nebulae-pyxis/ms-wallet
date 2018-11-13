@@ -140,8 +140,7 @@ describe("E2E - Simple transaction", function() {
   * CREATE BUSINESS UNITS
   */
   describe("Create the business units", function() {
-    const businessList = [
-      { _id: "123456789_Metro_med", name: "Metro de Medellin" }
+    const businessList = [{ _id: "123456789_Metro_med", name: "Metro de Medellin" }
     ]; // busines list demo
     it("Create one busines unit", function(done) {
       from(businessList)
@@ -186,6 +185,7 @@ describe("E2E - Simple transaction", function() {
               WalletDA.getWallet$(businessList[0]._id) // fect the wallet for the related  business
             )
           ),
+          // cheking the business
           tap(([business, spendingRule, wallet]) => {
             expect(business).to.be.deep.equal(
               {
@@ -195,6 +195,7 @@ describe("E2E - Simple transaction", function() {
               "The businessId vs businessName expected"
             );
 
+            // checking the spendingRule
             expect({
               ...spendingRule,
               id: 0,
@@ -215,11 +216,13 @@ describe("E2E - Simple transaction", function() {
               "Spending rule expected"
             );
 
+            // checking the spendingRule ID
             expect(spendingRule.id).to.be.equal(
               spendingRule.lastEditionTimestamp,
               "id and lastEditionTimestamp must to be equals"
             );
 
+            // cheking the wallet
             expect({ ...wallet, _id: 0 }).to.be.deep.equal(
               {
                 _id: 0,
@@ -426,7 +429,7 @@ describe("E2E - Simple transaction", function() {
     it("Insert a new productBonusConfig", function(done) {
       const productBonusConfigs = [
         {
-          type: "VENTA",
+          type: "SALE",
           concept: "RECARGA_CIVICA",
           bonusType: "PERCENTAGE",
           bonusValueByBalance: 1.38,
@@ -448,7 +451,6 @@ describe("E2E - Simple transaction", function() {
               };
             }
           ),
-          // give a debt capacity to 750.000
           mergeMap(spendingRuleUpdate =>
             broker.send$("Events", "", {
               et: "SpendingRuleUpdated",
@@ -477,7 +479,7 @@ describe("E2E - Simple transaction", function() {
               "Must to be just one element here"
             );
             expect(afterSpendingRule.productBonusConfigs[0]).to.be.deep.equal({
-              type: "VENTA",
+              type: "SALE",
               concept: "RECARGA_CIVICA",
               bonusType: "PERCENTAGE",
               bonusValueByBalance: 1.38,
@@ -589,7 +591,7 @@ describe("E2E - Simple transaction", function() {
           toArray()          
         )
         .subscribe(
-          () => console.log( "##### WALLET SPENDING COMMITS SENT WITHVALUES ==> ", valuesInTest ),
+          () => console.log( "##### WALLET SPENDING COMMITS SENT WITHVALUES ==> ", JSON.stringify(valuesInTest) ),
           error => {
             console.log(error);
             return done(error);

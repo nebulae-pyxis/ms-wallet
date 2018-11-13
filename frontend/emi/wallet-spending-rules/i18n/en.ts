@@ -43,7 +43,8 @@ export const locale = {
       MOVEMENT: 'MOVEMENT',
       RECARGA_CIVICA: 'RELOAD CIVICA',
       DEBIT: 'DEBIT',
-      CREDIT: 'CREDIT'
+      CREDIT: 'CREDIT',
+      MIN_OPERATION_AMOUNT_VALUE_REQUIRED: 'Minimun amount to operate required'
     },
     SAVE: 'Save',
     UNDO: 'Undo',

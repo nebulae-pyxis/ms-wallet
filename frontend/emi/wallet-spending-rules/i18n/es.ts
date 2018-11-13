@@ -43,7 +43,8 @@ export const locale = {
       MOVEMENT: 'MOVIMIENTO',
       RECARGA_CIVICA: 'RECARGA CIVICA',
       DEBIT: 'DEBITO',
-      CREDIT: 'CREDITO'
+      CREDIT: 'CREDITO',
+      MIN_OPERATION_AMOUNT_VALUE_REQUIRED: 'Monto mínimo de operación requerido'
     },
     SAVE: 'Guardar',
     UNDO: 'Deshacer',
