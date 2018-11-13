@@ -249,14 +249,20 @@ class WalletES {
               return throwError('Error ')
             }
 
+            let condition = false;
+
             switch (pocketSelectionRule.condition.comparator) {
-              case 'GT': return wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] > pocketSelectionRule.condition.value
-              case 'GTE': return wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] >= pocketSelectionRule.condition.value
-              case 'LT': return wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] < pocketSelectionRule.condition.value
-              case 'LTE': return wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] <= pocketSelectionRule.condition.value
-              case 'ENOUGH': return wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] > transactionAmount
-              default: return throwError('Invalid comparator');
+              case 'GT':     condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] > pocketSelectionRule.condition.value
+              case 'GTE':    condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] >= pocketSelectionRule.condition.value
+              case 'LT':     condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] < pocketSelectionRule.condition.value
+              case 'LTE':    condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] <= pocketSelectionRule.condition.value
+              case 'ENOUGH': condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] > transactionAmount
+              case 'INS':    condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] < transactionAmount
+              default:       throwError('Invalid comparator');
             }
+
+            return (condition && wallet.pockets[pocketSelectionRule.pocketToUse.toLowerCase()] >= transactionAmount);
+
             }),
             defaultIfEmpty({ pocketToUse: BALANCE_POCKET }),
             first()

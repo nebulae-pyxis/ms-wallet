@@ -14,8 +14,8 @@ export const locale = {
       BUSINESS_ID: 'ID de negocio',
       BUSINESS_NAME: 'Nombre de negocio',
       MIN_OPERATION_AMOUNT: 'Monto mínimo de operación',
-      TYPE: 'Tipo',
-      CONCEPT: 'Concepto',
+      TYPE: 'Tipo transacción',
+      CONCEPT: 'Concepto transacción',
       PERCETAGE_WITH_BALANCE: 'Saldo',
       PERCENTAGE_WITH_CREDIT: 'Crédito',
       PRIORITY: 'orden',
@@ -36,10 +36,19 @@ export const locale = {
       LTE: '≤',
       GTE: '≥',
       ENOUGH: 'Es suficiente',
+      INS: 'Es insuficiente',
       FIXED: 'Fijo',
-      PERCENTAGE: 'Porcentual'
+      PERCENTAGE: 'Porcentual',
+      SALE: 'VENTA',
+      MOVEMENT: 'MOVIMIENTO',
+      RECARGA_CIVICA: 'RECARGA CIVICA',
+      DEBIT: 'DEBITO',
+      CREDIT: 'CREDITO'
     },
     SAVE: 'Guardar',
-    UNDO: 'Deshacer'
+    UNDO: 'Deshacer',
+    RESULTS: {
+      UPDATE_DONE: 'Actualización realizada correctamente'
+    }
   }
 };

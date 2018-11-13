@@ -62,17 +62,37 @@
           <div *ngFor="let item of settingsForm.get('productBonusConfigs')['controls']; let i = index;" fxFlex="100"
             formArrayName="productBonusConfigs">
             <div [ngClass]="{'border': alertBorderAtProductBonusConfig != i, 'red-border': alertBorderAtProductBonusConfig == i }"
-               [formGroupName]="i" fxFlex="100" fxLayout="row wrap">
+               [formGroupName]="i" fxFlex="100" fxLayout="row wrap" fxLayoutAlign="space-between stretch">
               <!-- TYPE -->
-              <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
+              <!-- <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
                 <input emiUpperCase matInput formControlName="type" placeholder="{{'SPENDING_RULE.TYPE' | translate}}">
+              </mat-form-field> -->
+              <mat-form-field *ngIf="typeAndConcepts" class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
+                <mat-select formControlName="type" placeholder="{{'SPENDING_RULE.TYPE' | translate}}">
+                  <mat-option *ngFor="let productType of typeAndConcepts" [value]="productType"
+                  (onSelectionChange)="updateProductBonusConfig(i)" >
+                    {{ 'WALLET.' + productType.type | translate}}
+                  </mat-option>
+                </mat-select>
               </mat-form-field>
+
               <!-- TYPE -->
 
               <!-- CONCEPT -->
-              <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
+              <!-- <mat-form-field class="pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
                 <input emiUpperCase matInput formControlName="concept" placeholder="{{'SPENDING_RULE.CONCEPT' | translate}}">
+              </mat-form-field> -->
+              <mat-form-field *ngIf="settingsForm.controls['productBonusConfigs']['controls'][i].controls.type.value"
+                class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
+                <mat-select formControlName="concept" placeholder="{{'SPENDING_RULE.CONCEPT' | translate}}">
+                  <mat-option *ngFor="let concept of settingsForm.controls['productBonusConfigs']['controls'][i].controls.type.value.concepts"
+                  [value]="concept"
+                  (onSelectionChange)="updateProductBonusConfig(i)" >
+                    {{ 'WALLET.' + concept | translate}}
+                  </mat-option>
+                </mat-select>
               </mat-form-field>
+
               <!-- CONCEPT -->
 
               <!-- BONUS TYPE -->
@@ -165,7 +185,7 @@
               <!-- COMPARATOR -->
               <mat-form-field class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="15">
                 <mat-select formControlName="comparator" placeholder="{{'SPENDING_RULE.COMPARATOR' | translate}}">
-                  <mat-option *ngFor="let comparator of ['LT', 'GT', 'LTE', 'GTE', 'ENOUGH']"
+                  <mat-option *ngFor="let comparator of ['LT', 'GT', 'LTE', 'GTE', 'ENOUGH', 'INS']"
                     [value]="comparator" class="center-text" >
                     {{ 'WALLET.' + comparator | translate}}
                   </mat-option>
@@ -174,7 +194,8 @@
               <!-- COMPARATOR -->
 
               <!-- VALUE -->
-              <mat-form-field *ngIf="settingsForm.get('autoPocketSelectionRules')['controls'][i]['value']['comparator'] != 'ENOUGH'"
+              <mat-form-field *ngIf="settingsForm.get('autoPocketSelectionRules')['controls'][i]['value']['comparator'] != 'ENOUGH'
+               && settingsForm.get('autoPocketSelectionRules')['controls'][i]['value']['comparator'] != 'INS' "
                 class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="15">
                 <input [myCurrencyFormatter]="'FIXED'" matInput formControlName="value" placeholder="{{'SPENDING_RULE.VALUE' | translate}}"
                   [value]="settingsForm.controls['autoPocketSelectionRules']['controls'][i].controls.value.value">

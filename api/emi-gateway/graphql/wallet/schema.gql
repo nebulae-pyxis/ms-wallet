@@ -166,6 +166,8 @@ enum ComparatorEnum {
   GTE
   "Enough"
   ENOUGH
+  "Insufficient"
+  INS
 }
 
 type WalletPocketSelectionRuleCondition {
