@@ -7,9 +7,10 @@ import { FuseWidgetModule } from '../../../core/components/widget/widget.module'
 import { WalletComponent } from './wallet-spending-rules.component';
 import { SpendingRuleComponent } from './spending-rule/spending-rule.component';
 import { WalletSpendingRuleService } from './wallet-spending-rules.service';
-import { MyCurrencyFormatterDirective } from './directives/currency.directive';
-import { MyCurrencyPipe } from './directives/currency.pipe';
-import { UpperCaseDirective } from './directives/upperCase.directive';
+import { MyCurrencyFormatterDirective } from '../shared/directives/currency.directive';
+import { UpperCaseDirective } from '../shared/directives/upperCase.directive';
+import { MyCurrencyPipe } from '../shared/directives/currency.pipe';
+
 
 const routes: Routes = [
   {

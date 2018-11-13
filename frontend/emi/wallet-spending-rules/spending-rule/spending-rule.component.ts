@@ -3,6 +3,7 @@ import { FuseTranslationLoaderService } from './../../../../core/services/transl
 import { WalletSpendingRuleService } from '../wallet-spending-rules.service';
 import { Component, OnDestroy, OnInit, Input } from '@angular/core';
 import { fuseAnimations } from '../../../../core/animations';
+import {MatSnackBar} from '@angular/material';
 import { Subscription } from 'rxjs/Subscription';
 // tslint:disable-next-line:import-blacklist
 import * as Rx from 'rxjs/Rx';
@@ -13,6 +14,8 @@ import { ObservableMedia } from '@angular/flex-layout';
 import { from } from 'rxjs';
 import { locale as english } from '../i18n/en';
 import { locale as spanish } from '../i18n/es';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { TranslateService } from '@ngx-translate/core';
 
 
 export interface SpendingRule {
@@ -54,6 +57,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   screenMode = 0;
   alertBorderAtProductBonusConfig: -1;
   alertBorderAtAutopocketSelectionRule: -1;
+  typeAndConcepts: {type: string, concepts: string[]}[];
 
   settingsForm: FormGroup = new FormGroup({
     businessId: new FormControl('', [Validators.required]),
@@ -68,6 +72,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private translationLoader: FuseTranslationLoaderService,
     private formBuilder: FormBuilder,
+    public snackBar: MatSnackBar,
     private observableMedia: ObservableMedia ) {
       this.translationLoader.loadTranslations(english, spanish);
       this.settingsForm.get('autoPocketSelectionRules').setValidators([ Validators.required, this.validateAllAutoPocketSelection.bind(this) ]);
@@ -77,6 +82,11 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+    this.walletSpendingRuleService.getTypeAndConcepts$()
+      .pipe(
+        tap(typeAndConcepts => this.typeAndConcepts = JSON.parse(JSON.stringify(typeAndConcepts)))
+      )
+      .subscribe(p => { }, e => console.log(e), () => console.log('Completed'));
 
     const grid = new Map([['xs', 1], ['sm', 2], ['md', 3], ['lg', 4], ['xl', 5]]);
     let start: number;
@@ -91,6 +101,9 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       .startWith(start)
       .subscribe((e: number) => { this.screenMode = e; }, err => console.log(err));
 
+
+
+
     this.route.params
     .pipe(
       filter(params => params['buId']),
@@ -102,13 +115,6 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     )
     .subscribe(p => {}, e => console.log(e), () => console.log('Completed'));
 
-    this.walletSpendingRuleService.getTypeAndConcepts$()
-    .pipe(
-      tap(r => console.log(r))
-    )
-    .subscribe(p => {}, e => console.log(e), () => console.log('Completed'));
-
-
   }
 
   /**
@@ -116,6 +122,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
    * @param businesId Business id to search its spending rule
    */
   loadSpendingRule$(spendingRule: any){
+    console.log('loadSpendingRule$(spendingRule: any)', spendingRule);
     return Rx.Observable.of(spendingRule)
     .pipe(
       mergeMap((spendingRuleItem: SpendingRule) => Rx.Observable.forkJoin(
@@ -142,6 +149,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         .pipe(
           filter(rule => (rule.productBonusConfigs != null) ),
           map(sr => sr.productBonusConfigs),
+          // tap(r => console.log('productBonusConfigs', r)),
           mergeMap(productRules =>
             from(productRules).pipe(
               tap(productRule =>  this.addProductSetting(productRule))
@@ -163,6 +171,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   }
 
   deleteControl(formType: string, index: number){
+    this.alertBorderAtAutopocketSelectionRule = this.alertBorderAtProductBonusConfig = -1;
     const formGroup = this.settingsForm.get(formType) as FormArray;
     formGroup.removeAt(index);
   }
@@ -189,6 +198,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   }
 
   createProductSetting(productConfig?: ProductConfigRule) {
+    console.log('createProductSetting(productConfig?: ProductConfigRule)', productConfig);
     if (!productConfig){
       productConfig = {
         type: '',
@@ -198,8 +208,9 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         bonusValueByCredit: 0
       };
     }
+    const productType = this.typeAndConcepts.filter(e => e.type.toUpperCase() === productConfig.type)[0];
     return this.formBuilder.group({
-      type: new FormControl( { value: productConfig.type, disabled: !this.currentVersion },
+      type: new FormControl( { value: productType, disabled: !this.currentVersion },
         [Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
       concept: new FormControl({ value: productConfig.concept, disabled: !this.currentVersion },
         [ Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
@@ -227,7 +238,8 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
 
   validatePercentages(): { [s: string]: boolean } {
     const reloaders = this.settingsForm.get('productBonusConfigs') as FormArray;
-    const index = reloaders.getRawValue().findIndex(e => ( e.bonusValueByBalance >= 100 || e.bonusValueByCredit >= 100 || ( e.comparator === 'ENOUGH' && !e.value  ) ));
+    const index = reloaders.getRawValue().findIndex(e =>
+      ((e.bonusValueByBalance >= 100 || e.bonusValueByCredit >= 100) && e.bonusType === 'PERCENTAGE') || (e.comparator === 'ENOUGH' && !e.value));
     return (index !== -1) ? { 'percentageExceeded': true } : null;
   }
 
@@ -245,14 +257,14 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
 
   validateValue(): { [s: string]: boolean } {
     const reloaders = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
-    const index = reloaders.getRawValue().findIndex(e => (e.comparator !== 'ENOUGH' && e.value == null ) );
+    const index = reloaders.getRawValue().findIndex(e => ( (e.comparator !== 'ENOUGH' || e.comparator !== 'INS' ) && e.value == null ) );
     return (index !== -1) ? { 'valueRequired': true } : null;
   }
 
   validateAll(): { [s: string]: boolean } {
     let error = null;
     let controls = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
-    let index = controls.getRawValue().findIndex(e => (e.comparator !== 'ENOUGH' && e.value == null ) );
+    let index = controls.getRawValue().findIndex(e => ((e.comparator !== 'ENOUGH' || e.comparator !== 'INS' ) && e.value == null ) );
     error = (index !== -1) ? { 'valueRequired': true } : null;
     if (error){ return error; }
     controls = this.settingsForm.get('productBonusConfigs') as FormArray;
@@ -262,6 +274,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   }
 
   saveSpendingRule() {
+    console.log('saveSpendingRule()');
     Rx.Observable.of(this.settingsForm.getRawValue())
       .pipe(map(
         ({
@@ -275,7 +288,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
           productBonusConfigs: productBonusConfigs.reduce(
             (acc, p) => {
               acc.push({
-                type: p.type.toUpperCase(),
+                type: p.type.type.toUpperCase(),
                 concept: p.concept.toUpperCase(),
                 bonusType: p.bonusType,
                 bonusValueByBalance: p.bonusValueByBalance,
@@ -302,8 +315,18 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
           )
         })
       ),
+        tap(r => console.log(r) ),
         tap((sr: SpendingRule) => this.selectedSpendingRule = {...this.selectedSpendingRule, ... sr}),
-        mergeMap(spendingRuleUpdate => this.walletSpendingRuleService.updateSpendingRule$(spendingRuleUpdate))
+        mergeMap(spendingRuleUpdate => this.walletSpendingRuleService.updateSpendingRule$(spendingRuleUpdate)),
+        tap(result => {
+          console.log(result);
+          if (!result.erros) {
+            this.snackBar.open( this.translationLoader.getTranslate().instant('RESULTS.UPDATE_DONE') , '', {
+              duration: 3000,
+            });
+          }
+
+        })
       )
       .subscribe(r => {}, e => console.log(), () => {});
   }
