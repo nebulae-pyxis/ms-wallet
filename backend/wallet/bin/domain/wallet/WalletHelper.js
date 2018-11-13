@@ -110,13 +110,12 @@ class WalletHelper {
    * @return {Observable}
    */
   static changeWalletSpendingState$(businessId, newSpendingState){
-    // console.log("changeWalletSpendingState$");
     return of({businessId, newSpendingState})
     .pipe(
       //Updates the wallet spending state
       mergeMap(({businessId, newSpendingState}) => WalletDA.updateWalletSpendingState$(businessId, newSpendingState)),
       //Takes the updated wallet data
-      map(updateOperation => updateOperation.value),
+      //map(updateOperation => updateOperation.value),
       //Throws a wallet spending alarm according to the business spending state
       mergeMap(wallet => this.throwAlarm$(wallet))
     );

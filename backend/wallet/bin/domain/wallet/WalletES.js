@@ -39,8 +39,6 @@ class WalletES {
       }),
       // Create a new wallet fro the business created
       mergeMap(wallet => WalletDA.createWallet$(wallet)),
-      //Takes the document inserted
-      map(operationResult => operationResult.ops[0]),
       //Throws a wallet spending alarm according to the wallet spending state
       mergeMap(wallet => WalletHelper.throwAlarm$(wallet))
     )
@@ -289,23 +287,25 @@ class WalletES {
    * @param {*} walletDepositCommitedEvent 
    */
   handleWalletDepositCommited$(walletDepositCommitedEvent){
-    // console.log('handleWalletDepositCommited => ', walletDepositCommitedEvent);
+    console.log('handleWalletDepositCommited => ', walletDepositCommitedEvent);
     return of(walletDepositCommitedEvent)
     .pipe(
       //Create wallet execute transaction
       map(({data, user}) => {
         const uuId = Crosscutting.generateHistoricalUuid(new Date());
-        const transactions = {
+        const transaction = {
             id: uuId,
             pocket: 'BALANCE',
-            value: data.input.value,
-            notes: data.input.notes,            
+            value: data.value,
+            notes: data.notes,
+            location: data.location,            
             user
         };
-        return this.createWalletTransactionExecuted(data.input.businessId, 'BALANCE_ADJUSTMENT', 'PAYMENT', transactions);
+        return this.createWalletTransactionExecuted(data.businessId, data.type, data.concept, transaction);
       }),
       //Get wallet of the implied business
-      mergeMap(walletTransactionExecuted => WalletDA.getWallet$(walletTransactionExecuted.businessId).pipe(map(wallet => [wallet, walletTransactionExecuted]))),
+      mergeMap(walletTransactionExecuted => WalletDA.getWallet$(walletTransactionExecuted.businessId)
+      .pipe(map(wallet => [wallet, walletTransactionExecuted]))),
       //Emit the wallet transaction executed
       mergeMap(([wallet, walletTransactionExecuted]) => {           
         return eventSourcing.eventStore.emitEvent$(

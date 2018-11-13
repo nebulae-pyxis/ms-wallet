@@ -10,6 +10,8 @@ export const locale = {
       DEBIT: 'Debit',
       SELECT_AGENT: 'Select business:',
       MAX_CHARACTER_NOTES: 'Max 200 characters',
+      MIN_VALUE_REQUIRED: 'The value must be a value greater than zero.',
+      MAX_VALUE_REQUIRED: 'The value should not exceed 20,000,000.',
       VALUE_REQUIRED: 'Value required',
       NOTES_REQUIRED: 'Notes required',
       BUSINESS_REQUIRED: 'You should select the agent to which you want to make a manual balance adjustment.',
@@ -56,7 +58,13 @@ export const locale = {
       NONE: 'None',
       ASSOCIATED_TRANSACTIONS: 'Assocated transactions',
       TRANSACTION: 'Transaction ',
-      WALLET: 'Wallet'
+      WALLET: 'Wallet',
+      EXECUTED_OPERATION: 'The operation was executed correctly.',
+      CLOSE: 'Close',
+      MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE: "Are you sure you want to perform the operation?",
+      MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE: "Manual balance adjustment",
+      OK: 'Accept',
+      CANCEL: 'Cancel'
     }
   }
 };

@@ -80,7 +80,10 @@
                 "default" : false
             }            
         ],
-        "preBuildCommands": [],
+        "preBuildCommands": [
+            "npm install @coachcare/datepicker --save",
+            "npm install moment-timezome --save"
+        ],
         "environmentVars": {
         }
     }
