@@ -110,11 +110,18 @@ input ManualBalanceAdjustmentInput {
   "Value"
   value: Float!
   "Adjustment type"
-  adjustmentType: String!  
+  adjustmentType: AdjustmentType!  
   "Notes"
   notes: String!
   "Location"
   location: LocationInput
+}
+
+enum AdjustmentType {
+  "Credit adjustment"
+  CREDIT
+  "Debit adjustment"
+  DEBIT
 }
 
 input LocationInput {

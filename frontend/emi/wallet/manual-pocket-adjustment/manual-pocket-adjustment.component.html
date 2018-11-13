@@ -37,13 +37,18 @@
 
           <div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
 
-            <form name="manualBalanceAdjustmentsForm" [formGroup]="manualBalanceAdjustmentsForm" class="user w-100-p" fxLayout="column" class="mat-white-bg mat-elevation-z4 p-24 mr-24 mb-24">
+            <form name="manualBalanceAdjustmentsForm" [formGroup]="manualBalanceAdjustmentsForm" class="user w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
 
               <mat-form-field class="w-100-p">
-                <input matInput name="value" type="number" formControlName="value" placeholder="{{'WALLET.VALUE' | translate}}">
-                <span matPrefix>$&nbsp;</span>
+                <input matInput name="value" [myCurrencyFormatter]="'FIXED'" formControlName="value" placeholder="{{'WALLET.VALUE' | translate}}">
                 <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('required', ['value'])">
                   {{'WALLET.VALUE_REQUIRED' | translate}}
+                </mat-error>
+                <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('min', ['value'])">
+                  {{'WALLET.MIN_VALUE_REQUIRED' | translate}}
+                </mat-error>
+                <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('max', ['value'])">
+                  {{'WALLET.MAX_VALUE_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
 
@@ -70,8 +75,8 @@
               </mat-form-field>
 
               <div class="mt-16" fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="5px">
-                <button mat-raised-button (click)="makeManualBalanceAdjustment('ACCREDIT')" 
-                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.ACCREDIT' | translate}}</button>
+                <button mat-raised-button (click)="makeManualBalanceAdjustment('CREDIT')" 
+                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.CREDIT' | translate}}</button>
 
                 <button mat-raised-button (click)="makeManualBalanceAdjustment('DEBIT')" 
                 [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.DEBIT' | translate}}</button>

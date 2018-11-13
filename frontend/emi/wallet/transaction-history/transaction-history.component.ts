@@ -569,6 +569,7 @@ displayFn(business) {
    * @param response
    */
   showSnackBarError(response) {
+    console.log('showSnackBarError => ', response);
     if (response.errors) {
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {

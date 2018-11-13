@@ -12,6 +12,7 @@ import { FormBuilder, FormGroup, FormControl, Validators } from "@angular/forms"
 
 //////////// ANGULAR MATERIAL ///////////
 import {
+  MatDialog,
   MatSnackBar
 } from "@angular/material";
 
@@ -20,6 +21,9 @@ import { FuseTranslationLoaderService } from "../../../../core/services/translat
 import { TranslateService } from "@ngx-translate/core";
 import { locale as english } from "../i18n/en";
 import { locale as spanish } from "../i18n/es";
+
+////////// COMPONENTS /////////
+import { DialogComponent } from "../dialog/dialog.component";
 
 @Component({
   selector: 'app-manual-pocket-adjustment',
@@ -37,6 +41,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
   constructor(
     private walletService: WalletService,
     private manualPocketAdjustmentService: ManualPocketAdjustmentService,
+    private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private formBuilder: FormBuilder,
     private translationLoader: FuseTranslationLoaderService,
@@ -109,7 +114,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
    * @param business Business to query the info
    */
   getWallet$(business){
-    return this.walletService.getWallet$(business)
+    return this.walletService.getWallet$(business._id)
     .pipe(
       map((wallet: any)=> {
         return {
@@ -131,8 +136,8 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
    */
   createManualBalanceAdjustmentForm() {
     return this.formBuilder.group({
-      value: new FormControl(null, Validators.required),
-      notes: new FormControl(null, Validators.required),
+      value: new FormControl(null, [Validators.required, Validators.min(1)]),
+      notes: new FormControl(null, [Validators.required, , Validators.min(20000000)]),
       business: new FormControl(null, Validators.required),
       //adjustmentDate: new FormControl(null, Validators.required)
     });
@@ -144,28 +149,57 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
    * @param adjustmentType Indicates if the adjustment type is 'ACCREDIT' or 'DEBIT'
    */
   makeManualBalanceAdjustment(adjustmentType: String){
-    const data = this.manualBalanceAdjustmentsForm.getRawValue();
-
-    const manualBalanceAdjustment = {
-      adjustmentType,
-      businessId: data.business._id,
-      value: data.value,
-      notes: data.notes
-    };
-
-    this.manualPocketAdjustmentService.makeManualBalanceAdjustment$(manualBalanceAdjustment)
+    this.dialog
+    //Opens confirm dialog
+    .open(DialogComponent, {
+      data: {
+        dialogMessage: "WALLET.MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE",
+        dialogTitle: "WALLET.MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE"
+      }
+    })
+    .afterClosed()
     .pipe(
+      filter(accepted => accepted),
+      map(accepted => {
+        const data = this.manualBalanceAdjustmentsForm.getRawValue();
+        const manualBalanceAdjustment = {
+          adjustmentType,
+          businessId: data.business._id,
+          value: data.value,
+          notes: data.notes
+        };
+        return manualBalanceAdjustment;
+      }),
+      mergeMap(manualBalanceAdjustment => this.manualPocketAdjustmentService.makeManualBalanceAdjustment$(manualBalanceAdjustment)),
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter((resp: any) => !resp.errors || resp.errors.length === 0)
-    )
-    .subscribe(res => {
-      this.snackBar.open("La operación fue ejecutada correctamente", "Cerrar", {
+    ).subscribe(res => {
+      this.snackBar.open(this.translationLoader.getTranslate().instant('WALLET.EXECUTED_OPERATION'), 
+      this.translationLoader.getTranslate().instant('WALLET.CLOSE'), {
         duration: 2000
       });
     },
     error => {
       console.log("Error realizando operación ==> ", error);
     })
+
+
+    
+
+    // this.manualPocketAdjustmentService.makeManualBalanceAdjustment$(manualBalanceAdjustment)
+    // .pipe(
+    //   mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+    //   filter((resp: any) => !resp.errors || resp.errors.length === 0)
+    // )
+    // .subscribe(res => {
+    //   this.snackBar.open(this.translationLoader.getTranslate().instant('WALLET.EXECUTED_OPERATION'), 
+    //   this.translationLoader.getTranslate().instant('WALLET.CLOSE'), {
+    //     duration: 2000
+    //   });
+    // },
+    // error => {
+    //   console.log("Error realizando operación ==> ", error);
+    // })
 
   }
 

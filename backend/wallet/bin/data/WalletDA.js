@@ -63,7 +63,16 @@ class WalletDA {
           }
         };
         return collection.insertOne(walletData);
-      }))
+      })),
+      map(result => result.ops[0]),
+      map(wallet => {
+        return ({...wallet, 
+          pockets:{ 
+            balance: parseFloat(new NumberDecimal(wallet.pockets.balance.bytes).toString()),
+            bonus: parseFloat(new NumberDecimal(wallet.pockets.bonus.bytes).toString()) 
+          } 
+        });
+      })
     );
   }
 
@@ -123,7 +132,7 @@ class WalletDA {
    * @param {*} newSpendingState new spending state (ALLOWED, FORBIDDEN)
    */
   static updateWalletSpendingState$(businessId, newSpendingState) {
-    // console.log("updateWalletSpendingState$ ==> ", businessId, newSpendingState);
+    console.log("updateWalletSpendingState$ ==> ", businessId, newSpendingState);
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return of({businessId, newSpendingState})
     .pipe(
@@ -134,7 +143,18 @@ class WalletDA {
           }
         };
         return collection.findOneAndUpdate({ businessId }, updateQuery, {returnOriginal: false});
-      }))
+      })),
+      map(updateOperation => updateOperation.value),
+      map(wallet => {
+        console.log('updateWalletSpendingState => ', updateWalletSpendingState);
+
+        return ({...wallet, 
+          pockets:{ 
+            balance: parseFloat(new NumberDecimal(wallet.pockets.balance.bytes).toString()),
+            bonus: parseFloat(new NumberDecimal(wallet.pockets.bonus.bytes).toString()) 
+          } 
+        });
+      })
     );
   }
 }

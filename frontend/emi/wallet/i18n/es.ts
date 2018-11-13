@@ -7,9 +7,11 @@ export const locale = {
       VALUE: 'Valor',
       NOTES: 'Notas',
       ACCREDIT: 'Acreditar',
-      DEBIT: 'Debitar',
+      DEBIT: 'Débito',
       SELECT_AGENT: 'Seleccione negocio:',
       MAX_CHARACTER_NOTES: 'Máximo 200 caracteres',
+      MIN_VALUE_REQUIRED: 'El valor debe ser un valor mayor a cero.',
+      MAX_VALUE_REQUIRED: 'El valor no debe superar los 20.000.000',
       VALUE_REQUIRED: 'Valor requerido',
       NOTES_REQUIRED: 'Notas requeridas',
       BUSINESS_REQUIRED: 'Debe seleccionar el agente al cual desea aplicar el ajuste de saldo',
@@ -56,7 +58,13 @@ export const locale = {
       NONE: 'Ninguno',
       ASSOCIATED_TRANSACTIONS: 'Transacciones asociadas',
       TRANSACTION: 'Transacción ',
-      WALLET: 'Billetero'
+      WALLET: 'Billetero',
+      EXECUTED_OPERATION: 'La operación fue ejecutada correctamente.',
+      CLOSE: 'Cerrar',
+      MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE: "¿Estás seguro que desea realizar la operación?",
+      MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE: "Ajuste manual de saldo",
+      OK: 'Aceptar',
+      CANCEL: 'Cancelar'
     }
   }
 };

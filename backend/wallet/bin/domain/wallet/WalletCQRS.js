@@ -147,6 +147,8 @@ class WalletCQRS {
   makeManualBalanceAdjustment$(data, authToken) {
     const manualBalanceAdjustment = !data.args ? undefined : data.args.input;
     manualBalanceAdjustment._id = uuidv4();
+    manualBalanceAdjustment.type = 'MOVEMENT';
+    manualBalanceAdjustment.concept = manualBalanceAdjustment.adjustmentType;
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "wallet",
