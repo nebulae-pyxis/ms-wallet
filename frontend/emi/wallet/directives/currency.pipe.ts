@@ -3,7 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 const PADDING = '000000';
 
 @Pipe({ name: 'myCurrency' })
-export class MyCurrencyPipe implements PipeTransform {
+export class CurrencyPipe implements PipeTransform {
 
   private DECIMAL_SEPARATOR: string;
   private THOUSANDS_SEPARATOR: string;

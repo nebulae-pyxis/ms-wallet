@@ -7,9 +7,9 @@ import { FuseWidgetModule } from '../../../core/components/widget/widget.module'
 import { WalletComponent } from './wallet-spending-rules.component';
 import { SpendingRuleComponent } from './spending-rule/spending-rule.component';
 import { WalletSpendingRuleService } from './wallet-spending-rules.service';
-import { MyCurrencyFormatterDirective } from '../shared/directives/currency.directive';
-import { UpperCaseDirective } from '../shared/directives/upperCase.directive';
-import { MyCurrencyPipe } from '../shared/directives/currency.pipe';
+import { CurrencyAndPercentageDirective } from './directives/currency.directive';
+import { UpperCaseDirective } from './directives/upperCase.directive';
+import { CurrencyAndPercentagePipe } from './directives/currency.pipe';
 
 
 const routes: Routes = [
@@ -30,9 +30,9 @@ const routes: Routes = [
     FuseWidgetModule
   ],
   declarations: [
-    WalletComponent, SpendingRuleComponent, MyCurrencyFormatterDirective, UpperCaseDirective
+    WalletComponent, SpendingRuleComponent, CurrencyAndPercentageDirective, UpperCaseDirective
   ],
-  providers: [ WalletSpendingRuleService, DatePipe, MyCurrencyPipe]
+  providers: [ WalletSpendingRuleService, DatePipe, CurrencyAndPercentagePipe]
 })
 
 export class WalletSpengingRulesModule {}

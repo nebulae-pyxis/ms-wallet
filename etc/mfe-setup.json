@@ -82,7 +82,7 @@
         ],
         "preBuildCommands": [
             "npm install @coachcare/datepicker --save",
-            "npm install moment-timezome --save"
+            "npm install moment-timezone --save"
         ],
         "environmentVars": {
         }

@@ -14,7 +14,7 @@ import { ManualPocketAdjustmentComponent } from './manual-pocket-adjustment/manu
 import { TransactionHistoryDetailComponent } from './transaction-history-detail/transaction-history-detail.component';
 import { DialogComponent } from './dialog/dialog.component';
 import { CurrencyFormatterDirective } from './directives/currencyFormatter.directive';
-import { MyCurrencyPipe } from './directives/currency.pipe';
+import { CurrencyPipe } from './directives/currency.pipe';
 
 const routes: Routes = [
   {
@@ -46,7 +46,7 @@ const routes: Routes = [
     DialogComponent
   ],
   entryComponents: [DialogComponent],
-  providers: [ WalletService, DatePipe, ManualPocketAdjustmentService, TransactionHistoryService, TransactionHistoryDetailService, MyCurrencyPipe]
+  providers: [ WalletService, DatePipe, ManualPocketAdjustmentService, TransactionHistoryService, TransactionHistoryDetailService, CurrencyPipe]
 })
 
 export class walletModule {}

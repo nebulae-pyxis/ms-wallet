@@ -1,9 +1,9 @@
 import { Directive, HostListener, ElementRef, OnInit, Input } from '@angular/core';
-import { MyCurrencyPipe } from './currency.pipe';
+import { CurrencyAndPercentagePipe } from './currency.pipe';
 
 // tslint:disable-next-line:directive-selector
 @Directive({ selector: '[myCurrencyFormatter]' })
-export class MyCurrencyFormatterDirective implements OnInit {
+export class CurrencyAndPercentageDirective implements OnInit {
 
   @Input() myCurrencyFormatter: string;
 
@@ -11,7 +11,7 @@ export class MyCurrencyFormatterDirective implements OnInit {
 
   constructor(
     private elementRef: ElementRef,
-    private currencyPipe: MyCurrencyPipe
+    private currencyPipe: CurrencyAndPercentagePipe
   ) {
     this.el = this.elementRef.nativeElement;
   }
