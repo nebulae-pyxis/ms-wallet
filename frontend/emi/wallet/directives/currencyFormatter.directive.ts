@@ -17,7 +17,7 @@ export class CurrencyFormatterDirective implements OnInit {
   }
 
   ngOnInit() {
-    this.el.value = this.currencyPipe.transform(this.el.value, 2, this.CurrencyFormatter);
+    this.el.value = this.currencyPipe.transform(this.el.value, 2, this.currencyFormatter);
   }
 
   @HostListener('input', ['$event']) onInput(event) {
@@ -26,12 +26,12 @@ export class CurrencyFormatterDirective implements OnInit {
 
   @HostListener('focus', ['$event.target.value'])
   onFocus(value) {
-    this.el.value = this.currencyPipe.parse(value, 2,  this.CurrencyFormatter); // opossite of transform
+    this.el.value = this.currencyPipe.parse(value, 2,  this.currencyFormatter); // opossite of transform
   }
 
   @HostListener('blur', ['$event.target.value'])
   onBlur(value) {
-    this.el.value = this.currencyPipe.transform(value, 2, this.CurrencyFormatter);
+    this.el.value = this.currencyPipe.transform(value, 2, this.currencyFormatter);
   }
 
 

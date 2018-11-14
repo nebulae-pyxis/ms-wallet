@@ -20,6 +20,7 @@ export class MyCurrencyPipe implements PipeTransform {
       ? this.DECIMAL_SEPARATOR + (fraction + PADDING).substring(0, fractionSize)
       : '';
     integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, this.THOUSANDS_SEPARATOR);
+    console.log('transform => type ', type);
     return (type === 'FIXED')
       ? '$ ' + integer + fraction
       : integer + fraction + ' %';

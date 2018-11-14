@@ -13,8 +13,8 @@ import { TransactionHistoryComponent } from './transaction-history/transaction-h
 import { ManualPocketAdjustmentComponent } from './manual-pocket-adjustment/manual-pocket-adjustment.component';
 import { TransactionHistoryDetailComponent } from './transaction-history-detail/transaction-history-detail.component';
 import { DialogComponent } from './dialog/dialog.component';
-import { CurrencyFormatterDirective } from '../shared/directives/currencyFormatter.directive';
-import { MyCurrencyPipe } from '../shared/directives/currency.pipe';
+import { CurrencyFormatterDirective } from './directives/currencyFormatter.directive';
+import { MyCurrencyPipe } from './directives/currency.pipe';
 
 const routes: Routes = [
   {
