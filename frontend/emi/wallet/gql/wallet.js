@@ -81,6 +81,12 @@ export const getWalletTransactionsHistory = gql`
   }
 `;
 
+export const getWalletTransactionsHistoryAmount = gql`
+  query getWalletTransactionsHistoryAmount($filterInput: FilterInput!) {
+    getWalletTransactionsHistoryAmount(filterInput: $filterInput)
+  }
+`;
+
 export const getWalletTransactionsHistoryById = gql`
   query getWalletTransactionsHistoryById($id: ID!) {
     getWalletTransactionsHistoryById(id: $id) {

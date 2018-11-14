@@ -239,6 +239,8 @@ type Query {
   getWallet(businessId: String!): Wallet
   "Get the transactions history according to the filter and the pagination"
   getWalletTransactionsHistory(filterInput: FilterInput!, paginationInput: PaginationInput!): [WalletTransaction]
+  "Get the amount of transactions according to the filter"
+  getWalletTransactionsHistoryAmount(filterInput: FilterInput!): Int!
   "Get a transaction history by id"
   getWalletTransactionsHistoryById(id: ID!): WalletTransaction
   "Get a transaction history by id"

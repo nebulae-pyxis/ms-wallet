@@ -146,7 +146,11 @@ class EventStoreService {
       WalletTransactionExecuted: {
         fn: wallet.eventSourcing.handleWalletTransactionExecuted$,
         obj: wallet.eventSourcing
-      }
+      },
+      CreateIndexesWalletTriggered: { 
+        fn: wallet.eventSourcing.createIndexesWallet$, 
+        obj: wallet.eventSourcing 
+      },
     };
   }
 
@@ -178,6 +182,10 @@ class EventStoreService {
       {
         aggregateType: "Wallet",
         eventType: "WalletTransactionExecuted"
+      },
+      {
+        aggregateType: "Cronjob",
+        eventType: "CreateIndexesWalletTriggered"
       }
     ]
   }

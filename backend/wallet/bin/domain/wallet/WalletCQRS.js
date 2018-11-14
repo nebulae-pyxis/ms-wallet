@@ -82,6 +82,37 @@ class WalletCQRS {
   }
 
       /**
+   * Gets the amount of wallet transaction history of a business
+   *
+   * @param {*} args args
+   */
+  getWalletTransactionsHistoryAmount$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "WALLET",
+      "getWalletTransactionHistory",
+      PERMISSION_DENIED_ERROR,
+      ["SYSADMIN", "business-owner"]
+    ).pipe(
+      mergeMap(roles => {
+        const isSysAdmin = roles.SYSADMIN;
+        //If an user does not have the role to get the transaction history from other business, we must return an error
+          if (!isSysAdmin && authToken.businessId != args.businessId) {
+            return this.createCustomError$(
+              PERMISSION_DENIED_ERROR,
+              method
+            );
+          }
+          return of(roles);
+      }),
+      mergeMap(val => WalletTransactionDA.getTransactionsHistoryAmount$(args.filterInput)),
+      toArray(),
+      mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+      catchError(err => this.handleError$(err))
+    );
+  }
+
+      /**
    * Gets the wallet transaction history of a business
    *
    * @param {*} args args

@@ -7,6 +7,7 @@ import { GatewayService } from "../../../../api/gateway.service";
 import * as moment from "moment";
 import {
   getWalletTransactionsHistory,
+  getWalletTransactionsHistoryAmount,
   getTypesAndConcepts
 } from "../gql/wallet";
 
@@ -84,6 +85,23 @@ export class TransactionHistoryService {
       variables: {
         filterInput: filterInput,
         paginationInput: paginationInput
+      },
+      fetchPolicy: "network-only",
+      errorPolicy: "all"
+    });
+  }
+
+    /**
+   * Gets the transactions history amount according to the filter data.
+   *    
+   * @param filterInput 
+   * @returns {Observable}
+   */
+  getTransactionsHistoryAmount$(filterInput) {
+    return this.gateway.apollo.query<any>({
+      query: getWalletTransactionsHistoryAmount,
+      variables: {
+        filterInput: filterInput
       },
       fetchPolicy: "network-only",
       errorPolicy: "all"

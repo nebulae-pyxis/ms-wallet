@@ -73,6 +73,27 @@ module.exports = {
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
     },
+    getWalletTransactionsHistoryAmount(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        CONTEXT_NAME,
+        "getWalletTransactionsHistoryAmount",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["SYSADMIN", "business-owner"]
+      )
+        .mergeMap(response => {
+          return broker.forwardAndGetReply$(
+            "Wallet",
+            "emigateway.graphql.query.getWalletTransactionsHistoryAmount",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "getWalletTransactionsHistoryAmount"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
     getWalletTransactionsHistoryById(root, args, context) {
       console.log('getWalletTransactionsHistoryById *** ', args);
       return RoleValidator.checkPermissions$(

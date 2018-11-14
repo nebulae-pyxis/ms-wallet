@@ -10,6 +10,7 @@ const [ BALANCE_POCKET, BONUS_POCKET ]  = [ 'BALANCE', 'BONUS' ];
 const Crosscutting = require("../../tools/Crosscutting");
 const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
+const mongoDB = require('../../data/MongoDB').singleton();
 
 let instance;
 
@@ -388,6 +389,25 @@ class WalletES {
       catchError(error => {
         console.log(`An error was generated while a walletTransactionExecuted was being processed: ${error.stack}`);
         return this.errorHandler$(walletTransactionExecuted, error.stack, 'walletTransactionExecuted');
+      })
+    );
+  }
+
+/**
+ * Creates the indexes for the tables history
+ * @param {*} indexesWallet 
+ */
+  createIndexesWallet$(indexesWallet){
+    const indexes = [{
+      collection: 'TransactionsHistory_', 
+      fields: {type: 1, concept: 1, timestamp: 1, 'terminal.id': 1, 'terminal.userId': 1, 'terminal.username': 1}
+    }];
+    return from(indexes)
+    .pipe(
+      //Get the business implied in the transactions
+      mergeMap(index =>  {
+        index.collection = index.collection+Crosscutting.getMonthYear(new Date());
+        return mongoDB.createIndexBackground$(index);
       })
     );
   }

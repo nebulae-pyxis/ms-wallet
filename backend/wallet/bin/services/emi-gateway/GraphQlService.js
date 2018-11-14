@@ -169,6 +169,10 @@ class GraphQlService {
       {
         aggregateType: "Wallet",
         messageType: "emigateway.graphql.query.getWalletTransactionsHistory"
+      },      
+      {
+        aggregateType: "Wallet",
+        messageType: "emigateway.graphql.query.getWalletTransactionsHistoryAmount"
       },
       {
         aggregateType: "Wallet",
@@ -231,6 +235,10 @@ class GraphQlService {
       },
       "emigateway.graphql.query.getWalletTransactionsHistory": {
         fn: wallet.cqrs.getWalletTransactionHistory$,
+        obj: wallet.cqrs
+      },
+      "emigateway.graphql.query.getWalletTransactionsHistoryAmount": {
+        fn: wallet.cqrs.getWalletTransactionsHistoryAmount$,
         obj: wallet.cqrs
       },
       "emigateway.graphql.query.getWalletTransactionsHistoryById": {

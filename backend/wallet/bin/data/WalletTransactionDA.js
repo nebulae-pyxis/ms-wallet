@@ -152,6 +152,63 @@ class WalletTransactionDA {
     });
   }
 
+  /**
+ * Gets the amount of transactions history from a business according to the filters.
+ * 
+ * @param {*} filter Filter data
+ * @param {*} filter.businessId ID of the business to filter
+ * @param {*} filter.initDate start date range 
+ * @param {*} filter.endDate End date range 
+ * @param {*} filter.transactionType Transaction type filter
+ * @param {*} filter.transactionConcept Transaction concept filter
+ * @param {*} filter.terminal Terminal object
+ * @param {*} filter.terminal.id Id of the terminal to filter
+ * @param {*} filter.terminal.userId Id of the terminal user to filter
+ * @param {*} filter.terminal.username username of the terminal user to filter
+ */
+static getTransactionsHistoryAmount$(filter) {
+  console.log('getTransactionsHistoryAmount => ', filter);
+
+    const initDateFormat = new Date(filter.initDate);
+    const monthYear = Crosscutting.getMonthYear(initDateFormat);
+    const collection = mongoDB.db.collection(`${COLLECTION_NAME}${monthYear}`);
+    const query = {
+      businessId: filter.businessId,
+    };
+
+    if(filter.initDate){
+      query.timestamp = query.timestamp || {};
+      query.timestamp['$gte'] = filter.initDate;
+    }
+
+    if(filter.endDate){
+      query.timestamp = query.timestamp || {};
+      query.timestamp['$lt'] = filter.endDate;
+    }
+
+    if(filter.terminal && filter.terminal.id){
+      query['terminal.id'] = filter.terminal.id;
+    }
+
+    if(filter.terminal && filter.terminal.userId){
+      query['terminal.userId'] = filter.terminal.userId;
+    }
+
+    if(filter.terminal && filter.terminal.username){
+      query['terminal.username'] = filter.terminal.username;
+    }
+
+    if(filter.transactionType){
+      query.type = filter.transactionType;
+    }
+
+    if(filter.transactionConcept){
+      query.concept = filter.transactionConcept;
+    }
+
+    return collection.count(query);
+}
+
 
     /**
    * Extracts the next value from a mongo cursor if available, returns undefined otherwise

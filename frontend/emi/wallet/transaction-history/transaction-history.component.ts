@@ -401,7 +401,7 @@ displayFn(business) {
           console.log('refreshTable => ', ([filterAndPagination, selectedBusiness]));
           return filterAndPagination != null && selectedBusiness != null;
         }),
-        mergeMap(([filterAndPagination, selectedBusiness]) => {
+        map(([filterAndPagination, selectedBusiness]) => {
           console.log("[1filterAndPagination, selectedBusiness] => ", [
             filterAndPagination,
             selectedBusiness
@@ -420,18 +420,32 @@ displayFn(business) {
 
           const paginationInput = filterAndPagination.pagination;
           console.log('filterInput => ', filterInput);
-          return this.transactionHistoryService.getTransactionsHistory$(
-            filterInput,
-            paginationInput
-          );
+          return [filterInput, paginationInput];
+          // return this.transactionHistoryService.getTransactionsHistory$(
+          //   filterInput,
+          //   paginationInput
+          // );
         }),
-        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        mergeMap(([filterInput, paginationInput]) => {
+          return forkJoin(
+            this.transactionHistoryService.getTransactionsHistory$(filterInput,paginationInput)
+            .pipe(
+              mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp))
+            ),
+            this.transactionHistoryService.getTransactionsHistoryAmount$(filterInput)
+            .pipe(
+              mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp))
+            ),
+          )
+        }),
+        //filter((resp: any) => !resp.errors || resp.errors.length === 0),
         takeUntil(this.ngUnsubscribe)
       )
-      .subscribe(transactionsHistory => {
+      .subscribe(([transactionsHistory, transactionsHistoryAmount]) => {
+        console.log('transactionsHistoryAmount => ', transactionsHistoryAmount);
         this.dataSource.data =
           transactionsHistory.data.getWalletTransactionsHistory;
+          this.tableSize = transactionsHistoryAmount.data.getWalletTransactionsHistoryAmount;
       });
   }
 
@@ -569,7 +583,6 @@ displayFn(business) {
    * @param response
    */
   showSnackBarError(response) {
-    console.log('showSnackBarError => ', response);
     if (response.errors) {
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {

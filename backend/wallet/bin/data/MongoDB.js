@@ -63,6 +63,17 @@ class MongoDB {
     }
 
     /**
+     * Creates an index in the background
+     * @param {*} indexData 
+     */
+    createIndexBackground$(indexData){
+        return Rx.Observable.of(indexData)
+        .mergeMap(index => {
+            this.db.collection(index.collection).createIndex(index.fields, {background: true})
+        });
+    }
+
+    /**
    * Drop current DB
    */
   dropDB$() {
