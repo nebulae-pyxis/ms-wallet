@@ -72,10 +72,8 @@ export const getWalletTransactionsHistory = gql`
         username
       }
       location {
-        geojson {
-          type
-          coordinates
-        }
+        type
+        coordinates
       }
     }
   }

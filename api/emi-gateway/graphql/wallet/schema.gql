@@ -54,14 +54,8 @@ type WalletTransaction {
   associatedTransactiondIds: [String]
 }
 
-"Location with GeoJson format"
-type Location {
-  "Geojson"
-  geojson: GeoJson!
-}
-
 "GeoJSON format"
-type GeoJson {
+type Location {
   "Geojson type E.g: Point, LineString"
   type: String!
   "Geojson coordinates"

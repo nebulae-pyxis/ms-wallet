@@ -94,6 +94,11 @@
                       <span class="value">{{selectedTransactionHistory.user}}</span>
                   </div>
 
+                  <div class="form-field" fxLayout="row" fxLayoutAlign="start center" *ngIf="selectedTransactionHistory.notes">
+                    <span class="title">{{'WALLET.TRANSACTION_NOTES' | translate}}:</span>
+                    <span class="value">{{selectedTransactionHistory.notes}}</span>
+                </div>
+
 
                 </div>
 

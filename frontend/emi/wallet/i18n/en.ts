@@ -36,6 +36,7 @@ export const locale = {
       TRANSACTION_TERMINAL_USER_ID: 'User ID',
       TRANSACTION_TERMINAL_USERNAME: 'Terminal username',
       TRANSACTION_TIMESTAMP: 'Date',
+      TRANSACTION_NOTES: 'Notes',
       TRANSACTION_ID: 'Transaction ID',
       BALANCE: 'Balance',
       BONUS: 'Bonus',

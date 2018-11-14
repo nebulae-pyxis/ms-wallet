@@ -132,7 +132,6 @@ class WalletDA {
    * @param {*} newSpendingState new spending state (ALLOWED, FORBIDDEN)
    */
   static updateWalletSpendingState$(businessId, newSpendingState) {
-    console.log("updateWalletSpendingState$ ==> ", businessId, newSpendingState);
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return of({businessId, newSpendingState})
     .pipe(
@@ -146,8 +145,6 @@ class WalletDA {
       })),
       map(updateOperation => updateOperation.value),
       map(wallet => {
-        console.log('updateWalletSpendingState => ', updateWalletSpendingState);
-
         return ({...wallet, 
           pockets:{ 
             balance: parseFloat(new NumberDecimal(wallet.pockets.balance.bytes).toString()),

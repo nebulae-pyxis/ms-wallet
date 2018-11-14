@@ -36,6 +36,7 @@ export const locale = {
       TRANSACTION_TERMINAL_USER_ID: 'ID usuario terminal',
       TRANSACTION_TERMINAL_USERNAME: 'Nombre usuario terminal',
       TRANSACTION_TIMESTAMP: 'Fecha',
+      TRANSACTION_NOTES: 'Notas',
       TRANSACTION_ID: 'ID transacción',
       BALANCE: 'Saldo',
       BONUS: 'Comisión',

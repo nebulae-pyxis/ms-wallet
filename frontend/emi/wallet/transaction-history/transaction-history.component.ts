@@ -353,6 +353,7 @@ displayFn(business) {
   detectFilterAndPaginatorChanges() {
     Rx.Observable.combineLatest(this.getFormChanges$(), this.getPaginator$())
       .pipe(
+        tap(data => console.log('detectFilterAndPaginatorChanges => ', data)),
         filter(data => {
           return this.filterForm.enabled;
         }),
@@ -583,6 +584,7 @@ displayFn(business) {
    * @param response
    */
   showSnackBarError(response) {
+    console.log('showSnackBarError => ', response);
     if (response.errors) {
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {

@@ -29,9 +29,7 @@ class WalletHelper {
           concept: walletTransactionExecuted.data.transactionConcept,
           pocket: transaction.pocket,
           value: transaction.value,
-          user: walletTransactionExecuted.user,
-          notes: transaction.notes,
-          location: transaction.location,
+          user: walletTransactionExecuted.user
         };
 
         if (transaction.terminal) {
@@ -41,6 +39,16 @@ class WalletHelper {
             username: transaction.terminal.username,
           };
         }
+
+        if (transaction.location) {
+          transactionData.location = transaction.location;
+        }
+
+        if (transaction.notes) {
+          transactionData.notes = transaction.notes;
+        }
+
+        console.log('transactionData => ', transactionData);
 
         return WalletTransactionDA.saveTransactionHistory$(transactionData)
       })

@@ -190,7 +190,7 @@ class WalletCQRS {
       mergeMap(roles => {              
         return eventSourcing.eventStore.emitEvent$(
           new Event({
-            eventType: manualBalanceAdjustment.adjustmentType == 'DEBIT' ? "WalletSpendingCommited": "WalletDepositCommited",
+            eventType: manualBalanceAdjustment.adjustmentType == 'CREDIT' ? "WalletSpendingCommited": "WalletDepositCommited",
             eventTypeVersion: 1,
             aggregateType: "Wallet",
             aggregateId: manualBalanceAdjustment._id,
