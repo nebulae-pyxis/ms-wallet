@@ -200,8 +200,11 @@ class GraphQlService {
       },
       {
         aggregateType: "Wallet",
-        messageType: "emigateway.graphql.query.getTypeAndConcepts"
-        
+        messageType: "emigateway.graphql.query.getTypeAndConcepts",        
+      },
+      {
+        aggregateType: "Wallet",
+        messageType: "emigateway.graphql.query.getWalletSpendingRuleQuantity",        
       }
 
     ];
@@ -268,6 +271,10 @@ class GraphQlService {
       "emigateway.graphql.query.getTypeAndConcepts": {
         fn: wallet.cqrs.getTypesAndConceptsValues$,
         obj: wallet.cqrs
+      },
+      "emigateway.graphql.query.getWalletSpendingRuleQuantity":{
+        fn: spendingRules.cqrs.getWalletSpendingRuleQuantity$,
+        obj: spendingRules.cqrs
       }
     };
   }

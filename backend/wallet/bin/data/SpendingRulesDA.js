@@ -123,6 +123,11 @@ class SpendingRules {
       
     }
 
+    static getDocumentsCount$(){
+        const collection = mongoDB.db.collection(COLLECTION_NAME);
+        return defer(() => collection.count() )
+      }
+
 
     /**
    * Extracts the next value from a mongo cursor if available, returns undefined otherwise

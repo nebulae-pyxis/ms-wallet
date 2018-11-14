@@ -180,13 +180,13 @@ enum ComparatorEnum {
 type WalletPocketSelectionRuleCondition {
   pocket: String
   comparator: ComparatorEnum
-  value: Int
+  value: Float
 }
 
 input WalletPocketSelectionRuleConditionInput {
   pocket: String
   comparator: ComparatorEnum
-  value: Int 
+  value: Float 
 }
 
 type WalletPocketSelectionRule {
@@ -257,6 +257,8 @@ type Query {
   ): [WalletSpendingRule]
   "Get the diferents products and concepts types combinations"
   typeAndConcepts: [TypeVsConcepts]
+  "Get the quantity of spending rules"
+  WalletSpendingRuleQuantity: Int
 }
 
 type Mutation {

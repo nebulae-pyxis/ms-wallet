@@ -50,7 +50,7 @@ class WalletCQRS {
     );
   }
 
-    /**
+  /**  
    * Gets the wallet transaction history of a business
    *
    * @param {*} args args
@@ -211,7 +211,6 @@ class WalletCQRS {
   }
 
   getTypesAndConceptsValues$() {
-    console.log("getTypesAndConceptsValues$()");
     return of(process.env.WALLET_TRANSACTION_TYPES_CONCEPTS)
       .pipe(
         map(typesAndConcepts => JSON.parse(typesAndConcepts)),
