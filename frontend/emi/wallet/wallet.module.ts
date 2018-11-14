@@ -43,7 +43,8 @@ const routes: Routes = [
     TransactionHistoryDetailComponent,
     ManualPocketAdjustmentComponent,
     CurrencyFormatterDirective,
-    DialogComponent
+    DialogComponent,
+    CurrencyPipe
   ],
   entryComponents: [DialogComponent],
   providers: [ WalletService, DatePipe, ManualPocketAdjustmentService, TransactionHistoryService, TransactionHistoryDetailService, CurrencyPipe]
