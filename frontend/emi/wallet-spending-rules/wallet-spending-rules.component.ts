@@ -71,6 +71,13 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+
+    this.walletSpendingService.getSpendingRulesQuantity$()
+    .pipe(
+      tap(spendingRulesQuantity => this.tableSize = spendingRulesQuantity)
+    )
+    .subscribe( r => {  }, e => console.log(e), () => {} );
+
     /**
      * subscription to listen the filter text
      */
@@ -90,15 +97,15 @@ export class WalletComponent implements OnInit, OnDestroy {
 
      // Creates an observable for listen the events when the paginator of the table is modified
      this.allSubscriptions.push(
-      this.paginator.page.subscribe(pageChanged => {
-        this.page = pageChanged.pageIndex;
-        this.count = pageChanged.pageSize;
-        this.refreshDataTable(
-          pageChanged.pageIndex,
-          pageChanged.pageSize,
-          this.filterText
-        );
-      })
+      this.paginator.page
+      .pipe(
+        tap(pageChanged => {
+          this.page = pageChanged.pageIndex;
+          this.count = pageChanged.pageSize;
+        }),
+        mergeMap( () => this.refreshDataTable(this.page, this.count, this.filterText))
+      )
+      .subscribe(() => {}, error => console.log(error), () => {})
     );
   }
 
@@ -111,6 +118,7 @@ export class WalletComponent implements OnInit, OnDestroy {
    * @param searchFilter Search filter
    */
   refreshDataTable(page, count, searchFilter) {
+    console.log('refreshDataTable(page, count, searchFilter)');
     return this.walletSpendingService
       .getSpendinRules$(page, count, searchFilter, this.sortColumn, this.sortOrder)
       .pipe(

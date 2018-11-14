@@ -255,6 +255,8 @@ type Query {
   ): [WalletSpendingRule]
   "Get the diferents products and concepts types combinations"
   typeAndConcepts: [TypeVsConcepts]
+  "Get the quantity of spending rules"
+  WalletSpendingRuleQuantity: Int
 }
 
 type Mutation {

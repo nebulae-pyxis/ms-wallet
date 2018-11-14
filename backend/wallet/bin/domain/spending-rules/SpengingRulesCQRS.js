@@ -31,6 +31,21 @@ class BusinessCQRS {
     );
   }
 
+  getWalletSpendingRuleQuantity$({ root, args, jwt }, authToken) {
+    console.log("LLEGO AL DOMINIO", args);
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "SpendingRule",
+      "getSpendingRule$",
+      PERMISSION_DENIED_ERROR,
+      ["developer"]
+    ).pipe(
+      mergeMap(() => spendingRulesDA.getDocumentsCount$() ),
+      mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
+      catchError(err => this.errorHandler$(err))
+    );
+  }
+
   getSpendingRules$({ root, args, jwt }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,

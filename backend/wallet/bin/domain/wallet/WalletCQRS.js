@@ -50,7 +50,7 @@ class WalletCQRS {
     );
   }
 
-    /**
+  /**  
    * Gets the wallet transaction history of a business
    *
    * @param {*} args args

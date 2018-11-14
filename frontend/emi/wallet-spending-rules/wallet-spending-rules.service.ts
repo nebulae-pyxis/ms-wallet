@@ -3,6 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import * as Rx from 'rxjs';
 import { GatewayService } from '../../../api/gateway.service';
 import {
+  getSpendingRulesQuantity,
   getTypeAndConcepts,
   getSpendingRule,
   getSpendingRules,
@@ -19,9 +20,16 @@ export class WalletSpendingRuleService {
 
   }
 
-  /**
-   * Hello World sample, please remove
-   */
+  getSpendingRulesQuantity$() {
+    return this.gateway.apollo
+      .query<any>({
+        query: getSpendingRulesQuantity,
+        fetchPolicy: 'network-only'
+      })
+      .map(resp => resp.data.WalletSpendingRuleQuantity);
+  }
+
+
   getTypeAndConcepts$() {
     return this.gateway.apollo
       .query<any>({
