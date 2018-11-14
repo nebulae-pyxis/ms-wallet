@@ -13,7 +13,7 @@ import { TransactionHistoryComponent } from './transaction-history/transaction-h
 import { ManualPocketAdjustmentComponent } from './manual-pocket-adjustment/manual-pocket-adjustment.component';
 import { TransactionHistoryDetailComponent } from './transaction-history-detail/transaction-history-detail.component';
 import { DialogComponent } from './dialog/dialog.component';
-import { MyCurrencyFormatterDirective } from '../shared/directives/currency.directive';
+import { CurrencyFormatterDirective } from '../shared/directives/currencyFormatter.directive';
 import { MyCurrencyPipe } from '../shared/directives/currency.pipe';
 
 const routes: Routes = [
@@ -42,7 +42,7 @@ const routes: Routes = [
     TransactionHistoryComponent,
     TransactionHistoryDetailComponent,
     ManualPocketAdjustmentComponent,
-    MyCurrencyFormatterDirective,
+    CurrencyFormatterDirective,
     DialogComponent
   ],
   entryComponents: [DialogComponent],

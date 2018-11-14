@@ -40,7 +40,7 @@
             <form name="manualBalanceAdjustmentsForm" [formGroup]="manualBalanceAdjustmentsForm" class="user w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
 
               <mat-form-field class="w-100-p">
-                <input matInput name="value" [myCurrencyFormatter]="'FIXED'" maxlength="12" formControlName="value" placeholder="{{'WALLET.VALUE' | translate}}">
+                <input matInput name="value" [currencyFormatter]="'FIXED'" maxlength="12" formControlName="value" placeholder="{{'WALLET.VALUE' | translate}}">
                 <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('required', ['value'])">
                   {{'WALLET.VALUE_REQUIRED' | translate}}
                 </mat-error>
