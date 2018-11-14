@@ -24,11 +24,11 @@ export class WalletSpendingRuleService {
    */
   getTypeAndConcepts$() {
     return this.gateway.apollo
-      .watchQuery<any>({
+      .query<any>({
         query: getTypeAndConcepts,
         fetchPolicy: 'network-only'
       })
-      .valueChanges.map(resp => resp.data.typeAndConcepts);
+      .map(resp => resp.data.typeAndConcepts);
   }
 
   /**
