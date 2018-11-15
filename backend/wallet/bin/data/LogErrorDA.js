@@ -19,6 +19,7 @@ class LogErrorDA {
       observer.complete();
     });
   }
+  
 
   /**
    * Gets errors
