@@ -14,7 +14,7 @@ const MongoDB = require("../bin/data/MongoDB").MongoDB;
 let mongoDB = undefined;
 let broker = undefined;
 
-const dbName = `wallet`;
+const dbName = `test-${uuidv4()}`;
 
 const environment = {
   NODE_ENV: "production",

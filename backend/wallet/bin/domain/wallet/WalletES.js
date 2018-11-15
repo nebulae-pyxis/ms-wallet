@@ -59,7 +59,7 @@ class WalletES {
   }
   
   handleWalletSpendingCommited$(evt){
-    console.log("handleWalletSpendingCommited$", evt);
+    // console.log("handleWalletSpendingCommited$", evt);
     return of(evt.data)
     .pipe(
       mergeMap(eventData => forkJoin(
@@ -73,7 +73,7 @@ class WalletES {
       // selects the according productBonusConfig returns => { wallet, productBonusConfig, selectedPocket }
       map(result => ({...result, spendingRule: result.spendingRule.productBonusConfigs.find(e => (e.type == evt.data.type && e.concept == evt.data.concept)) })),      
       mergeMap(result => this.calculateTransactionsToExecute$(evt, result)),
-      tap(r => console.log("PARA PROCESAR", JSON.stringify(r))),
+      // tap(r => console.log("PARA PROCESAR", JSON.stringify(r))),
       map(tx => ({
         wallet: tx.wallet,
         transaction: this.createWalletTransactionExecuted(
@@ -137,9 +137,9 @@ class WalletES {
           }
           return of({ ...basicObj, transactions: [mainTx, bonusTx].filter(e => e != null ) })       
         }),
-        tap(({transactions}) => {
-          transactions.forEach(tx => console.log('TX => ',tx))
-        } ),
+        // tap(({transactions}) => {
+        //   transactions.forEach(tx => console.log('TX => ',tx))
+        // } ),
         map(tx => ({transaction: tx, wallet: result.wallet}) )  
       )
   }

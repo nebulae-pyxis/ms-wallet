@@ -48,7 +48,7 @@ class WalletHelper {
           transactionData.notes = transaction.notes;
         }
 
-        console.log('transactionData => ', transactionData);
+        // console.log('transactionData => ', transactionData);
 
         return WalletTransactionDA.saveTransactionHistory$(transactionData)
       })
