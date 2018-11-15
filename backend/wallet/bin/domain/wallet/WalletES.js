@@ -6,7 +6,7 @@ const SpendingRulesDA = require('../../data/SpendingRulesDA');
 const { mergeMap, catchError, map, defaultIfEmpty, first, tap, filter, toArray} = require('rxjs/operators');
 const  { forkJoin, of, interval, from, throwError, concat, Observable } = require('rxjs');
 const uuidv4 = require("uuid/v4");
-const [ BALANCE_POCKET, BONUS_POCKET ]  = [ 'BALANCE', 'BONUS' ];
+const [ MAIN_POCKET, BONUS_POCKET ]  = [ 'MAIN', 'BONUS' ];
 const Crosscutting = require("../../tools/Crosscutting");
 const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
@@ -33,7 +33,7 @@ class WalletES {
           businessName: businessCreated.generalInfo.name,
           spendingState: 'FORBIDDEN',
           pockets: {
-            balance: 0,
+            main: 0,
             bonus: 0
           }
         }
@@ -107,12 +107,12 @@ class WalletES {
  * @param {Object} result Transaction object
  * @param {Object} result.wallet business unitWallet
  * @param {Object} result.wallet.pockets business unit pockets in wallet
- * @param {number} result.wallet.pockets.balance balance amount in wallet
+ * @param {number} result.wallet.pockets.main main amount in wallet
  * @param {number} result.wallet.pockets.bonus bonus amount in wallet
  * @param {Object} result.productBonusConfig productBonus configuration
  * @param {string} result.productBonusConfig.bonusType bonustype
- * @param {number} result.productBonusConfig.BonusValueByBalance BonusValueByBalance
- * @param {number} result.productBonusConfig.BonusValueByCredit BonusValueByCredit
+ * @param {number} result.productBonusConfig.bonusValueByMain BonusValueByMain
+ * @param {number} result.productBonusConfig.bonusValueByCredit BonusValueByCredit
  * @param {string} result.selectedPocket selected pocket to use 
  * 
  */
@@ -172,12 +172,12 @@ class WalletES {
    * @param {Object} result Transaction object
    * @param {Object} result.wallet business unitWallet
    * @param {Object} result.wallet.pockets business unit pockets in wallet
-   * @param {number} result.wallet.pockets.balance balance amount in wallet
+   * @param {number} result.wallet.pockets.main main amount in wallet
    * @param {number} result.wallet.pockets.bonus bonus amount in wallet
    * @param {Object} result.productBonusConfig productBonus configuration
    * @param {string} result.productBonusConfig.bonusType bonustype
-   * @param {number} result.productBonusConfig.BonusValueByBalance BonusValueByBalance
-   * @param {number} result.productBonusConfig.BonusValueByCredit BonusValueByCredit
+   * @param {number} result.productBonusConfig.bonusValueByMain BonusValueByMain
+   * @param {number} result.productBonusConfig.bonusValueByCredit BonusValueByCredit
    * @param {string} result.selectedPocket selected pocket to use 
    */
   calculateBonusTransaction$(evt, result, now) {
@@ -185,7 +185,7 @@ class WalletES {
     return of({ evt, result })
       .pipe(
         mergeMap(() => {
-          return (result.selectedPocket != BALANCE_POCKET || !result.spendingRule )
+          return (result.selectedPocket != MAIN_POCKET || !result.spendingRule )
             ? of(null)
             : of({}).
               pipe(
@@ -207,11 +207,11 @@ class WalletES {
                       .pipe(
                         map(data => {
                           return (data.spendingRule.bonusType == "FIXED")
-                            ? (data.wallet.pockets.balance >= data.txAmount)
-                              ? data.spendingRule.bonusValueByBalance
+                            ? (data.wallet.pockets.main >= data.txAmount)
+                              ? data.spendingRule.bonusValueByMain
                               : data.spendingRule.bonusValueByCredit
-                            : (data.wallet.pockets.balance >= data.txAmount)
-                              ? (data.txAmount * data.spendingRule.bonusValueByBalance) / 100
+                            : (data.wallet.pockets.main >= data.txAmount)
+                              ? (data.txAmount * data.spendingRule.bonusValueByMain) / 100
                               : (data.txAmount * data.spendingRule.bonusValueByCredit) / 100
                         }),
                         map(amount => ((amount * 1000) / 1000 ).toString()),
@@ -247,7 +247,7 @@ class WalletES {
           .pipe(
             filter(pocketSelectionRule => {
             if (
-              (pocketSelectionRule.condition.pocket != BALANCE_POCKET && pocketSelectionRule.condition.pocket != BONUS_POCKET)
+              (pocketSelectionRule.condition.pocket != MAIN_POCKET && pocketSelectionRule.condition.pocket != BONUS_POCKET)
               || (pocketSelectionRule.condition.comparator != 'ENOUGH' && !pocketSelectionRule.condition.value)) {
               return throwError('Error ')
             }
@@ -267,7 +267,7 @@ class WalletES {
             return (condition && wallet.pockets[pocketSelectionRule.pocketToUse.toLowerCase()] >= transactionAmount);
 
             }),
-            defaultIfEmpty({ pocketToUse: BALANCE_POCKET }),
+            defaultIfEmpty({ pocketToUse: MAIN_POCKET }),
             first()
           )  
         ),
@@ -277,9 +277,9 @@ class WalletES {
             ( wallet.pockets[selectedPocket.toLowerCase()] >= transactionAmount )
             )
             ? selectedPocket
-            : (selectedPocket == BALANCE_POCKET && wallet.pockets.balance < transactionAmount && wallet.pockets.bonus >= transactionAmount )
+            : (selectedPocket == MAIN_POCKET && wallet.pockets.main < transactionAmount && wallet.pockets.bonus >= transactionAmount )
               ? BONUS_POCKET
-              : BALANCE_POCKET
+              : MAIN_POCKET
         }),
         // tap(sp => console.log("#### SELECTED POCKET ", sp, " for ", transactionAmount)),
         mergeMap(selectedPocket => of({ wallet, spendingRule, selectedPocket }))
@@ -300,7 +300,7 @@ class WalletES {
         const uuId = Crosscutting.generateHistoricalUuid(new Date());
         const transaction = {
             id: uuId,
-            pocket: 'BALANCE',
+            pocket: MAIN_POCKET,
             value: data.value,
             notes: data.notes,
             location: data.location,

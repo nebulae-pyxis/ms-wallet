@@ -8,8 +8,8 @@ type CommandResponse {
 
 "Wallet info"
 type Pocket {
-  "balance pocket"
-  balance: Float
+  "Main pocket"
+  main: Float
   "bonus pocket"
   bonus: Float
 }
@@ -86,7 +86,7 @@ type ProductBonusConfig {
   type: String
   concept: String
   bonusType: String
-  bonusValueByBalance: Float
+  bonusValueByMain: Float
   bonusValueByCredit: Float
 }
 
@@ -94,7 +94,7 @@ input ProductBonusConfigInput {
   type: String
   concept: String
   bonusType: String
-  bonusValueByBalance: Float
+  bonusValueByMain: Float
   bonusValueByCredit: Float
 }
 

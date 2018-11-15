@@ -45,7 +45,7 @@ export const getWallet = gql`
     getWallet(businessId: $businessId) {
       _id
       pockets {
-        balance
+        main
         bonus
       }
       spendingState

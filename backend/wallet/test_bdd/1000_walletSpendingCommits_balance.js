@@ -206,7 +206,7 @@ describe("E2E - Simple transaction", function() {
                 businessName: businessList[0].name,
                 spendingState: "FORBIDDEN",
                 pockets: {
-                  balance: 0,
+                  main: 0,
                   bonus: 0
                 }
               },
@@ -287,7 +287,7 @@ describe("E2E - Simple transaction", function() {
                 businessName: businessList[0].name,
                 spendingState: "ALLOWED",
                 pockets: {
-                  balance: 0,
+                  main: 0,
                   bonus: 0
                 }
               },
@@ -305,7 +305,7 @@ describe("E2E - Simple transaction", function() {
           type: "VENTA",
           concept: "RECARGA_CIVICA",
           bonusType: "PERCENTAGE",
-          bonusValueByBalance: 0,
+          bonusValueByMain: 0,
           bonusValueByCredit: 0
         }
       ];
@@ -358,7 +358,7 @@ describe("E2E - Simple transaction", function() {
                 businessName: businessList[0].name,
                 spendingState: "ALLOWED",
                 pockets: {
-                  balance: 0,
+                  main: 0,
                   bonus: 0
                 }
               },
@@ -547,7 +547,7 @@ describe("E2E - Simple transaction", function() {
               businessName: businessList[0].name,
               spendingState: 'FORBIDDEN',
               pockets: {
-                balance: -25490100,
+                main: -25490100,
                 bonus: 0
               }
             })

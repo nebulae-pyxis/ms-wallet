@@ -207,7 +207,7 @@ describe("E2E - Simple transaction", function() {
                 businessName: businessList[0].name,
                 spendingState: "FORBIDDEN",
                 pockets: {
-                  balance: 0,
+                  main: 0,
                   bonus: 0
                 }
               },
@@ -246,7 +246,7 @@ describe("E2E - Simple transaction", function() {
           type: "VENTA",
           concept: "RECARGA_CIVICA",
           bonusType: "PERCENTAGE",
-          bonusValueByBalance: 0,
+          bonusValueByMain: 0,
           bonusValueByCredit: 0
         }
       ];
@@ -292,7 +292,7 @@ describe("E2E - Simple transaction", function() {
               type: "VENTA",
               concept: "RECARGA_CIVICA",
               bonusType: "PERCENTAGE",
-              bonusValueByBalance: 0,
+              bonusValueByMain: 0,
               bonusValueByCredit: 0
             });
             expect(afterSpendingRule.editedBy).to.be.equal("juan.santa");
@@ -304,7 +304,7 @@ describe("E2E - Simple transaction", function() {
                 businessName: businessList[0].name,
                 spendingState: "FORBIDDEN",
                 pockets: {
-                  balance: 0,
+                  main: 0,
                   bonus: 0
                 }
               },
@@ -330,7 +330,7 @@ describe("E2E - Simple transaction", function() {
             businessName: businessList[0].name,
             spendingState: "FORBIDDEN",
             pockets: {
-              balance: 0,
+              main: 0,
               bonus: 500000000
             }
           });
@@ -522,7 +522,7 @@ describe("E2E - Simple transaction", function() {
               businessName: businessList[0].name,
               spendingState: 'ALLOWED',
               pockets: {
-                balance: 0,
+                main: 0,
                 bonus: 474509900
               }
             })

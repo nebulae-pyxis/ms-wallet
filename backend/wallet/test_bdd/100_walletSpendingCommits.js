@@ -230,7 +230,7 @@ describe("E2E - Simple transaction", function() {
                 businessName: businessList[0].name,
                 spendingState: "FORBIDDEN",
                 pockets: {
-                  balance: 0,
+                  main: 0,
                   bonus: 0
                 }
               },
@@ -337,7 +337,7 @@ describe("E2E - Simple transaction", function() {
               businessName: businessList[0].name,
               spendingState: "FORBIDDEN",
               pockets: {
-                balance: 0,
+                main: 0,
                 bonus: 0
               }
             });
@@ -415,7 +415,7 @@ describe("E2E - Simple transaction", function() {
                 businessName: businessList[0].name,
                 spendingState: "ALLOWED",
                 pockets: {
-                  balance: 0,
+                  main: 0,
                   bonus: 0
                 }
               },
@@ -432,7 +432,7 @@ describe("E2E - Simple transaction", function() {
           type: "SALE",
           concept: "RECARGA_CIVICA",
           bonusType: "PERCENTAGE",
-          bonusValueByBalance: 1.38,
+          bonusValueByMain: 1.38,
           bonusValueByCredit: 1.35
         }
       ];
@@ -482,7 +482,7 @@ describe("E2E - Simple transaction", function() {
               type: "SALE",
               concept: "RECARGA_CIVICA",
               bonusType: "PERCENTAGE",
-              bonusValueByBalance: 1.38,
+              bonusValueByMain: 1.38,
               bonusValueByCredit: 1.35
             });
             expect(afterSpendingRule.editedBy).to.be.equal("juan.santa");
@@ -494,7 +494,7 @@ describe("E2E - Simple transaction", function() {
                 businessName: businessList[0].name,
                 spendingState: "ALLOWED",
                 pockets: {
-                  balance: 0,
+                  main: 0,
                   bonus: 0
                 }
               },
@@ -652,7 +652,7 @@ describe("E2E - Simple transaction", function() {
               businessName: businessList[0].name,
               spendingState: 'FORBIDDEN',
               pockets: {
-                balance: -2167200,
+                main: -2167200,
                 bonus: 3557
               }
             })
