@@ -67,6 +67,10 @@ export const locale = {
       MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE: "Manual balance adjustment",
       OK: 'Accept',
       CANCEL: 'Cancel'
+    },
+    ERRORS: {
+      19001: 'Internal server error',
+      19002: 'Permission denied',
     }
   }
 };

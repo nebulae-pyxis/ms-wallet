@@ -67,6 +67,10 @@ export const locale = {
       MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE: 'Ajuste manual de saldo',
       OK: 'Aceptar',
       CANCEL: 'Cancelar'
+    },
+    ERRORS: {
+      19001: 'Error interno de servidor',
+      19002: 'Permiso denegado.',  
     }
   }
 };
