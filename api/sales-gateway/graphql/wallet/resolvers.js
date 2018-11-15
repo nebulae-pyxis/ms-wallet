@@ -95,8 +95,7 @@ module.exports = {
       .catch(err => handleError$(err, "getWallet"))
       .mergeMap(response => getResponseFromBackEnd$(response))
       .toPromise();
-    },
-    
+    }    
   },
   //// MUTATIONS ///////
   Mutation: {

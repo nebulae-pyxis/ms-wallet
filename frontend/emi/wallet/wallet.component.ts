@@ -28,6 +28,7 @@ export class walletComponent implements OnInit, OnDestroy {
   }
 
   
+  
   ngOnDestroy() {
   }
 

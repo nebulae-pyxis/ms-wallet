@@ -100,7 +100,7 @@ jobs:
 
       - run:
           name: Installing NebulaE cli & Compose Sales Gateway API
-          comand: |    
+          command: |    
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/            
             gitChanged api/sales-gateway || echo $GCP_SERVICE_ACCOUNT_PROD | base64 --decode --ignore-garbage > /tmp/gcloud-service-key.json
@@ -185,7 +185,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/wallet/
             export DOCKERHUB_IMAGE=wallet.backend.wallet
-            export DOCKERHUB_TAG=0.0.5
+            export DOCKERHUB_TAG=0.0.6
             gitChanged backend/wallet || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/wallet/
             gitChanged backend/wallet || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/wallet || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
