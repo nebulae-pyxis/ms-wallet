@@ -13,7 +13,7 @@ spec:
         app: wallet
     spec:      
       containers:
-      - image: nebulaepyxis/wallet.backend.wallet:0.0.9
+      - image: nebulaepyxis/wallet.backend.wallet:0.0.10
         name: wallet
         volumeMounts:
         - name: google-application-credentials
@@ -55,7 +55,7 @@ spec:
           value: PUBSUB
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
-          value: "2018.11.15.1702"
+          value: "2018.11.15.1708"
         # PRODUCTS AND CONCEPTS TYPES
         - name: WALLET_TRANSACTION_TYPES_CONCEPTS
           value: '{"SALES": ["RECARGA_CIVICA"], "MOVEMENTS": ["WITHDRAWAL", "DEPOSIT"]}'
