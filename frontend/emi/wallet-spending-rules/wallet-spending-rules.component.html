@@ -96,6 +96,7 @@
         </ng-container>
         <!-- EDITED BY -->
         
+        
 
         <mat-header-row *cdkHeaderRowDef="tableColumns"></mat-header-row>
         <mat-row *cdkRowDef="let spendingRule; columns: tableColumns;" class="mat-row" matRipple [routerLink]="['edit/', spendingRule.businessId]" >

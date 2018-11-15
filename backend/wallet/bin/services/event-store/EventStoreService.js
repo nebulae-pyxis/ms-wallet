@@ -152,6 +152,7 @@ class EventStoreService {
         obj: wallet.eventSourcing 
       },
     };
+    
   }
   
 

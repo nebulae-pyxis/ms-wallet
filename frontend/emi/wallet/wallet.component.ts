@@ -17,7 +17,8 @@ export class walletComponent implements OnInit, OnDestroy {
   helloWorldLabelQuery$: Rx.Observable<any>;
   helloWorldLabelSubscription$: Rx.Observable<any>;
 
-  constructor(private walletervice: WalletService  ) {    
+  constructor(private walletervice: WalletService  ) {  
+      
 
   }
     
