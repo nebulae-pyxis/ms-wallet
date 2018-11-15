@@ -17,6 +17,11 @@ let instance;
 class BusinessCQRS {
   constructor() {}
 
+  /**
+   * 
+   * @param {any} param0 args that contains args query and JWT
+   * @param {any} authToken decoded token
+   */
   getSpendingRule$({ root, args, jwt }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,

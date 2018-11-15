@@ -24,7 +24,7 @@
                 },
                 "navURL": "/wallet/transaction-history",
                 "path": "wallet",
-                "loadChildren": "./main/content/wallet/wallet.module#walletModule",
+                "loadChildren": "./main/content/wallet/wallet.module#WalletModule",
                 "priority": 1000,
                 "roles" : ["SYSADMIN", "business-owner"],
                 "default" : false
@@ -39,7 +39,7 @@
                 },
                 "navURL": "/wallet/manual-pocket-adjustment",
                 "path": "wallet",
-                "loadChildren": "./main/content/wallet/wallet.module#walletModule",
+                "loadChildren": "./main/content/wallet/wallet.module#WalletModule",
                 "priority": 1000,
                 "roles" : ["SYSADMIN"],
                 "default" : false
