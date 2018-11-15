@@ -14,7 +14,11 @@ const MongoDB = require("../bin/data/MongoDB").MongoDB;
 let mongoDB = undefined;
 let broker = undefined;
 
-const dbName = `test-${uuidv4()}`;
+const dbName = `test-${uuidv4()
+  .toString()
+  .slice(0, 5)}-wallet`;
+
+// const dbName = `wallet`;
 
 const environment = {
   NODE_ENV: "production",
@@ -32,7 +36,9 @@ const environment = {
   EVENT_STORE_STORE_TYPE: "MONGO",
   EVENT_STORE_STORE_URL: "mongodb://localhost:27017",
   EVENT_STORE_STORE_AGGREGATES_DB_NAME: "Aggregates",
-  EVENT_STORE_STORE_EVENTSTORE_DB_NAME: "EventStore"
+  EVENT_STORE_STORE_EVENTSTORE_DB_NAME: "EventStore",
+  GMT_TO_SERVE: "GMT-5",
+  WALLET_TRANSACTION_TYPES_CONCEPTS: {"SALE": ["RECARGA_CIVICA"], "MOVEMENT": ["DEPOSIT", "WITHDRAWAL"]}
 };
 
 /*
