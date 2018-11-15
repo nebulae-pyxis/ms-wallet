@@ -48,12 +48,12 @@
                     <div class="h2 secondary-text">{{'WALLET.TRANSACTION' | translate}}(ID: {{selectedTransactionHistory._id}})</div>
                 </div>
 
-                <div class="w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24">                  
+                <div class="w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24">
 
                     <div class="form-field" fxLayout="row" fxLayoutAlign="start center">
                         <span class="title">{{'WALLET.TIMESTAMP' | translate}}</span>
                         <span class="value">{{selectedTransactionHistory.timestamp | date: "dd/MM/y HH:mm:ss"}}</span>
-                    </div>                    
+                    </div>
 
                   <div fxLayout="row">
 
@@ -61,7 +61,7 @@
                           <span class="title">{{'WALLET.TRANSACTION_TYPE' | translate}}:</span>
                           <span class="value">{{'WALLET.TYPES.' +selectedTransactionHistory.type | translate}}</span>
                       </div>
-    
+
                       <div class="form-field" fxLayout="row" fxLayoutAlign="start center">
                           <span class="title">{{'WALLET.TRANSACTION_CONCEPT' | translate}}:</span>
                           <span class="value">{{'WALLET.CONCEPTS.' +selectedTransactionHistory.concept | translate}}</span>
@@ -161,7 +161,7 @@
 
                     <mat-row *cdkRowDef="let transaction; columns: displayedColumns;" class="transactions"
                     (click)="selectTransactionHistoryRow(transaction)" [ngClass]="{'highlight': selectedTransactionHistory && selectedTransactionHistory._id == transaction._id}"
-                    [routerLink]="['../', '9'+transaction._id]" matRipple>
+                    [routerLink]="['../', transaction._id]" matRipple>
                     </mat-row>
 
                   </mat-table>

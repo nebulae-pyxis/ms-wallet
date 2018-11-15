@@ -43,7 +43,7 @@ import { fuseAnimations } from "../../../../core/animations";
 
 //////////// i18n ////////////
 import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
-import { TranslateService } from "@ngx-translate/core";
+import { TranslateService, LangChangeEvent, TranslationChangeEvent } from "@ngx-translate/core";
 import { locale as english } from "../i18n/en";
 import { locale as spanish } from "../i18n/es";
 
@@ -51,28 +51,27 @@ import { locale as spanish } from "../i18n/es";
 import { KeycloakService } from "keycloak-angular";
 import { WalletService } from "./../wallet.service";
 import { TransactionHistoryService } from "./transaction-history.service";
+import { MAT_MOMENT_DATE_FORMATS } from "./my-date-format";
 
-import {
-  MAT_MOMENT_DATE_FORMATS,
-  MomentDateAdapter
-} from "@angular/material-moment-adapter";
 import {
   DateAdapter,
   MAT_DATE_FORMATS,
-  MAT_DATE_LOCALE
-} from "@angular/material/core";
+  MAT_DATE_LOCALE,
+  MomentDateAdapter
+} from '@coachcare/datepicker';
+
 import * as moment from "moment";
 
 @Component({
   selector: "app-transaction-history",
   templateUrl: "./transaction-history.component.html",
   styleUrls: ["./transaction-history.component.scss"],
-  animations: fuseAnimations
-  // providers: [
-  //   {provide: MAT_DATE_LOCALE, useValue: 'ja-JP'},
-  //   {provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE]},
-  //   {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  // ]
+  animations: fuseAnimations,
+  providers: [
+    {provide: MAT_DATE_LOCALE, useValue: 'es'},
+    {provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE]},
+    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
+  ]
 })
 export class TransactionHistoryComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject();
@@ -91,8 +90,8 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     "user"
   ];
 
-  transactionTypes: any = ["SALE", "BALANCE_ADJUSTMENT"];
-  transactionConcepts: any = ["RECARGA_CIVICA", "PAYMENT"];
+  transactionTypes: any = [];
+  transactionConcepts: any = [];
   typesAndConceptsList: any = null;
 
   myBusiness: any = null;
@@ -104,9 +103,9 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   businessQueryFiltered$: Observable<any[]>;
 
   walletData: any = {
-    spendingState: "",
+    spendingState: '',
     pockets: {
-      balance: 0,
+      main: 0,
       bonus: 0,
       credit: 0
     }
@@ -118,22 +117,22 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   transactionType: any;
 
   maxEndDate: any = null;
-  minEndDate: any = null;  
+  minEndDate: any = null;
 
   // Table values
   @ViewChild(MatPaginator)
   paginator: MatPaginator;
-  @ViewChild("filter")
+  @ViewChild('filter')
   filter: ElementRef;
   @ViewChild(MatSort)
   sort: MatSort;
   tableSize: number;
   page = 0;
   count = 10;
-  filterText = "";
+  filterText = '';
   sortColumn = null;
   sortOrder = null;
-  itemPerPage = "";
+  itemPerPage = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -153,6 +152,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.buildFilterForm();
+    this.onLangChange();
     this.loadTypesAndConcepts();
     this.loadBusinessFilter();
     this.loadDataInForm();
@@ -200,10 +200,10 @@ displayFn(business) {
     )
       .pipe(take(1))
       .subscribe(([filterAndPaginator, selectedBusiness]) => {
-        console.log('filterAndPaginator ==>>> ', filterAndPaginator);
-        console.log('selectedBusiness ==>>> ', selectedBusiness);
+        // console.log('filterAndPaginator ==>>> ', filterAndPaginator);
+        // console.log('selectedBusiness ==>>> ', selectedBusiness);
         if (filterAndPaginator) {
-          if(filterAndPaginator.filter){
+          if (filterAndPaginator.filter){
             const filter: any = filterAndPaginator.filter;
             const terminal:any = filterAndPaginator.filter.terminal || {};
             this.filterForm.patchValue({
@@ -217,7 +217,7 @@ displayFn(business) {
             });
           }
 
-          if(filterAndPaginator.pagination){
+          if (filterAndPaginator.pagination){
             this.page = filterAndPaginator.pagination.page,
             this.count = filterAndPaginator.pagination.count;
           }
@@ -227,8 +227,11 @@ displayFn(business) {
           this.selectedBusinessData = selectedBusiness;
           this.businessFilterCtrl.setValue(this.selectedBusinessData);
         }
-        this.filterForm.enable({ onlySelf: false, emitEvent: true});
-        this.filterForm.updateValueAndValidity({ onlySelf: false, emitEvent: true});
+        this.filterForm.enable();
+        this.filterForm.patchValue({
+          terminalId:  'test',
+        }, {emitEvent: true});
+        // this.filterForm.updateValueAndValidity({ onlySelf: false, emitEvent: true});
       });
   }
 
@@ -240,6 +243,22 @@ displayFn(business) {
     .pipe(startWith({ pageIndex: 0, pageSize: 10 }));
   }
 
+  /**
+   * Changes the internationalization of the dateTimePicker component
+   */
+  onLangChange(){
+    this.translate.onLangChange
+    .pipe(
+      startWith({lang: this.translate.currentLang}),
+      takeUntil(this.ngUnsubscribe)
+    )
+    .subscribe(event => {
+      if (event){
+        this.adapter.setLocale(event.lang);
+      }
+    });
+  }
+
   loadTypesAndConcepts() {
     this.transactionHistoryService.getTypesAndConcepts$()
     .pipe(
@@ -248,7 +267,7 @@ displayFn(business) {
     )
     .subscribe(data => {
       this.typesAndConceptsList = data;
-    })
+    });
   }
 
   /**
@@ -257,7 +276,6 @@ displayFn(business) {
   loadWalletData() {
     this.transactionHistoryService.selectedBusinessEvent$
       .pipe(
-        //tap(data => console.log('selected business wallet  => ', data)),
         filter(selectedBusiness => selectedBusiness != null),
         mergeMap((selectedBusiness: any) =>
           this.walletService.getWallet$(selectedBusiness._id)
@@ -267,8 +285,8 @@ displayFn(business) {
         map(result => result.data.getWallet),
         map(wallet => {
           let credit = 0;
-          if(wallet.pockets.balance < 0){
-            credit += wallet.pockets.balance;
+          if(wallet.pockets.main < 0){
+            credit += wallet.pockets.main;
           }
 
           if(wallet.pockets.bonus < 0){
@@ -277,7 +295,7 @@ displayFn(business) {
           const walletCopy = {
             ...wallet,
             pockets: {
-              balance: wallet.pockets.balance < 0 ? 0 : wallet.pockets.balance,
+              main: wallet.pockets.main < 0 ? 0 : wallet.pockets.main,
               bonus: wallet.pockets.bonus < 0 ? 0 : wallet.pockets.bonus,
               credit: credit,
             }
@@ -297,10 +315,11 @@ displayFn(business) {
    */
   getFormChanges$() {
     return this.filterForm.valueChanges.pipe(
+      tap(val => console.log('this.filterForm.valueChanges => ', val)),
       debounceTime(500),
       distinctUntilChanged(),
       tap(val => console.log('getFormChanges$'))
-      //startWith({ initDate: this.filterForm.get('initDate').value, endDate: this.filterForm.get('endDate').value })
+      // startWith({ initDate: this.filterForm.get('initDate').value, endDate: this.filterForm.get('endDate').value })
     );
   }
 
@@ -315,18 +334,18 @@ displayFn(business) {
     const endMonth = end.month();
     const endYear = end.year();
     const endMonthYear = endMonth+'-'+endYear;
-    
+
     this.minEndDate = moment(start);
     if(startMonthYear != endMonthYear){
       console.log('Select last day of month or current date');
       this.filterForm.patchValue({
         endDate: start.endOf("month")
       });
-      this.maxEndDate = start.endOf("month"); 
+      this.maxEndDate = start.endOf("month");
     }else{
       console.log('Same month');
     }
-    
+
     console.log('minEndDate => ', this.minEndDate.format('MMMM Do YYYY, h:mm:ss a'));
     console.log('maxEndDate => ', this.maxEndDate.format('MMMM Do YYYY, h:mm:ss a'));
   }
@@ -342,8 +361,8 @@ displayFn(business) {
     this.page = 0;
     this.count = 10;
 
-    const startOfMonth = moment().startOf("month");
-    const endOfMonth = moment().endOf("month");
+    const startOfMonth = moment().startOf('month');
+    const endOfMonth = moment().endOf('month');
     this.filterForm.patchValue({
       initDate: startOfMonth,
       endDate: endOfMonth
@@ -437,9 +456,9 @@ displayFn(business) {
             .pipe(
               mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp))
             ),
-          )
+          );
         }),
-        //filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        // filter((resp: any) => !resp.errors || resp.errors.length === 0),
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(([transactionsHistory, transactionsHistoryAmount]) => {

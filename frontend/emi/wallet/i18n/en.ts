@@ -6,8 +6,8 @@ export const locale = {
       MANUAL_BALANCE_ADJUSTMENT: 'Manual balance adjustment',
       VALUE: 'Value',
       NOTES: 'Notes',
-      ACCREDIT: 'Accredit',
-      DEBIT: 'Debit',
+      WITHDRAWAL: 'Withdrawal',
+      DEPOSIT: 'Deposit',
       SELECT_AGENT: 'Select business:',
       MAX_CHARACTER_NOTES: 'Max 200 characters',
       MIN_VALUE_REQUIRED: 'The value must be a value greater than zero.',
@@ -47,8 +47,8 @@ export const locale = {
       },
       CONCEPTS: {
         RECARGA_CIVICA: 'Civic recharge card',
-        DEBIT: 'Debit',
-        CREDIT: 'Credit'
+        WITHDRAWAL: 'Withdrawal',
+        DEPOSIT: 'Deposit'
       },
       TRANSACTION_HISTORY_DETAIL: 'Transaction detail',
       INFO: 'Info',

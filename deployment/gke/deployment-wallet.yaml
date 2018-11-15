@@ -58,7 +58,10 @@ spec:
           value: "initial_lock"
         # PRODUCTS AND CONCEPTS TYPES
         - name: WALLET_TRANSACTION_TYPES_CONCEPTS
-          value: '{"SALES": ["RECARGA_CIVICA"], "MOVEMENTS": ["DEBIT", "CREDIT"]}'
+          value: '{"SALES": ["RECARGA_CIVICA"], "MOVEMENTS": ["WITHDRAWAL", "DEPOSIT"]}'
+        # BACKEND PARAMETERS
+        - name: GMT_TO_SERVE
+          value: "GMT-5"
         
       volumes:
       - name: google-application-credentials

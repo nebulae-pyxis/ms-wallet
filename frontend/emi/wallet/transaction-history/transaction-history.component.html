@@ -57,15 +57,15 @@
         *fuseIfOnDom
         [@animate]="{ value: '*', params: { y: '50px' } }"
       >
-       
-      
+
+
 
       <div
           class="grey-300-bg p-4"
           fxLayout="column"
           fxLayoutAlign="start center"
         >
-        
+
           <div fxLayout="column" fxFill>
             <div
               class="px-16 py-12"
@@ -84,9 +84,9 @@
               >
                 <span
                   [ngStyle]="{
-                    color: walletData.pockets.balance >= 0 ? 'green' : 'red'
+                    color: walletData.pockets.main >= 0 ? 'green' : 'red'
                   }"
-                  >{{ walletData.pockets.balance | currency }}</span
+                  >{{ walletData.pockets.main | currency }}</span
                 >
               </div>
             </div>
@@ -155,9 +155,8 @@
                   [for]="pickerInitDate"
                 ></mat-datepicker-toggle>
                 <mat-datepicker
-                  twelveHour="false"
+                [twelveHour]="false"
                   type="datetime"
-                  clockStep="1"
                   #pickerInitDate
                 ></mat-datepicker>
               </mat-form-field>
@@ -177,9 +176,8 @@
                   [for]="pickerEndDate"
                 ></mat-datepicker-toggle>
                 <mat-datepicker
-                  twelveHour="true"
+                [twelveHour]="false"
                   type="datetime"
-                  clockStep="1"
                   #pickerEndDate
                 ></mat-datepicker>
               </mat-form-field>
@@ -302,7 +300,7 @@
             fxLayout="row"
             fxLayoutAlign="start center"
           >
-          
+
             <mat-icon>search</mat-icon>
             <mat-select *ngIf="false"
               [placeholder]="'WALLET.SELECT_BUSINESS' | translate"
@@ -318,12 +316,12 @@
                 {{ business.name }} (ID: {{ business._id }})
               </mat-option>
             </mat-select>
-            
+
 
               <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" [matAutocomplete]="auto"
               [(value)]="selectedBusinessData" [formControl]="businessFilterCtrl" fxFlex>
               <mat-autocomplete #auto="matAutocomplete" (optionSelected)='onSelectBusinessEvent($event.option.value)' [displayWith]="displayFn">
-                <mat-option *ngFor="let business of businessQueryFiltered$ | async"                
+                <mat-option *ngFor="let business of businessQueryFiltered$ | async"
                 [value]="business">
                 {{ business.name }} (ID: {{ business._id }})
               </mat-option>

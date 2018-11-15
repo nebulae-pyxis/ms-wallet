@@ -15,6 +15,7 @@ import { TransactionHistoryDetailComponent } from './transaction-history-detail/
 import { DialogComponent } from './dialog/dialog.component';
 import { CurrencyFormatterDirective } from './directives/currencyFormatter.directive';
 import { CurrencyPipe } from './directives/currency.pipe';
+import { MatDatepickerModule as MatDatepickerModule1, MatMomentDateModule as  MatMomentDateModule1} from '@coachcare/datepicker';
 
 const routes: Routes = [
   {
@@ -35,7 +36,9 @@ const routes: Routes = [
   imports: [
     SharedModule,
     RouterModule.forChild(routes),
-    FuseWidgetModule
+    FuseWidgetModule,
+    MatDatepickerModule1,
+    MatMomentDateModule1,
   ],
   declarations: [
     walletComponent,

@@ -1,6 +1,7 @@
 'use strict'
 
 const uuidv4 = require("uuid/v4");
+const GMT_OFFSET = ((parseInt(process.env.GMT_TO_SERVE.replace('GMT', '') * 60)) + new Date().getTimezoneOffset()) * 60000;
 
 class Crosscutting{
 
@@ -11,8 +12,9 @@ class Crosscutting{
      * 
      * @param {*} date Date with which will be generated the suffix of the uuid.
      */
-    static generateHistoricalUuid(date){
-        const sufixUuid = this.getMonthYear(date);
+    static generateHistoricalUuid(date) {
+        const dateGMT = new Date(date.getTime() + GMT_OFFSET)
+        const sufixUuid = this.getMonthYear(dateGMT);
         const uuId = `${uuidv4()}-${sufixUuid}`;
         return uuId;
     }

@@ -6,8 +6,8 @@ export const locale = {
       MANUAL_BALANCE_ADJUSTMENT: 'Ajuste manual de saldo',
       VALUE: 'Valor',
       NOTES: 'Notas',
-      ACCREDIT: 'Acreditar',
-      DEBIT: 'Débito',
+      WITHDRAWAL: 'Retiro',
+      DEPOSIT: 'Deposito',
       SELECT_AGENT: 'Seleccione negocio:',
       MAX_CHARACTER_NOTES: 'Máximo 200 caracteres',
       MIN_VALUE_REQUIRED: 'El valor debe ser un valor mayor a cero.',
@@ -47,8 +47,8 @@ export const locale = {
       },
       CONCEPTS: {
         RECARGA_CIVICA: 'Recarga civica',
-        DEBIT: 'Débito',
-        CREDIT: 'Crédito'
+        WITHDRAWAL: 'Retiro',
+        DEPOSIT: 'Deposito'
       },
       TRANSACTION_HISTORY_DETAIL: 'Detalle de transacción',
       INFO: 'Información',
@@ -62,8 +62,8 @@ export const locale = {
       WALLET: 'Billetero',
       EXECUTED_OPERATION: 'La operación fue ejecutada correctamente.',
       CLOSE: 'Cerrar',
-      MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE: "¿Estás seguro que desea realizar la operación?",
-      MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE: "Ajuste manual de saldo",
+      MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE: '¿Estás seguro que desea realizar la operación?',
+      MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE: 'Ajuste manual de saldo',
       OK: 'Aceptar',
       CANCEL: 'Cancelar'
     }

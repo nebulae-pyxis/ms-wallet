@@ -75,7 +75,6 @@ export class TransactionHistoryDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    console.log("ngOnInit");
     this.checkIfUserIsSystemAdmin();
     this.loadTransactionHistory();
   }
@@ -85,7 +84,7 @@ export class TransactionHistoryDetailComponent implements OnInit, OnDestroy {
    */
   async checkIfUserIsSystemAdmin() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
-    this.isSystemAdmin = this.userRoles.some(role => role === "SYSADMIN");
+    this.isSystemAdmin = this.userRoles.some(role => role === 'SYSADMIN');
   }
 
   /**
@@ -94,14 +93,14 @@ export class TransactionHistoryDetailComponent implements OnInit, OnDestroy {
   loadTransactionHistory() {
     this.activatedRouter.params
       .pipe(
-        mergeMap(params =>
-          this.transactionHistoryDetailService
-            .getTransactionHistoryById$(params.id)
-            .map(
-              transactionHistory =>
-                transactionHistory.data.getWalletTransactionsHistoryById
-            )
-        ),
+        mergeMap(params => {
+          return this.transactionHistoryDetailService
+          .getTransactionHistoryById$(params.id)
+          .map(
+            transactionHistory =>
+              transactionHistory.data.getWalletTransactionsHistoryById
+          );
+        }),
         mergeMap(transactionHistory => {
           const hasAssociatedTxIds =
             transactionHistory.associatedTransactionIds != null &&

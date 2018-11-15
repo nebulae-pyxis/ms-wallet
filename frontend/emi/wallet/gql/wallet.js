@@ -45,7 +45,7 @@ export const getWallet = gql`
     getWallet(businessId: $businessId) {
       _id
       pockets {
-        balance
+        main
         bonus
       }
       spendingState
@@ -97,16 +97,15 @@ export const getWalletTransactionsHistoryById = gql`
       value
       user
       notes
+      associatedTransactionIds
       terminal {
         id
         userId
         username
       }
       location {
-        geojson {
-          type
-          coordinates
-        }
+        type
+        coordinates
       }
     }
   }
@@ -130,10 +129,8 @@ export const getAssociatedTransactionsHistoryByTransactionHistoryId = gql`
         username
       }
       location {
-        geojson {
-          type
-          coordinates
-        }
+        type
+        coordinates
       }
     }
   }

@@ -29,7 +29,8 @@ class WalletHelper {
           concept: walletTransactionExecuted.data.transactionConcept,
           pocket: transaction.pocket,
           value: transaction.value,
-          user: walletTransactionExecuted.user
+          user: transaction.user,
+          associatedTransactionIds: transaction.associatedTransactionIds
         };
 
         if (transaction.terminal) {

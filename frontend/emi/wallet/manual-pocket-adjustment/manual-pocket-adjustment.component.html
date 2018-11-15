@@ -58,16 +58,16 @@
                 <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('required', ['notes'])">
                   {{'WALLET.NOTES_REQUIRED' | translate}}
                 </mat-error>
-                
+
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
                 <mat-select formControlName="business" placeholder="{{'WALLET.SELECT_AGENT' | translate}}" [(value)]="selectedBusinessData" (selectionChange)="onSelectBusinessEvent($event.value)">
-  
+
                   <mat-option *ngFor="let business of allBusiness" [value]="business">
-                    {{business.name}} - {{business._id}} 
+                    {{business.name}} - {{business._id}}
                   </mat-option>
-  
+
                 </mat-select>
                 <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('required', ['business'])">
                   {{'WALLET.BUSINESS_REQUIRED' | translate}}
@@ -75,11 +75,11 @@
               </mat-form-field>
 
               <div class="mt-16" fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="5px">
-                <button mat-raised-button (click)="makeManualBalanceAdjustment('CREDIT')" 
-                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.CREDIT' | translate}}</button>
+                <button mat-raised-button (click)="makeManualBalanceAdjustment('WITHDRAWAL')"
+                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.WITHDRAWAL' | translate}}</button>
 
-                <button mat-raised-button (click)="makeManualBalanceAdjustment('DEBIT')" 
-                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.DEBIT' | translate}}</button>
+                <button mat-raised-button (click)="makeManualBalanceAdjustment('DEPOSIT')"
+                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.DEPOSIT' | translate}}</button>
               </div>
 
             </form>

@@ -42,7 +42,6 @@ class WalletTransactionDA {
    * @param {*} transactionHistoryId ID of the transaction history
    */
   static getTransactionHistoryById$(businessId, transactionHistoryId) {
-    console.log('getTransactionHistory => ', businessId, transactionHistoryId);
     const monthYear = transactionHistoryId.substr(transactionHistoryId.length - 4);
     const collection = mongoDB.db.collection(`${COLLECTION_NAME}${monthYear}`);
     return of({businessId, transactionHistoryId})
@@ -100,7 +99,6 @@ class WalletTransactionDA {
  * @param {*} pagination.sortTimestamp Indicates if the info should be sorted asc or desc according to the timestamp.
  */
   static getTransactionsHistory$(filter, pagination) {
-    console.log('getTransactionHistory => ', filter, pagination);
 
     return Observable.create(async observer => {
       const initDateFormat = new Date(filter.initDate);
@@ -167,7 +165,6 @@ class WalletTransactionDA {
  * @param {*} filter.terminal.username username of the terminal user to filter
  */
 static getTransactionsHistoryAmount$(filter) {
-  console.log('getTransactionsHistoryAmount => ', filter);
 
     const initDateFormat = new Date(filter.initDate);
     const monthYear = Crosscutting.getMonthYear(initDateFormat);

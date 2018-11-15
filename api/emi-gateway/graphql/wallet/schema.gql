@@ -51,7 +51,7 @@ type WalletTransaction {
   "Terminal data (Additional info useful to identify where the operation was performed)"
   terminal: Terminal
   "IDs of the wallet transactions associated with this one"
-  associatedTransactiondIds: [String]
+  associatedTransactionIds: [String]
 }
 
 "GeoJSON format"
@@ -112,10 +112,10 @@ input ManualBalanceAdjustmentInput {
 }
 
 enum AdjustmentType {
-  "Credit adjustment"
-  CREDIT
-  "Debit adjustment"
-  DEBIT
+  "Withdrawal adjustment"
+  WITHDRAWAL
+  "Deposit adjustment"
+  DEPOSIT
 }
 
 input LocationInput {

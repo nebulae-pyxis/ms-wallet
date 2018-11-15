@@ -39,17 +39,12 @@ type WalletTransaction {
 
 "Location with GeoJson format"
 type Location {
-  "Geojson"
-  geojson: GeoJson!
-}
-
-"GeoJSON format"
-type GeoJson {
   "Geojson type E.g: Point, LineString"
   type: String!
   "Geojson coordinates"
   coordinates: [String]!
 }
+
 
 "Terminal data"
 type Terminal {

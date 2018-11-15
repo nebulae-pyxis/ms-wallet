@@ -120,7 +120,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
         return {
           businessId: '4312432',
           pocket: {
-            balance: 0,
+            main: 0,
             bonus: 0,
             credit: 0
           },
