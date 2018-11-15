@@ -13,7 +13,7 @@ spec:
         app: wallet
     spec:      
       containers:
-      - image: nebulaepyxis/wallet.backend.wallet:0.0.6
+      - image: nebulaepyxis/wallet.backend.wallet:0.0.7
         name: wallet
         volumeMounts:
         - name: google-application-credentials
