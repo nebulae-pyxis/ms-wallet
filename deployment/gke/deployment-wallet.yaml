@@ -13,7 +13,7 @@ spec:
         app: wallet
     spec:      
       containers:
-      - image: nebulaepyxis/wallet.backend.wallet:0.0.11
+      - image: nebulaepyxis/wallet.backend.wallet:0.0.12
         name: wallet
         volumeMounts:
         - name: google-application-credentials
@@ -58,7 +58,7 @@ spec:
           value: "2018.11.15.1713"
         # PRODUCTS AND CONCEPTS TYPES
         - name: WALLET_TRANSACTION_TYPES_CONCEPTS
-          value: '{"SALES": ["RECARGA_CIVICA"], "MOVEMENTS": ["WITHDRAWAL", "DEPOSIT"]}'
+          value: '{"SALE": ["RECARGA_CIVICA"], "MOVEMENT": ["WITHDRAWAL", "DEPOSIT"]}'
         # BACKEND PARAMETERS
         - name: GMT_TO_SERVE
           value: "GMT-5"
