@@ -25,7 +25,6 @@ class WalletDA {
   /**
    * get the wallet info by business ID
    * @param {string} businessId Business unit related
-   * new NumberDecimal(wallet.pockets.balance.bytes).toString()
    */
   static getWallet$(businessId) {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
@@ -36,7 +35,7 @@ class WalletDA {
       map(wallet => 
         ({...wallet, 
           pockets:{ 
-            balance: parseFloat(new NumberDecimal(wallet.pockets.balance.bytes).toString()),
+            main: parseFloat(new NumberDecimal(wallet.pockets.main.bytes).toString()),
             bonus: parseFloat(new NumberDecimal(wallet.pockets.bonus.bytes).toString()) 
           } 
         })
@@ -58,7 +57,7 @@ class WalletDA {
           businessName: wallet.businessName,
           spendingState: wallet.spendingState,
           pockets: {
-            balance: NumberDecimal.fromString(wallet.pockets.balance.toString()) ,
+            main: NumberDecimal.fromString(wallet.pockets.main.toString()) ,
             bonus:NumberDecimal.fromString(wallet.pockets.bonus.toString()) 
           }
         };
@@ -68,7 +67,7 @@ class WalletDA {
       map(wallet => {
         return ({...wallet, 
           pockets:{ 
-            balance: parseFloat(new NumberDecimal(wallet.pockets.balance.bytes).toString()),
+            main: parseFloat(new NumberDecimal(wallet.pockets.main.bytes).toString()),
             bonus: parseFloat(new NumberDecimal(wallet.pockets.bonus.bytes).toString()) 
           } 
         });
@@ -99,7 +98,7 @@ class WalletDA {
    * 
    * @param {string} business Business data
    * @param {Object} increment Indicates the increments that must be performed on the different pockets
-   * @param {Object} increment.balance value to be incremented in the balance pocket
+   * @param {Object} increment.main value to be incremented in the main pocket
    * @param {Object} increment.bonus value to be incremented in the bonus pocket
    */
   static updateWalletPockets$(business, increment) {
@@ -110,9 +109,9 @@ class WalletDA {
       mergeMap(business => defer(() => {
         const updateQuery = {
           $inc: {
-            // 'pockets.balance': increment.balance,
+            // 'pockets.main': increment.main,
             // 'pockets.bonus': increment.bonus
-            'pockets.balance': NumberDecimal.fromString(increment.balance.toString()),
+            'pockets.main': NumberDecimal.fromString(increment.main.toString()),
             'pockets.bonus': NumberDecimal.fromString(increment.bonus.toString())
           },
           $setOnInsert: {
@@ -147,7 +146,7 @@ class WalletDA {
       map(wallet => {
         return ({...wallet, 
           pockets:{ 
-            balance: parseFloat(new NumberDecimal(wallet.pockets.balance.bytes).toString()),
+            main: parseFloat(new NumberDecimal(wallet.pockets.main.bytes).toString()),
             bonus: parseFloat(new NumberDecimal(wallet.pockets.bonus.bytes).toString()) 
           } 
         });

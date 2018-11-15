@@ -55,8 +55,6 @@ module.exports = {
   //// QUERY ///////
   Query: {
     Wallet(root, args, context){
-      console.log("return {spendingState: 'ALLOWED', pockets:{ balance: 150000, bonus: 5700 }};");
-      // return {spendingState: "ALLOWED", pockets:{ balance: 150000, bonus: 5700 }};
       return Rx.Observable.of({})
       .mergeMap(() =>
         broker.forwardAndGetReply$(

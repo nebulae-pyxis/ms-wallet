@@ -203,7 +203,7 @@ describe("E2E - Simple transaction", function() {
                 businessName: businessList[0].name,
                 spendingState: "FORBIDDEN",
                 pockets: {
-                  balance: 0,
+                  main: 0,
                   bonus: 0
                 }
               },
@@ -372,7 +372,7 @@ describe("E2E - Simple transaction", function() {
               businessName: businessList[0].name,
               spendingState: 'FORBIDDEN',
               pockets: {
-                balance: -2729950,
+                main: -2729950,
                 bonus: 0
               }
             })

@@ -25,7 +25,7 @@ export const getSpendingRule = gql`
         type
         concept
         bonusType
-        bonusValueByBalance
+        bonusValueByMain
         bonusValueByCredit
       }
       autoPocketSelectionRules {
@@ -53,7 +53,7 @@ export const getSpendingRules = gql`query  WalletGetSpendingRules($page: Int!, $
       type
       concept
       bonusType
-      bonusValueByBalance
+      bonusValueByMain
       bonusValueByCredit
     }
     autoPocketSelectionRules{

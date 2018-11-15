@@ -187,7 +187,7 @@ describe("E2E - Simple transaction", function() {
             businessName: businessList[0].name,
             spendingState: 'FORBIDDEN',
             pockets:{
-              balance: 0,
+              main: 0,
               bonus: 0
             }
           }, 'Expected wallet by default')
@@ -282,7 +282,7 @@ describe("E2E - Simple transaction", function() {
           businessName: businessList[0].name,
           spendingState: 'FORBIDDEN',
           pockets:{
-            balance: 0,
+            main: 0,
             bonus: 0
           }
         })
@@ -350,7 +350,7 @@ describe("Update SpendingRule", function(){
           businessName: businessList[0].name,
           spendingState: 'ALLOWED',
           pockets: {
-            balance: 0, 
+            main: 0, 
             bonus: 0
           }
         }, 'must to be deep equal with allowed at spendingstate');
@@ -398,7 +398,7 @@ describe("Update SpendingRule", function(){
           businessName: businessList[0].name,
           spendingState: 'FORBIDDEN',
           pockets: {
-            balance: 0, 
+            main: 0, 
             bonus: 0
           }
         }, 'must to be deep equal with FORBIDDEN at spendingstate');
@@ -414,7 +414,7 @@ describe("Update SpendingRule", function(){
         type: 'VENTA',
         concept: 'RECARGA_CIVICA',
         bonusType: 'PERCENTAGE',
-        bonusValueByBalance: 1.38,
+        bonusValueByMain: 1.38,
         bonusValueByCredit: 1.17
       }
     ];
@@ -456,7 +456,7 @@ describe("Update SpendingRule", function(){
           type: 'VENTA',
           concept: 'RECARGA_CIVICA',
           bonusType: 'PERCENTAGE',
-          bonusValueByBalance: 1.38,
+          bonusValueByMain: 1.38,
           bonusValueByCredit: 1.17
         });
         expect(afterSpendingRule.editedBy).to.be.equal('juan.santa');
@@ -467,7 +467,7 @@ describe("Update SpendingRule", function(){
           businessName: businessList[0].name,
           spendingState: 'FORBIDDEN',
           pockets: {
-            balance: 0, 
+            main: 0, 
             bonus: 0
           }
         }, '');
@@ -521,9 +521,9 @@ describe("Update SpendingRule", function(){
     const autoPocketSelectionRules = [
       {
         priority: 1,
-        pocketToUse: 'BALANCE',
+        pocketToUse: 'MAIN',
         condition:{
-          pocket: 'BALANCE',
+          pocket: 'MAIN',
           comparator: 'GTE',
           value: 250000
         }
@@ -611,7 +611,7 @@ describe("MAKE A DEPOSIT COMMIT", function(){
   
 
 
-  it('Make sure the the wallet is with 0 at balancen and bonus', function(done){
+  it('Make sure the the wallet is with 0 at main and bonus', function(done){
     of({})
     .pipe(
       mergeMap(() => WalletDA.getWallet$(businessList[0]._id)),
@@ -622,7 +622,7 @@ describe("MAKE A DEPOSIT COMMIT", function(){
           businessName: businessList[0].name,
           spendingState: 'FORBIDDEN',
           pockets: {
-            balance: 0,
+            main: 0,
             bonus: 0  
           }
         });
@@ -635,12 +635,12 @@ describe("MAKE A DEPOSIT COMMIT", function(){
     const collection = mongoDB.client.db(dbName).collection(`TransactionsHistory_${month}${year}`);  
     of({})
     .pipe(
-      mergeMap(() => WalletDA.getWallet$(businessList[0]._id)), // get the current spendingRule
+      mergeMap(() => WalletDA.getWallet$(businessList[0]._id)), // get the current spendingRule      
       tap(wallet => beforeWallet = wallet),
       map(({businessId }) => 
         ({ businessId,
-          type: 'DEPOSIT',
-          concept: 'CARGA_SALDO',
+          type: 'MOVEMENT',
+          concept: 'DEPOSIT',
           value: 100000,
           terminal: {
             id: '87ki-47hy-98fu-87hy',
@@ -661,12 +661,11 @@ describe("MAKE A DEPOSIT COMMIT", function(){
         etv: 1,
         at: "Wallet",
         aid: businessList[0]._id,
-        data: {input: depositCommit},
+        data: depositCommit,
         user: "juan.santa",
         timestamp: Date.now(),
         av: 164
-      })
-      ),
+      })),      
       delay(1000),
       mergeMap(() => forkJoin(
         WalletDA.getWallet$(businessList[0]._id),
@@ -676,6 +675,7 @@ describe("MAKE A DEPOSIT COMMIT", function(){
           reduce((txs, tx) => { txs.push(tx); return txs; }, [])
         )
       )), // get the current spendingRule
+      tap(([wallet, transactions ]) => console.log("#############################", wallet, transactions)),
       tap(([wallet, transactions ]) => afterWallet = wallet),
       tap( ([ wallet, transactions]) => {
         expect({ ...wallet, _id: 0 }).to.be.deep.equal({
@@ -684,7 +684,7 @@ describe("MAKE A DEPOSIT COMMIT", function(){
           businessName: businessList[0].name,
           spendingState: 'FORBIDDEN',
           pockets: {
-            balance: 100000,
+            main: 100000,
             bonus: 0
           }
         });
@@ -725,7 +725,7 @@ describe("MAKE A DEPOSIT COMMIT", function(){
         etv: 1,
         at: "Wallet",
         aid: businessList[0]._id,
-        data: {input: depositCommit},
+        data: depositCommit,
         user: "juan.santa",
         timestamp: Date.now(),
         av: 164
@@ -748,7 +748,7 @@ describe("MAKE A DEPOSIT COMMIT", function(){
           businessName: businessList[0].name,
           spendingState: 'ALLOWED',
           pockets: {
-            balance: 500000,
+            main: 500000,
             bonus: 0
           }
         });

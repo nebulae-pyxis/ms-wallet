@@ -1,5 +1,5 @@
 type WalletPockets{
-  balance: Float
+  main: Float
   bonus: Float
 }
 

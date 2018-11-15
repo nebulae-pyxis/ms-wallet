@@ -49,7 +49,7 @@ class WalletHelper {
           transactionData.notes = transaction.notes;
         }
 
-        console.log('transactionData => ', transactionData);
+        // console.log('transactionData => ', transactionData);
 
         return WalletTransactionDA.saveTransactionHistory$(transactionData)
       })
@@ -67,17 +67,17 @@ class WalletHelper {
     .pipe(
       //Processes each transaction one by one
       mergeMap(event => from(event.data.transactions)),
-      //Calculates the increment value from balance and bonus pockets
+      //Calculates the increment value from main and bonus pockets
       reduce((acc, transaction) => {
-        if(transaction.pocket.toUpperCase() == 'BALANCE'){
-          acc.balance += transaction.value;
+        if(transaction.pocket.toUpperCase() == 'MAIN'){
+          acc.main += transaction.value;
         }else if(transaction.pocket.toUpperCase() == 'BONUS'){
           acc.bonus += transaction.value;
         }else{
           throw new Error(`Invalid pocket: ${transaction.pocket}`);
         }
         return acc;
-      }, {balance: 0, bonus: 0}),
+      }, {main: 0, bonus: 0}),
       //Update wallet values
       mergeMap(increment => WalletDA.updateWalletPockets$(business, increment))
     );
@@ -98,7 +98,7 @@ class WalletHelper {
       )),
       mergeMap(([wallet, spendingRule]) => {
         // console.log('checkWalletSpendingAlarms => ', JSON.stringify([wallet, spendingRule]));
-        const debt = (wallet.pockets.balance || 0) + (wallet.pockets.bonus || 0);
+        const debt = (wallet.pockets.main || 0) + (wallet.pockets.bonus || 0);
 
         if (debt < spendingRule.minOperationAmount && wallet.spendingState == 'ALLOWED') {
           return this.changeWalletSpendingState$(wallet.businessId, 'FORBIDDEN');
@@ -145,7 +145,7 @@ class WalletHelper {
         const alarm = {
           businessId: wallet.businessId,
           wallet: {
-            balance: wallet.pockets.balance,
+            main: wallet.pockets.main,
             bonus: wallet.pockets.bonus
           }
         };

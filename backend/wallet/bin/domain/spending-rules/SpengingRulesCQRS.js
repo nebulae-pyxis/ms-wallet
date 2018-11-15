@@ -32,7 +32,6 @@ class BusinessCQRS {
   }
 
   getWalletSpendingRuleQuantity$({ root, args, jwt }, authToken) {
-    console.log("LLEGO AL DOMINIO", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "SpendingRule",

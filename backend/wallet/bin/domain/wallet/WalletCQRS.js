@@ -25,7 +25,6 @@ class WalletCQRS {
    * @param {*} args args
    */
   getWallet$({ args }, authToken) {
-    console.log('query getWallet');
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "WALLET",

@@ -30,7 +30,7 @@ const routes: Routes = [
     FuseWidgetModule
   ],
   declarations: [
-    WalletComponent, SpendingRuleComponent, CurrencyAndPercentageDirective, UpperCaseDirective
+    WalletComponent, SpendingRuleComponent, CurrencyAndPercentageDirective, UpperCaseDirective, CurrencyAndPercentagePipe
   ],
   providers: [ WalletSpendingRuleService, DatePipe, CurrencyAndPercentagePipe]
 })

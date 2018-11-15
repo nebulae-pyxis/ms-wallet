@@ -33,7 +33,7 @@ export interface ProductConfigRule {
   type: string;
   concept: string;
   bonusType: String;
-  bonusValueByBalance: number;
+  bonusValueByMain: number;
   bonusValueByCredit: number;
 }
 
@@ -178,9 +178,9 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     if (!pocketRule){
       pocketRule = {
         priority : (this.settingsForm.get('autoPocketSelectionRules') as FormArray).length + 1,
-        pocketToUse: 'BALANCE',
+        pocketToUse: 'MAIN',
         condition: {
-          pocket: 'BALANCE',
+          pocket: 'MAIN',
           comparator: 'ENOUGH',
           value: null
         }
@@ -201,7 +201,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         type: '',
         concept: '',
         bonusType: 'PERCENTAGE',
-        bonusValueByBalance: 0,
+        bonusValueByMain: 0,
         bonusValueByCredit: 0
       };
     }
@@ -212,7 +212,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
       concept: new FormControl({ value: productConfig.concept, disabled: !this.currentVersion },
         [ Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
       bonusType: new FormControl({ value: productConfig.bonusType, disabled: !this.currentVersion }, [Validators.required]),
-      bonusValueByBalance: new FormControl({ value: productConfig.bonusValueByBalance, disabled: !this.currentVersion }, [
+      bonusValueByMain: new FormControl({ value: productConfig.bonusValueByMain, disabled: !this.currentVersion }, [
           Validators.required,
           Validators.min(0),
           this.validatePercentages.bind(this)
@@ -230,9 +230,9 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   validatePercentages(): { [s: string]: boolean } {
     // const productConfigControls = this.settingsForm.get('productBonusConfigs') as FormArray;
     // const index = productConfigControls.getRawValue().findIndex(e => {
-    // const result = ( (e.bonusType === 'PERCENTAGE') && ( e.bonusValueByBalance > 100 || e.bonusValueByCredit > 100));
+    // const result = ( (e.bonusType === 'PERCENTAGE') && ( e.bonusValueByMain > 100 || e.bonusValueByCredit > 100));
     //   if (result){
-    //     console.log(e.bonusType, e.bonusValueByBalance, e.bonusValueByCredit );
+    //     console.log(e.bonusType, e.bonusValueByMain, e.bonusValueByCredit );
     //     return result;
     //   }
     //   return false;
@@ -245,7 +245,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   updatePercentageValidations(): void {
     const productConfigControls = this.settingsForm.get('productBonusConfigs') as FormArray;
     productConfigControls.controls.forEach(control => {
-      control.get('bonusValueByBalance').updateValueAndValidity();
+      control.get('bonusValueByMain').updateValueAndValidity();
       control.get('bonusValueByCredit').updateValueAndValidity();
     });
     const automaticPocketSelectionControls = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
@@ -287,7 +287,7 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
                 type: p.type.type.toUpperCase(),
                 concept: p.concept.toUpperCase(),
                 bonusType: p.bonusType,
-                bonusValueByBalance: this.truncateNumber(p.bonusValueByBalance),
+                bonusValueByMain: this.truncateNumber(p.bonusValueByMain),
                 bonusValueByCredit: this.truncateNumber(p.bonusValueByCredit)
               });
               return acc;
