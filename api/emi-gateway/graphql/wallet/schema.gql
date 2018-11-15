@@ -255,6 +255,7 @@ type Query {
   WalletSpendingRuleQuantity: Int
 }
 
+
 type Mutation {
   "Mutation to create manual balance adjustments."
   makeManualBalanceAdjustment(input: ManualBalanceAdjustmentInput): CommandResponse
