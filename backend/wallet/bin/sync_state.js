@@ -6,6 +6,11 @@ if (process.env.NODE_ENV !== 'production') {
 
 const mongoDB = require('./data/MongoDB').singleton();
 const BusinessDA = require('./data/BusinessDA');
+const WalletDA = require('./data/WalletDA');
+const WalletTransactionDA = require('./data/WalletTransactionDA');
+const LogErrorDA = require('./data/LogErrorDA');
+const SpendingRulesDA = require('./data/SpendingRulesDA');
+
 const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
 const Rx = require('rxjs');
@@ -13,9 +18,13 @@ const Rx = require('rxjs');
 const start = () => {
     Rx.concat(
         // initializing needed resources
-        mongoDB.start$(),
+        mongoDB.start$(),        
+        eventSourcing.eventStore.start$(),  
         BusinessDA.start$(),
-        eventSourcing.eventStore.start$(),        
+        WalletDA.start$(),
+        WalletTransactionDA.start$(),
+        LogErrorDA.start$(),
+        SpendingRulesDA.start$(),
         // // executing maintenance tasks
         eventStoreService.syncState$(),
 
