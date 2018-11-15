@@ -300,7 +300,6 @@ module.exports = {
       },
 
   },
-
   //// MUTATIONS ///////
   Mutation: {
     makeManualBalanceAdjustment(root, args, context) {
