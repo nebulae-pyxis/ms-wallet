@@ -44,12 +44,14 @@ export const locale = {
       RESET_FILTER: 'Reset filter',
       TYPES: {
         SALE: 'Sale',
-        MOVEMENT: 'Movement'
+        MOVEMENT: 'Movement',
+        undefined: ''
       },
       CONCEPTS: {
         RECARGA_CIVICA: 'Civic recharge card',
         WITHDRAWAL: 'Withdrawal',
-        DEPOSIT: 'Deposit'
+        DEPOSIT: 'Deposit',
+        undefined: ''
       },
       TRANSACTION_HISTORY_DETAIL: 'Transaction detail',
       INFO: 'Info',
