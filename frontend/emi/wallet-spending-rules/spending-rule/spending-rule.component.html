@@ -99,7 +99,7 @@
               <!-- BONUS TYPE -->
               <mat-form-field class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="18">
                 <mat-select formControlName="bonusType" placeholder="{{'SPENDING_RULE.BONUS_TYPE' | translate}}">
-                  <mat-option *ngFor="let bonusType of ['PERCENTAGE', 'FIXED']" [value]="bonusType" (onSelectionChange)="updatePercentageValidations()" >
+                  <mat-option *ngFor="let bonusType of ['PERCENTAGE', 'FIXED']" [value]="bonusType">
                     {{ 'WALLET.' + bonusType | translate}}
                   </mat-option>
                 </mat-select>
@@ -188,7 +188,7 @@
               <mat-form-field class="center-text pr-5 pl-5" fxFlex="100" fxFlex.gt-xs="15">
                 <mat-select formControlName="comparator" placeholder="{{'SPENDING_RULE.COMPARATOR' | translate}}">
                   <mat-option *ngFor="let comparator of ['LT', 'GT', 'LTE', 'GTE', 'ENOUGH', 'INS']"
-                    [value]="comparator" class="center-text" (onSelectionChange)="updatePercentageValidations()"  >
+                    [value]="comparator" class="center-text" >
                     {{ 'WALLET.' + comparator | translate}}
                   </mat-option>
                 </mat-select>

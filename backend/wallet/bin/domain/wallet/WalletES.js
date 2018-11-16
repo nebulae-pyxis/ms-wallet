@@ -193,7 +193,10 @@ class WalletES {
                   id: Crosscutting.generateHistoricalUuid(now),
                   pocket: BONUS_POCKET,
                   value: 0,
-                  user: "SYSTEM"
+                  user: evt.user,
+                  location: evt.data.location,
+                  notes: evt.data.notes,
+                  terminal: evt.data.terminal,
                 })),
                 mergeMap( tx =>
                   forkJoin( 

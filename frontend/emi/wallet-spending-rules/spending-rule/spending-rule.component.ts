@@ -4,18 +4,15 @@ import { WalletSpendingRuleService } from '../wallet-spending-rules.service';
 import { Component, OnDestroy, OnInit, Input } from '@angular/core';
 import { fuseAnimations } from '../../../../core/animations';
 import {MatSnackBar} from '@angular/material';
-import { Subscription } from 'rxjs/Subscription';
 // tslint:disable-next-line:import-blacklist
 import * as Rx from 'rxjs/Rx';
-import { FormGroup, FormControl, Validators, FormArray, FormBuilder } from '@angular/forms';
+import { FormGroup, FormControl, Validators, FormArray, FormBuilder, AbstractControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { filter, mergeMap, map } from 'rxjs/operators';
 import { ObservableMedia } from '@angular/flex-layout';
-import { from } from 'rxjs';
+import { from, forkJoin, of } from 'rxjs';
 import { locale as english } from '../i18n/en';
 import { locale as spanish } from '../i18n/es';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
-import { TranslateService } from '@ngx-translate/core';
 
 
 export interface SpendingRule {
@@ -54,7 +51,7 @@ export interface AutoPocketRule {
 export class SpendingRuleComponent implements OnInit, OnDestroy {
   @Input() currentVersion = true;
   selectedSpendingRule: SpendingRule;
-  screenMode = 0;
+  // screenMode = 0;
   alertBorderAtProductBonusConfig: -1;
   alertBorderAtAutopocketSelectionRule: -1;
   typeAndConcepts: {type: string, concepts: string[]}[];
@@ -62,7 +59,6 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup = new FormGroup({
     businessId: new FormControl('', [Validators.required]),
     businessName: new FormControl('', [Validators.required]),
-    // minOperationAmount: new FormControl('', [ Validators.required ]),
     productBonusConfigs: new FormArray([]),
     autoPocketSelectionRules: new FormArray([])
   });
@@ -76,30 +72,25 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     private observableMedia: ObservableMedia ) {
       this.translationLoader.loadTranslations(english, spanish);
       this.settingsForm.get('autoPocketSelectionRules').setValidators([ Validators.required]);
-      this.settingsForm.get('productBonusConfigs').setValidators([ Validators.required]);
+      this.settingsForm.get('productBonusConfigs').setValidators([ this.validateAllProductBonusConfigs.bind(this) ]);
       this.settingsForm.setValidators([this.validateAll.bind(this)]);
   }
 
 
   ngOnInit() {
-    this.walletSpendingRuleService.getTypeAndConcepts$()
-      .pipe(
-        tap(typeAndConcepts => this.typeAndConcepts = JSON.parse(JSON.stringify(typeAndConcepts)))
-      )
-      .subscribe(p => { }, e => console.log(e), () => {});
 
-    const grid = new Map([['xs', 1], ['sm', 2], ['md', 3], ['lg', 4], ['xl', 5]]);
-    let start: number;
-    grid.forEach((cols, mqAlias) => {
-      if (this.observableMedia.isActive(mqAlias)) {
-        start = cols;
-      }
-    });
+    // const grid = new Map([['xs', 1], ['sm', 2], ['md', 3], ['lg', 4], ['xl', 5]]);
+    // let start: number;
+    // grid.forEach((cols, mqAlias) => {
+    //   if (this.observableMedia.isActive(mqAlias)) {
+    //     start = cols;
+    //   }
+    // });
 
-    this.observableMedia.asObservable()
-      .map(change => grid.get(change.mqAlias))
-      .startWith(start)
-      .subscribe((e: number) => { this.screenMode = e; }, err => console.log(err));
+    // this.observableMedia.asObservable()
+    //   .map(change => grid.get(change.mqAlias))
+    //   .startWith(start)
+    //   .subscribe((e: number) => { this.screenMode = e; }, err => console.log(err));
 
 
 
@@ -108,7 +99,12 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
     .pipe(
       filter(params => params['buId']),
       map(params => params['buId']),
-      mergeMap(buId => this.walletSpendingRuleService.getSpendinRule$(buId)),
+      mergeMap(buId => forkJoin(
+        this.walletSpendingRuleService.getTypeAndConcepts$()
+        .pipe( tap(typeAndConcepts => this.typeAndConcepts = JSON.parse(JSON.stringify(typeAndConcepts))) ),
+        of(buId)
+      )),
+      mergeMap( ([x, buId]) => this.walletSpendingRuleService.getSpendinRule$(buId)),
       map(rule => JSON.parse(JSON.stringify(rule))),
       tap(spendingRule => this.selectedSpendingRule = spendingRule),
       mergeMap(spendingRule => this.loadSpendingRule$(spendingRule))
@@ -131,7 +127,6 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
             this.settingsForm.get('businessName').setValue(sr.businessName);
             this.settingsForm.get('businessId').setValue(sr.businessId);
             this.settingsForm.addControl('minOperationAmount', new FormControl(sr.minOperationAmount, [ Validators.required ]) );
-            // get('minOperationAmount').setValue(sr.minOperationAmount);
           })
         ),
         Rx.Observable.of(spendingRuleItem)
@@ -186,13 +181,15 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         }
       };
     }
-    return this.formBuilder.group({
+    const group = this.formBuilder.group({
       priority: new FormControl({ value: pocketRule.priority, disabled: !this.currentVersion }, [Validators.required, Validators.min(1)]),
       pocketToUse: new FormControl({ value: pocketRule.pocketToUse, disabled: !this.currentVersion }, [Validators.required]),
       pocket: new FormControl({ value: pocketRule.condition.pocket, disabled: !this.currentVersion }, [Validators.required]),
       comparator: new FormControl({ value: pocketRule.condition.comparator, disabled: !this.currentVersion }, [Validators.required]),
-      value: new FormControl({ value: pocketRule.condition.value, disabled: !this.currentVersion })
+      value: new FormControl({ value: pocketRule.condition.value, disabled: !this.currentVersion } )
     });
+    group.setValidators(this.validateComparatorValue.bind(this));
+    return group;
   }
 
   createProductSetting(productConfig?: ProductConfigRule) {
@@ -205,68 +202,58 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
         bonusValueByCredit: 0
       };
     }
-    const productType = this.typeAndConcepts.filter(e => e.type.toUpperCase() === productConfig.type)[0];
+    const productType = this.typeAndConcepts.find(e => e.type.toUpperCase() === productConfig.type);
     return this.formBuilder.group({
-      type: new FormControl( { value: productType, disabled: !this.currentVersion },
-        [Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
+      type: new FormControl( { value: productType, disabled: !this.currentVersion  }, [Validators.required]),
       concept: new FormControl({ value: productConfig.concept, disabled: !this.currentVersion },
         [ Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
       bonusType: new FormControl({ value: productConfig.bonusType, disabled: !this.currentVersion }, [Validators.required]),
       bonusValueByMain: new FormControl({ value: productConfig.bonusValueByMain, disabled: !this.currentVersion }, [
           Validators.required,
-          Validators.min(0),
-          this.validatePercentages.bind(this)
+          Validators.min(0)
         ]
       ),
       bonusValueByCredit: new FormControl({ value: productConfig.bonusValueByCredit, disabled: !this.currentVersion }, [
         Validators.required,
-        Validators.min(0),
-        this.validatePercentages.bind(this)
+        Validators.min(0)
       ]
     )
     });
   }
 
-  validatePercentages(): { [s: string]: boolean } {
-    // const productConfigControls = this.settingsForm.get('productBonusConfigs') as FormArray;
-    // const index = productConfigControls.getRawValue().findIndex(e => {
-    // const result = ( (e.bonusType === 'PERCENTAGE') && ( e.bonusValueByMain > 100 || e.bonusValueByCredit > 100));
-    //   if (result){
-    //     console.log(e.bonusType, e.bonusValueByMain, e.bonusValueByCredit );
-    //     return result;
-    //   }
-    //   return false;
-    // });
+  validateComparatorValue(formsGroup: FormGroup): {[s: string]: boolean} {
+    console.log('####################', formsGroup);
+    if ( (formsGroup.controls.comparator.value !== 'INS' && formsGroup.controls.comparator.value !== 'ENOUGH' ) && formsGroup.controls.comparator.value.value == null  ){
+      console.log('return {"valueRequired": true };');
+      return {'valueRequired': true };
+    }
 
-    // return (index !== -1) ? { 'percentageExceeded': true } : null;
     return null;
   }
 
-  updatePercentageValidations(): void {
-    const productConfigControls = this.settingsForm.get('productBonusConfigs') as FormArray;
-    productConfigControls.controls.forEach(control => {
-      control.get('bonusValueByMain').updateValueAndValidity();
-      control.get('bonusValueByCredit').updateValueAndValidity();
+  validateAllProductBonusConfigs(): { [s: string]: boolean } {
+    const productsConfsControls = this.settingsForm.get('productBonusConfigs') as FormArray;
+    let error = null;
+    productsConfsControls.controls.forEach((productsConfs: FormGroup) => {
+      Object.keys(productsConfs.controls).forEach(atr => {
+        if (productsConfs.controls[atr].errors){
+          error = { 'Invalid' : true};
+        }
+      });
     });
-    const automaticPocketSelectionControls = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
-    automaticPocketSelectionControls.controls.forEach(control => {
-      control.get('value').updateValueAndValidity();
-    });
-
-
-
+    return error || null;
   }
 
   validateAll(): { [s: string]: boolean } {
-    // let error = null;
-    // let controls = this.settingsForm.get('autoPocketSelectionRules') as FormArray;
-    // let index = controls.getRawValue().findIndex(e => ((e.comparator !== 'ENOUGH' || e.comparator !== 'INS' ) && e.value == null ) );
-    // error = (index !== -1) ? { 'valueRequired': true } : null;
-    // if (error){ return error; }
-    // controls = this.settingsForm.get('productBonusConfigs') as FormArray;
-    // index = controls.getRawValue().findIndex(e => ( e.type === '' || !e.type || e.concept === '' || !e.concept ) );
-    // error = (index !== -1) ? { 'conceptAndtypeRequired': true } : null;
-    // if (error){ return error; }
+    if ( this.settingsForm.get('minOperationAmount') && this.settingsForm.get('minOperationAmount').errors) {
+      return  { 'conceptAndtypeRequired': true };
+    }
+    if (this.settingsForm.get('productBonusConfigs').errors){
+      return {'someProductConfigInvalid': true};
+    }
+    if (this.settingsForm.get('autoPocketSelectionRules').errors){
+      return {'somePocketSelectionRulesInvalid': true};
+    }
     return null;
   }
 
@@ -328,20 +315,20 @@ export class SpendingRuleComponent implements OnInit, OnDestroy {
 
     console.log('form ===>', this.settingsForm);
 
-    Rx.Observable.of(this.selectedSpendingRule)
-    .pipe(
-      tap(() => {
-        this.settingsForm = new FormGroup({
-          businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
-          businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
-          // minOperationAmount: new FormControl(null, [Validators.required]),
-          productBonusConfigs: new FormArray([], [Validators.required]),
-          autoPocketSelectionRules: new FormArray([], [Validators.required])
-        });
-      }),
-      mergeMap(() => this.loadSpendingRule$(this.selectedSpendingRule) )
-    )
-    .subscribe(r => {}, e => console.log(e), () => console.log('Completed') );
+    // Rx.Observable.of(this.selectedSpendingRule)
+    // .pipe(
+    //   tap(() => {
+    //     this.settingsForm = new FormGroup({
+    //       businessId: new FormControl({value: '', disabled: true}, [Validators.required]),
+    //       businessName: new FormControl({value: '', disabled: true}, [Validators.required]),
+    //       // minOperationAmount: new FormControl(null, [Validators.required]),
+    //       productBonusConfigs: new FormArray([], [Validators.required]),
+    //       autoPocketSelectionRules: new FormArray([], [Validators.required])
+    //     });
+    //   }),
+    //   mergeMap(() => this.loadSpendingRule$(this.selectedSpendingRule) )
+    // )
+    // .subscribe(r => {}, e => console.log(e), () => console.log('Completed') );
   }
 
   truncateNumber(number: number, decimals: number = 2): number{
