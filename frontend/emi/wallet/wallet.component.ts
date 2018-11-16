@@ -13,11 +13,12 @@ import * as Rx from 'rxjs/Rx';
 })
 export class walletComponent implements OnInit, OnDestroy {
   
-  helloWorld: String = 'Hello World static';
+  helloWorld: String = 'Hello World static.';
   helloWorldLabelQuery$: Rx.Observable<any>;
   helloWorldLabelSubscription$: Rx.Observable<any>;
 
-  constructor(private walletervice: WalletService  ) {    
+  constructor(private walletervice: WalletService  ) {  
+      
 
   }
     
@@ -27,6 +28,7 @@ export class walletComponent implements OnInit, OnDestroy {
     // this.helloWorldLabelSubscription$ = this.walletervice.getEventSourcingMonitorHelloWorldSubscription$();
   }
 
+  
   
   ngOnDestroy() {
   }

@@ -24,6 +24,7 @@ import {
   mergeMap
 } from 'rxjs/operators';
 
+
 export interface SpendingRule {
   businessId: string;
   businessName: string;

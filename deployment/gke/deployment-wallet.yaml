@@ -13,7 +13,7 @@ spec:
         app: wallet
     spec:      
       containers:
-      - image: nebulaepyxis/wallet.backend.wallet:0.0.2
+      - image: nebulaepyxis/wallet.backend.wallet:0.0.13
         name: wallet
         volumeMounts:
         - name: google-application-credentials
@@ -45,7 +45,7 @@ spec:
           value: wallet
         # JWT CONGIF        
         - name: JWT_PUBLIC_KEY
-          value: -----BEGIN PUBLIC KEY-----\n\n-----END PUBLIC KEY-----
+          value: -----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6mv0ByMprlVOd2tzyw/+BxOylLOTG5+oLFgaCiQu3RSIoVyDXtK9d2+kSmP2qsDE+wqVFEdpw2HrUXB8vhjUpu0CluzIw4m5v6l6ExHqyQHBWTCrX4Aynb3eQIWDm1B5Z592XYBLC+ZMDCDkUeiy7R4rGZnG7BPieAGP7KpO23Yc3YVe16Xkwewp3KOgMwch3uyjLVLu386qAeRfEd6yoMYjt+n5dJ5Lv9ZE+vod+BXOrlbmar3GLnE+x+c07YQfAk1jG2WRucN2wqmBKvygRz/Z50jMEclUjddH2wiXbBp9g83MDSQna93tOxlnhRmCTkzsRZqSRVb7HzjASIbfFQIDAQAB\n-----END PUBLIC KEY-----
         # API - EMI-GATEWAY CONFIG
         - name: EMI-GATEWAY_REPLIES_TOPIC_SUBSCRIPTION
           value: emi-gateway-replies-topic-mbe-wallet
@@ -55,10 +55,10 @@ spec:
           value: PUBSUB
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
-          value: "initial_lock"
+          value: "2018.11.15.1713"
         # PRODUCTS AND CONCEPTS TYPES
         - name: WALLET_TRANSACTION_TYPES_CONCEPTS
-          value: '{"SALES": ["RECARGA_CIVICA"], "MOVEMENTS": ["WITHDRAWAL", "DEPOSIT"]}'
+          value: '{"SALE": ["RECARGA_CIVICA"], "MOVEMENT": ["WITHDRAWAL", "DEPOSIT"]}'
         # BACKEND PARAMETERS
         - name: GMT_TO_SERVE
           value: "GMT-5"

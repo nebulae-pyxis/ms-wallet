@@ -79,7 +79,7 @@ jobs:
   build-api:    
     working_directory: ~/nebulae/
     docker:
-      - image: circleci/node:9.9.0
+      - image: circleci/node:10.12
         command: bash
     steps:
       - attach_workspace:
@@ -100,7 +100,7 @@ jobs:
 
       - run:
           name: Installing NebulaE cli & Compose Sales Gateway API
-          comand: |    
+          command: |    
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/            
             gitChanged api/sales-gateway || echo $GCP_SERVICE_ACCOUNT_PROD | base64 --decode --ignore-garbage > /tmp/gcloud-service-key.json
@@ -120,7 +120,7 @@ jobs:
             mkdir -p ~/nebulae/api
             gitChanged api/emi-gateway || ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-pyxis/emi-gateway  ~/nebulae/api/shell )      
             gitChanged api/emi-gateway || ls ~/nebulae/api/shell
-            gitChanged api/emi-gateway || export DOCKERHUB_IMAGE=emi-gateway
+            gitChanged api/emi-gateway || export DOCKERHUB_IMAGE=emigateway
             gitChanged api/emi-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
             gitChanged api/emi-gateway || ( cd ~/nebulae/api/shell && sh ~/nebulae/api/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
             gitChanged api/emi-gateway || echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/api/DOCKERHUB_GENERATED_IMAGE_DIGEST
@@ -185,7 +185,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/wallet/
             export DOCKERHUB_IMAGE=wallet.backend.wallet
-            export DOCKERHUB_TAG=0.0.2
+            export DOCKERHUB_TAG=0.0.13
             gitChanged backend/wallet || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/wallet/
             gitChanged backend/wallet || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/wallet || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG

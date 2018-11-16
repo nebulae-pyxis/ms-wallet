@@ -148,7 +148,7 @@ class BusinessCQRS {
 module.exports = () => {
   if (!instance) {
     instance = new BusinessCQRS();
-    console.log("BusinessCQRS Singleton created");
+    console.log("BusinessCQRS Singleton created.");
   }
   return instance;
 };

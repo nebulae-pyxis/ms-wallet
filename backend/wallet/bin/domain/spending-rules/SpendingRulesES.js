@@ -44,6 +44,10 @@ class SpendingRulesES {
     );
   }
 
+  /**
+   * 
+   * @param {any} evt SpendingRuleUpdated event
+   */
   handleSpendingRuleUpdated$(evt){
     return of(evt.data.input)
     .pipe(

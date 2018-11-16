@@ -50,4 +50,4 @@ const routes: Routes = [
   providers: [ WalletService, DatePipe, ManualPocketAdjustmentService, TransactionHistoryService, TransactionHistoryDetailService, CurrencyPipe]
 })
 
-export class walletModule {}
+export class WalletModule {}

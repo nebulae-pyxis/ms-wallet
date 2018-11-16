@@ -152,7 +152,9 @@ class EventStoreService {
         obj: wallet.eventSourcing 
       },
     };
+    
   }
+  
 
   /**
   * Generates a map that assocs each AggretateType withs its events
