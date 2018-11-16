@@ -37,7 +37,7 @@
 
           <div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
 
-            <form name="manualBalanceAdjustmentsForm" [formGroup]="manualBalanceAdjustmentsForm" class="user w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
+            <form name="manualBalanceAdjustmentsForm" #formDirective="ngForm" [formGroup]="manualBalanceAdjustmentsForm" class="user w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
 
               <mat-form-field class="w-100-p">
                 <input matInput name="value" [currencyFormatter]="'FIXED'" maxlength="12" formControlName="value" placeholder="{{'WALLET.VALUE' | translate}}">
@@ -58,6 +58,12 @@
                 <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('required', ['notes'])">
                   {{'WALLET.NOTES_REQUIRED' | translate}}
                 </mat-error>
+                <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('minlength', ['notes'])">
+                  {{'WALLET.NOTES_MINLENGTH' | translate}}
+                </mat-error>
+                <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('maxlength', ['notes'])">
+                  {{'WALLET.NOTES_MAXLENGTH' | translate}}
+                </mat-error>
 
               </mat-form-field>
 
@@ -75,11 +81,13 @@
               </mat-form-field>
 
               <div class="mt-16" fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="5px">
-                <button mat-raised-button (click)="makeManualBalanceAdjustment('WITHDRAWAL')"
+
+                <button mat-raised-button color="warn" (click)="makeManualBalanceAdjustment('WITHDRAWAL', formDirective)"
                 [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.WITHDRAWAL' | translate}}</button>
 
-                <button mat-raised-button (click)="makeManualBalanceAdjustment('DEPOSIT')"
+                <button mat-raised-button color="primary" (click)="makeManualBalanceAdjustment('DEPOSIT', formDirective)"
                 [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.DEPOSIT' | translate}}</button>
+                
               </div>
 
             </form>

@@ -185,7 +185,7 @@
               <mat-form-field>
                 <mat-select
                   placeholder="{{'WALLET.SELECT_TRANSACTION_TYPE' | translate}}"
-                  formControlName="transactionType" [compareWith]="compareTypes"
+                  formControlName="transactionType"
                   id="transactionType" (selectionChange)="filterForm.get('transactionConcept').reset()"
                 >
                   <mat-option>{{ "WALLET.NONE" | translate }}</mat-option>
@@ -307,7 +307,7 @@
 
               <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" [matAutocomplete]="auto" *ngIf="isSystemAdmin"
               [(value)]="selectedBusinessData" [formControl]="businessFilterCtrl" fxFlex>
-              <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption (optionSelected)='onSelectBusinessEvent($event.option.value)' [displayWith]="displayFn">
+              <mat-autocomplete #auto="matAutocomplete" (optionSelected)='onSelectBusinessEvent($event.option.value)' [displayWith]="displayFn">
                 <mat-option *ngFor="let business of businessQueryFiltered$ | async"
                 [value]="business">
                 {{ business.name }} (ID: {{ business._id }})

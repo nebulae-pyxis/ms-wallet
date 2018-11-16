@@ -8,7 +8,7 @@ export const locale = {
       NOTES: 'Notas',
       WITHDRAWAL: 'Retiro',
       DEPOSIT: 'Deposito',
-      SELECT_AGENT: 'Seleccione negocio:',
+      SELECT_AGENT: 'Seleccione unidad de negocio:',
       MAX_CHARACTER_NOTES: 'Máximo 200 caracteres',
       MIN_VALUE_REQUIRED: 'El valor debe ser un valor mayor a cero.',
       MAX_VALUE_REQUIRED: 'El valor no debe superar los 20.000.000',
@@ -17,7 +17,7 @@ export const locale = {
       BUSINESS_REQUIRED: 'Debe seleccionar el agente al cual desea aplicar el ajuste de saldo',
       TRANSACTION_HISTORY: 'Historial de transacciones',
       BUSINESS: 'Agente:',
-      SELECT_BUSINESS: 'Seleccione negocio',
+      SELECT_BUSINESS: 'Seleccione unidad de negocio',
       FILTER: 'Filtro',
       INIT_DATE: 'Fecha inicial',
       END_DATE: 'Fecha final',
@@ -48,7 +48,7 @@ export const locale = {
         undefined: ''
       },
       CONCEPTS: {
-        RECARGA_CIVICA: 'Recarga civica',
+        RECARGA_CIVICA: 'Recarga cívica',
         WITHDRAWAL: 'Retiro',
         DEPOSIT: 'Deposito',
         undefined: ''
@@ -68,11 +68,12 @@ export const locale = {
       MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE: '¿Estás seguro que desea realizar la operación?',
       MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE: 'Ajuste manual de saldo',
       OK: 'Aceptar',
-      CANCEL: 'Cancelar'
+      CANCEL: 'Cancelar',
+      NOTES_MINLENGTH: 'Mínima cantidad de caracteres permitidos: 20',
     },
     ERRORS: {
       19001: 'Error interno de servidor',
-      19002: 'Permiso denegado.',  
+      19002: 'Permiso denegado.',
     }
   }
 };

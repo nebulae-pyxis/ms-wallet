@@ -14,47 +14,29 @@ import {
 @Injectable()
 export class TransactionHistoryService {
 
-  private selectedBusinessSubject$ = new BehaviorSubject(null);
+  private selectedBusinessSubject$ = new BehaviorSubject<any>(null);
   private _filterAndPaginator$ = new BehaviorSubject({
-    filter: { 
-      initDate: moment().startOf("month"), 
-      endDate: moment(),
+    filter: {
+      initDate: moment().startOf('month'),
+      endDate: moment().endOf('day'),
       terminal: {}
     },
     pagination: {
       page: 0, count: 10, sort: -1
-    },    
+    },
   });
-
-  private transactionsHistoryFilter = {
-    initDate: undefined,
-    endDate: undefined,
-    transactionType: undefined,
-    transactionConcept: undefined,
-    terminal: {
-      id: undefined,
-      userId: undefined,
-      username: undefined
-    }
-  };
-
-  private paginationData = {
-    page: 0,
-    count: 10,
-    sort: -1
-  };
 
   constructor(private gateway: GatewayService) {}
 
   addFilterAndPaginatorData(filterAndPaginator) {
-    console.log('-> addFilterAndPaginatorData => ', filterAndPaginator);
+    console.log(`addFilterAndPaginatorData => ${JSON.stringify(filterAndPaginator)}`);
     this._filterAndPaginator$.next(filterAndPaginator);
   }
 
   /**
    * @returns {Observable<any>}
    */
-  get filterAndPaginator$() {
+  get filterAndPaginator$(): Observable<any> {
     return this._filterAndPaginator$.asObservable()
   }
 
@@ -74,9 +56,9 @@ export class TransactionHistoryService {
 
   /**
    * Gets the transactions history according to the filter data and pagination.
-   *    
-   * @param filterInput 
-   * @param paginationInput 
+   *
+   * @param filterInput
+   * @param paginationInput
    * @returns {Observable}
    */
   getTransactionsHistory$(filterInput, paginationInput) {
@@ -93,8 +75,8 @@ export class TransactionHistoryService {
 
     /**
    * Gets the transactions history amount according to the filter data.
-   *    
-   * @param filterInput 
+   *
+   * @param filterInput
    * @returns {Observable}
    */
   getTransactionsHistoryAmount$(filterInput) {
@@ -110,7 +92,7 @@ export class TransactionHistoryService {
 
   /**
    * Gets the transactions types and concepts
-   * 
+   *
    * @returns {Observable}
    */
   getTypesAndConcepts$() {
@@ -120,5 +102,5 @@ export class TransactionHistoryService {
       errorPolicy: "all"
     });
   }
-  
+
 }
