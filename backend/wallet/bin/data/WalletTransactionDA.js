@@ -51,7 +51,7 @@ class WalletTransactionDA {
           _id: transactionHistoryId
         };
         if(filter.businessId){
-          query.businessId = filter.businessID;
+          query.businessId = filter.businessId;
         }
         return query;
       }),
@@ -64,7 +64,6 @@ class WalletTransactionDA {
    * @param {*} transactionHistoryIds ID of the transaction history
    */
   static getTransactionsHistoryByIds$(id, transactionHistoryIds, businessId) {
-    console.log('getTransactionsHistoryByIds => ', transactionHistoryIds);
     const monthYear = id.substr(id.length - 4);
     const collection = mongoDB.db.collection(`${COLLECTION_NAME}${monthYear}`);
     return of(transactionHistoryIds)
@@ -138,7 +137,7 @@ class WalletTransactionDA {
         query.concept = filter.transactionConcept;
       }
 
-      console.log('QUery => ', JSON.stringify(query));
+      console.log('Query => ', JSON.stringify(query));
       const cursor = collection.find(query).skip(pagination.count * pagination.page).limit(pagination.count).sort({timestamp: pagination.sort});
       let obj = await this.extractNextFromMongoCursor(cursor);
       while (obj) {

@@ -185,13 +185,13 @@
               <mat-form-field>
                 <mat-select
                   placeholder="{{'WALLET.SELECT_TRANSACTION_TYPE' | translate}}"
-                  formControlName="transactionType"
+                  formControlName="transactionType" [compareWith]="compareTypes"
                   id="transactionType" (selectionChange)="filterForm.get('transactionConcept').reset()"
                 >
                   <mat-option>{{ "WALLET.NONE" | translate }}</mat-option>
                   <mat-option
                     *ngFor="let transactionType of typesAndConceptsList"
-                    [value]="transactionType"
+                    [value]="transactionType"                    
                   >
                     {{ "WALLET.TYPES." + transactionType.type | translate }}
                   </mat-option>
@@ -298,29 +298,16 @@
             class="search mat-white-bg"
             flex
             fxLayout="row"
-            fxLayoutAlign="start center"
-          >
+            fxLayoutAlign="start center">
 
-            <mat-icon>search</mat-icon>
-            <mat-select *ngIf="false"
-              [placeholder]="'WALLET.SELECT_BUSINESS' | translate"
-              [compareWith]="compareIds"
-              [(value)]="selectedBusinessData"
-              (selectionChange)="onSelectBusinessEvent($event.value)"
-              fxFlex
-            >
-              <mat-option
-                *ngFor="let business of allBusiness"
-                [value]="business"
-              >
-                {{ business.name }} (ID: {{ business._id }})
-              </mat-option>
-            </mat-select>
+            <mat-icon *ngIf="isSystemAdmin">search</mat-icon>
 
+            <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" *ngIf="!isSystemAdmin"
+             [formControl]="businessFilterCtrl" [(value)]="selectedBusinessName" fxFlex readonly="true">
 
-              <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" [matAutocomplete]="auto"
+              <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" [matAutocomplete]="auto" *ngIf="isSystemAdmin"
               [(value)]="selectedBusinessData" [formControl]="businessFilterCtrl" fxFlex>
-              <mat-autocomplete #auto="matAutocomplete" (optionSelected)='onSelectBusinessEvent($event.option.value)' [displayWith]="displayFn">
+              <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption (optionSelected)='onSelectBusinessEvent($event.option.value)' [displayWith]="displayFn">
                 <mat-option *ngFor="let business of businessQueryFiltered$ | async"
                 [value]="business">
                 {{ business.name }} (ID: {{ business._id }})

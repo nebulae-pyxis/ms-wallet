@@ -13,12 +13,29 @@ const {
   PERMISSION_DENIED_ERROR,
   INTERNAL_SERVER_ERROR
 } = require("../../tools/ErrorCodes");
+const context = "wallet";
 
 let instance;
 
 class WalletCQRS {
   constructor() {}
 
+
+        /**
+   * Creates a custom error observable
+   * @param {*} errorCode Error code
+   * @param {*} methodError Method where the error was generated
+   */
+  createCustomError$(errorCode, methodError) {
+    return throwError(
+      new CustomError(
+        context,
+        methodError || "",
+        errorCode.code,
+        errorCode.description
+      )
+    );
+  }
   /**
    * Gets the wallet info of a business
    *
@@ -38,7 +55,7 @@ class WalletCQRS {
           if (!isSysAdmin && authToken.businessId != args.businessId) {
             return this.createCustomError$(
               PERMISSION_DENIED_ERROR,
-              method
+              'getWallet'
             );
           }
           return of(roles);
@@ -65,10 +82,10 @@ class WalletCQRS {
       mergeMap(roles => {
         const isSysAdmin = roles.SYSADMIN;
         //If an user does not have the role to get the transaction history from other business, we must return an error
-          if (!isSysAdmin && authToken.businessId != args.businessId) {
+          if (!isSysAdmin && authToken.businessId != args.filterInput.businessId) {
             return this.createCustomError$(
               PERMISSION_DENIED_ERROR,
-              method
+              'getWalletTransactionHistory'
             );
           }
           return of(roles);
@@ -96,10 +113,10 @@ class WalletCQRS {
       mergeMap(roles => {
         const isSysAdmin = roles.SYSADMIN;
         //If an user does not have the role to get the transaction history from other business, we must return an error
-          if (!isSysAdmin && authToken.businessId != args.businessId) {
+          if (!isSysAdmin && authToken.businessId != args.filterInput.businessId) {
             return this.createCustomError$(
               PERMISSION_DENIED_ERROR,
-              method
+              'getWalletTransactionsHistoryAmount'
             );
           }
           return of(roles);

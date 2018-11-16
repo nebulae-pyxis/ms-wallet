@@ -22,7 +22,7 @@ export class TransactionHistoryService {
       terminal: {}
     },
     pagination: {
-      page: 0, count: 10, sort: 1
+      page: 0, count: 10, sort: -1
     },    
   });
 
@@ -41,7 +41,7 @@ export class TransactionHistoryService {
   private paginationData = {
     page: 0,
     count: 10,
-    sort: 1
+    sort: -1
   };
 
   constructor(private gateway: GatewayService) {}

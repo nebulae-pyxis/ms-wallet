@@ -52,20 +52,13 @@ class BusinessCQRS {
       "wallet",
       "getWalletBusiness$",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN"]
+      ["SYSADMIN", "business-owner"]
       ).pipe(
-        mergeMap(roles => {
-          const isSysAdmin = roles.SYSADMIN;
-          //If a user does not have the role to get info from other business, we must return an error
-            if (!isSysAdmin && authToken.businessId != args.businessId) {
-              return this.createCustomError$(
-                PERMISSION_DENIED_ERROR,
-                method
-              );
-            }
-            return of(roles);
+          mergeMap(roles => {
+            console.log('authToken.businessId => ', authToken.businessId);
+            const businessId = authToken.businessId || '';
+            return BusinessDA.getBusiness$(businessId);
           }),
-          mergeMap(roles => BusinessDA.getBusiness$(args.businessId)),
           mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
           catchError(err => {
             return this.handleError$(err);

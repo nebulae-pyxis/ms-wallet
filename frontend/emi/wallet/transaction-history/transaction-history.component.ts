@@ -97,6 +97,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   myBusiness: any = null;
   allBusiness: any = [];
   selectedBusinessData: any = null;
+  selectedBusinessName: any = '';
   selectedTransactionHistory: any = null;
   isSystemAdmin: Boolean = false;
 
@@ -111,10 +112,10 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     }
   };
 
-  terminalIdInput: any;
-  terminalUserId: any;
-  terminalUsername: any;
-  transactionType: any;
+  //terminalIdInput: any;
+  //terminalUserId: any;
+  //terminalUsername: any;
+  //transactionType: any;
 
   maxEndDate: any = null;
   minEndDate: any = null;
@@ -153,12 +154,14 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.buildFilterForm();
     this.onLangChange();
+    this.test();
     this.loadTypesAndConcepts();
     this.loadBusinessFilter();
-    this.loadDataInForm();
     this.detectFilterAndPaginatorChanges();
+    
+    this.loadDataInForm();    
     this.loadRoleData();
-    this.loadBusinessData();
+    // this.loadBusinessData();
     this.loadWalletData();
     this.refreshTransactionHistoryTable();
   }
@@ -188,8 +191,21 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     return business1 && business2 ? business1._id === business2._id : business1 === business2;
 }
 
+compareTypes(type1: any, type2: any): boolean {
+  console.log('compare types',type1, type2);
+  return type1 && type2 ? type1.type === type2.type : type1 === type2;
+}
+
 displayFn(business) {
   return (business || {}).name;
+}
+
+test(){
+  this.transactionHistoryService.filterAndPaginator$
+  .subscribe(filterAndPaginator => {
+    //console.log('*************** filterAndPaginator => ', filterAndPaginator);
+    //console.log('filter.transactionType => ', filterAndPaginator.filter.transactionType);
+  })
 }
 
 
@@ -200,8 +216,8 @@ displayFn(business) {
     )
       .pipe(take(1))
       .subscribe(([filterAndPaginator, selectedBusiness]) => {
-        // console.log('filterAndPaginator ==>>> ', filterAndPaginator);
-        // console.log('selectedBusiness ==>>> ', selectedBusiness);
+        console.log('filterAndPaginator ==>>> ', filterAndPaginator);
+        console.log('selectedBusiness ==>>> ', selectedBusiness);
         if (filterAndPaginator) {
           if (filterAndPaginator.filter){
             const filter: any = filterAndPaginator.filter;
@@ -214,7 +230,8 @@ displayFn(business) {
               terminalUsername: terminal.username,
               transactionType: filter.transactionType,
               transactionConcept: filter.transactionConcept
-            });
+            });    
+            console.log('filter.transactionType123 => ', filter.transactionType);        
           }
 
           if (filterAndPaginator.pagination){
@@ -227,10 +244,10 @@ displayFn(business) {
           this.selectedBusinessData = selectedBusiness;
           this.businessFilterCtrl.setValue(this.selectedBusinessData);
         }
-        this.filterForm.enable();
-        this.filterForm.patchValue({
-          terminalId:  'test',
-        }, {emitEvent: true});
+        this.filterForm.enable({emitEvent: true});
+        // this.filterForm.patchValue({
+        //   terminalId:  'test',
+        // }, {emitEvent: true});
         // this.filterForm.updateValueAndValidity({ onlySelf: false, emitEvent: true});
       });
   }
@@ -315,10 +332,9 @@ displayFn(business) {
    */
   getFormChanges$() {
     return this.filterForm.valueChanges.pipe(
-      tap(val => console.log('this.filterForm.valueChanges => ', val)),
       debounceTime(500),
       distinctUntilChanged(),
-      tap(val => console.log('getFormChanges$'))
+      //tap(val => console.log('getFormChanges$'))
       // startWith({ initDate: this.filterForm.get('initDate').value, endDate: this.filterForm.get('endDate').value })
     );
   }
@@ -377,11 +393,20 @@ displayFn(business) {
           return this.filterForm.enabled;
         }),
         map(([formChanges, paginator]) => {
-          return {
+
+          let types = undefined;
+          if(formChanges.transactionType){
+            types = {
+              type: formChanges.transactionType.type,
+              concepts: formChanges.transactionType.concepts
+            };
+          }
+
+          const data = {
             filter: {
               initDate: formChanges.initDate,
               endDate: formChanges.endDate,
-              transactionType: formChanges.transactionType,
+              //transactionType: types,
               transactionConcept: formChanges.transactionConcept,
               terminal: {
                 id: formChanges.terminalId,
@@ -392,15 +417,21 @@ displayFn(business) {
             pagination: {
               page: paginator.pageIndex,
               count: paginator.pageSize,
-              sort: 1
+              sort: -1
             }
           };
+          
+          data.filter['transactionType'] = types;
+          console.log('antes enviar => ', data);
+          return data;
         }),
-        tap(filterAndPagination =>
+        tap(filterAndPagination1 =>{
+
+          console.log('ENVIAR ==> ', filterAndPagination1);
           this.transactionHistoryService.addFilterAndPaginatorData(
-            filterAndPagination
-          )
-        ),
+            filterAndPagination1
+          );
+        }),
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(data => {
@@ -418,15 +449,10 @@ displayFn(business) {
     )
       .pipe(
         filter(([filterAndPagination, selectedBusiness]) =>{
-          console.log('refreshTable => ', ([filterAndPagination, selectedBusiness]));
+          //console.log('refreshTable => ', ([filterAndPagination, selectedBusiness]));
           return filterAndPagination != null && selectedBusiness != null;
         }),
         map(([filterAndPagination, selectedBusiness]) => {
-          console.log("[1filterAndPagination, selectedBusiness] => ", [
-            filterAndPagination,
-            selectedBusiness
-          ]);
-
           const filterInput: any = filterAndPagination.filter;
           filterInput.initDate = filterInput.initDate
             ? filterInput.initDate.valueOf()
@@ -439,7 +465,7 @@ displayFn(business) {
           filterInput.transactionType = filterInput.transactionType ? filterInput.transactionType.type : undefined;
 
           const paginationInput = filterAndPagination.pagination;
-          console.log('filterInput => ', filterInput);
+          //console.log('filterInput => ', filterInput);
           return [filterInput, paginationInput];
           // return this.transactionHistoryService.getTransactionsHistory$(
           //   filterInput,
@@ -462,7 +488,7 @@ displayFn(business) {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(([transactionsHistory, transactionsHistoryAmount]) => {
-        console.log('transactionsHistoryAmount => ', transactionsHistoryAmount);
+        //console.log('transactionsHistoryAmount => ', transactionsHistoryAmount);
         this.dataSource.data =
           transactionsHistory.data.getWalletTransactionsHistory;
           this.tableSize = transactionsHistoryAmount.data.getWalletTransactionsHistoryAmount;
@@ -492,45 +518,73 @@ displayFn(business) {
    */
   checkIfUserIsAdmin$() {
     return Rx.Observable.of(this.keycloakService.getUserRoles(true)).pipe(
-      map(userRoles => userRoles.some(role => role === "SYSADMIN"))
+      map(userRoles => userRoles.some(role => role === "SYSADMIN")),
+      tap(isAdmin => {
+        this.isSystemAdmin = isAdmin;
+      })
     );
   }
 
   /**
    * Loads business data
    */
-  loadBusinessData() {
-    return this.checkIfUserIsAdmin$()
-      .pipe(
-        mergeMap(hasSysAdminRole => {
-          return forkJoin(
-            of(hasSysAdminRole),
-            this.getBusiness$(),
-            hasSysAdminRole ? this.getAllBusiness$() : of([])
-          );
-        }),
-        takeUntil(this.ngUnsubscribe)
-      )
-      .subscribe(([hasSysAdminRole, myBusiness, allBusinesses]) => {
-        this.myBusiness = myBusiness;
-        this.allBusiness = allBusinesses;
+  // loadBusinessData() {
+  //   return this.checkIfUserIsAdmin$()
+  //     .pipe(
+  //       mergeMap(hasSysAdminRole => {
+  //         return forkJoin(
+  //           of(hasSysAdminRole),
+  //           this.getBusiness$()
+  //         );
+  //       }),
+  //       takeUntil(this.ngUnsubscribe)
+  //     )
+  //     .subscribe(([hasSysAdminRole, myBusiness]) => {
+  //       console.log('hasSysAdminRole => ', hasSysAdminRole);
+  //       console.log('myBusiness => ', myBusiness);
+  //       this.myBusiness = myBusiness;
 
-        // If the user is not SYSADMIN, he will be only able to see info about its business, therefore the business is selected automatically.
-        if (!hasSysAdminRole && this.myBusiness) {
-          this.onSelectBusinessEvent(this.myBusiness);
-        }
-      });
-  }
+  //       // If the user is not SYSADMIN, he will be only able to see info about its business, therefore the business is selected automatically.
+  //       if (!hasSysAdminRole && this.myBusiness) {
+  //         this.onSelectBusinessEvent(this.myBusiness);
+  //       }
+  //     });
+  // }
 
   loadBusinessFilter(){
     this.businessQueryFiltered$ =
-      this.businessFilterCtrl.valueChanges.pipe(
-        startWith(undefined),
-        debounceTime(500),
-        distinctUntilChanged(),
-        mergeMap((filterText:String) => {
-          return this.getBusinessFiltered(filterText, 10);
-        })
+      this.checkIfUserIsAdmin$()
+      .pipe(
+        mergeMap(isAdmin => {
+          console.log('loadBusinessFilter1 => ', isAdmin);
+          if (isAdmin){
+            return this.businessFilterCtrl.valueChanges
+            .pipe(
+              startWith(undefined),
+              debounceTime(500),
+              distinctUntilChanged(),
+              mergeMap((filterText:String) => {
+                return this.getBusinessFiltered(filterText, 10);
+              })
+            );
+          }else {
+            return this.getBusiness$()
+            .pipe(
+              tap(business => {
+                // this.myBusiness = business;                
+                this.selectedBusinessData = business;                
+                // this.businessFilterCtrl.setValue(this.selectedBusinessData);
+                //console.log('this.selectedBusinessData => ', this.selectedBusinessData);
+                //this.businessFilterCtrl.enable();
+                this.selectedBusinessName = this.selectedBusinessData.name;
+                this.onSelectBusinessEvent(this.selectedBusinessData);
+              }),
+              filter(business => business != null),
+              toArray()
+            )
+          }        
+        }),
+        //tap(data => console.log('loadBusinessFilter2 => ', data))
       );
   }
 
@@ -603,7 +657,7 @@ displayFn(business) {
    * @param response
    */
   showSnackBarError(response) {
-    console.log('showSnackBarError => ', response);
+    //console.log('showSnackBarError => ', response);
     if (response.errors) {
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {
