@@ -16,6 +16,7 @@ let instance;
 
 class BusinessCQRS {
   constructor() {}
+  
 
   /**
    * 
