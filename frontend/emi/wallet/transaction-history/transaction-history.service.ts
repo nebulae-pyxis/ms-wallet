@@ -47,7 +47,7 @@ export class TransactionHistoryService {
   constructor(private gateway: GatewayService) {}
 
   addFilterAndPaginatorData(filterAndPaginator) {
-    console.log('addFilterAndPaginatorData => ', filterAndPaginator);
+    console.log('-> addFilterAndPaginatorData => ', filterAndPaginator);
     this._filterAndPaginator$.next(filterAndPaginator);
   }
 

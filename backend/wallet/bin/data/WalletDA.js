@@ -30,7 +30,6 @@ class WalletDA {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return of(businessId).pipe(
       mergeMap(id => defer(() => collection.findOne({ businessId: id }))),
-      // map(r => { console.log(felipe); return r; }),
       mergeMap(wallet => wallet ? of(wallet) : throwError(WALLET_NO_FOUND_ERROR) ),
       map(wallet => 
         ({...wallet, 

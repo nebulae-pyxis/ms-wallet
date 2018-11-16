@@ -14,7 +14,7 @@ type Pocket {
   bonus: Float
 }
 
-"Wallet info"
+"Wallet info."
 type Wallet {
   "Wallet ID"
   _id: ID!
