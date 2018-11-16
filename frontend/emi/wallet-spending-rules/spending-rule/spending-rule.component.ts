@@ -41,6 +41,7 @@ export interface AutoPocketRule {
 }
 
 
+
 @Component({
   // tslint:disable-next-line:component-selector
   selector: 'spending-rule',
