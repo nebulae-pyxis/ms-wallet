@@ -54,18 +54,18 @@
         "src": "frontend/emi/wallet-spending-rules",
         "groups": [
             {
-                "id": "SYSTEM",
+                "id": "BUSINESS_UNIT_MANAGER",
                 "icon": "location_searching",
                 "translate": {
-                    "en": "System",
-                    "es": "Sistema"
+                    "en": "Business unit manager",
+                    "es": "Administración unidad de negocio"
                 },
-                "priority": 100
+                "priority": 200
             }
           ],
         "contents": [
             {
-                "groupId": "SYSTEM",
+                "groupId": "BUSINESS_UNIT_MANAGER",
                 "id": "wallet-spending-rules",
                 "icon": "dashboard",
                 "translate": {
