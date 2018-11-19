@@ -55,7 +55,7 @@ class BusinessCQRS {
       ["SYSADMIN", "business-owner"]
       ).pipe(
           mergeMap(roles => {
-            console.log('authToken.businessId => ', authToken.businessId);
+            //console.log('authToken.businessId => ', authToken.businessId);
             const businessId = authToken.businessId || '';
             return BusinessDA.getBusiness$(businessId);
           }),

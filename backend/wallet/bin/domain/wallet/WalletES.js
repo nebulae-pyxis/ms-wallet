@@ -2,9 +2,10 @@ const BusinessDA = require("../../data/BusinessDA");
 const LogErrorDA = require("../../data/LogErrorDA");
 const WalletDA = require('../../data/WalletDA');
 const WalletHelper = require("./WalletHelper");
+const broker = require('../../tools/broker/BrokerFactory')();
 const SpendingRulesDA = require('../../data/SpendingRulesDA');
-const { mergeMap, catchError, map, defaultIfEmpty, first, tap, filter, toArray} = require('rxjs/operators');
-const  { forkJoin, of, interval, from, throwError, concat, Observable } = require('rxjs');
+const { mergeMap, catchError, map, defaultIfEmpty, first, tap, filter, toArray, groupBy, debounceTime} = require('rxjs/operators');
+const  { forkJoin, of, interval, from, throwError, concat, Observable, Subject } = require('rxjs');
 const uuidv4 = require("uuid/v4");
 const [ MAIN_POCKET, BONUS_POCKET ]  = [ 'MAIN', 'BONUS' ];
 const Crosscutting = require("../../tools/Crosscutting");
@@ -12,13 +13,48 @@ const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
 const mongoDB = require('../../data/MongoDB').singleton();
 
+const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
+
 let instance;
 
 class WalletES {
   constructor() {
+    this.materializedViewsEventEmitted$ = new Subject();
+    this.buildWalletEmissor();
   }
 
-  
+  /**
+   * Defines when a wallet event must be emitted
+   */
+  buildWalletEmissor(){
+    this.materializedViewsEventEmitted$
+    .pipe(
+      groupBy(business => business._id),
+      mergeMap(group$ => group$.pipe(debounceTime(5000))),
+      mergeMap(business => this.sendUpdatedWalletEvent$(business))
+    )
+    .subscribe(
+      (result) => {},
+      (err) => { console.log(err) },
+      () => { }
+    );
+  }
+
+  /**
+   * Sends an event with the wallet info associated with the indicated business 
+   * @param {*} business 
+   */
+  sendUpdatedWalletEvent$(business){
+    return of(business)
+    .pipe(
+      mergeMap(business => WalletDA.getWallet$(business._id)),
+      mergeMap(wallet => {
+        //console.log('MATERIALIZED_VIEW_TOPIC => ', wallet);
+        return broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletUpdated', wallet)        ;
+      })
+    );
+  }
+
 
   /**
    * Receives a business created event and create a wallet for the business
@@ -295,7 +331,6 @@ class WalletES {
    * @param {*} walletDepositCommitedEvent 
    */
   handleWalletDepositCommited$(walletDepositCommitedEvent){
-    console.log('handleWalletDepositCommited => ', walletDepositCommitedEvent);
     return of(walletDepositCommitedEvent)
     .pipe(
       //Create wallet execute transaction
@@ -389,10 +424,16 @@ class WalletES {
         )
       ),
       mergeMap(([event, business]) => concat(
+        of(business),
         WalletHelper.saveTransactions$(event),
         WalletHelper.applyTransactionsOnWallet$(event, business),
-        WalletHelper.checkWalletSpendingAlarms$(business._id)
+        WalletHelper.checkWalletSpendingAlarms$(business._id),
       )),
+      toArray(),
+      tap(res => {
+        //console.log('handleWalletTransactionExecuted => ', res[0])
+        this.materializedViewsEventEmitted$.next(res[0])
+      }),
       catchError(error => {
         console.log(`An error was generated while a walletTransactionExecuted was being processed: ${error.stack}`);
         return this.errorHandler$(walletTransactionExecuted, error.stack, 'walletTransactionExecuted');

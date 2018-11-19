@@ -185,13 +185,13 @@
               <mat-form-field>
                 <mat-select
                   placeholder="{{'WALLET.SELECT_TRANSACTION_TYPE' | translate}}"
-                  formControlName="transactionType"
+                  formControlName="transactionType" [compareWith]="compareTypes"
                   id="transactionType" (selectionChange)="filterForm.get('transactionConcept').reset()"
                 >
                   <mat-option>{{ "WALLET.NONE" | translate }}</mat-option>
                   <mat-option
                     *ngFor="let transactionType of typesAndConceptsList"
-                    [value]="transactionType"                    
+                    [value]="transactionType"
                   >
                     {{ "WALLET.TYPES." + transactionType.type | translate }}
                   </mat-option>

@@ -157,10 +157,16 @@ export const makeManualBalanceAdjustment = gql`
 
 
 //Hello world sample, please remove
-export const walletHelloWorldSubscription = gql`
-  subscription {
-    walletHelloWorldSubscription {
-      sn
+export const walletUpdated = gql`
+  subscription walletUpdated($businessId: String!) {
+    walletUpdated(businessId: $businessId) {
+      _id
+      pockets {
+        main
+        bonus
+      }
+      spendingState
+      businessId
     }
   }
 `;

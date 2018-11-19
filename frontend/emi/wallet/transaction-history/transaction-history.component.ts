@@ -30,7 +30,7 @@ import {
   distinctUntilChanged,
   take
 } from "rxjs/operators";
-import { Subject, fromEvent, of, forkJoin, Observable } from "rxjs";
+import { Subject, fromEvent, of, forkJoin, Observable, concat } from "rxjs";
 
 //////////// ANGULAR MATERIAL ///////////
 import {
@@ -43,7 +43,11 @@ import { fuseAnimations } from "../../../../core/animations";
 
 //////////// i18n ////////////
 import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
-import { TranslateService, LangChangeEvent, TranslationChangeEvent } from "@ngx-translate/core";
+import {
+  TranslateService,
+  LangChangeEvent,
+  TranslationChangeEvent
+} from "@ngx-translate/core";
 import { locale as english } from "../i18n/en";
 import { locale as spanish } from "../i18n/es";
 
@@ -58,7 +62,7 @@ import {
   MAT_DATE_FORMATS,
   MAT_DATE_LOCALE,
   MomentDateAdapter
-} from '@coachcare/datepicker';
+} from "@coachcare/datepicker";
 
 import * as moment from "moment";
 
@@ -68,9 +72,13 @@ import * as moment from "moment";
   styleUrls: ["./transaction-history.component.scss"],
   animations: fuseAnimations,
   providers: [
-    {provide: MAT_DATE_LOCALE, useValue: 'es'},
-    {provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE]},
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
+    { provide: MAT_DATE_LOCALE, useValue: "es" },
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE]
+    },
+    { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS }
   ]
 })
 export class TransactionHistoryComponent implements OnInit, OnDestroy {
@@ -97,14 +105,14 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   myBusiness: any = null;
   allBusiness: any = [];
   selectedBusinessData: any = null;
-  selectedBusinessName: any = '';
+  selectedBusinessName: any = "";
   selectedTransactionHistory: any = null;
   isSystemAdmin: Boolean = false;
 
   businessQueryFiltered$: Observable<any[]>;
 
   walletData: any = {
-    spendingState: '',
+    spendingState: "",
     pockets: {
       main: 0,
       bonus: 0,
@@ -123,17 +131,17 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   // Table values
   @ViewChild(MatPaginator)
   paginator: MatPaginator;
-  @ViewChild('filter')
+  @ViewChild("filter")
   filter: ElementRef;
   @ViewChild(MatSort)
   sort: MatSort;
   tableSize: number;
   page = 0;
   count = 10;
-  filterText = '';
+  filterText = "";
   sortColumn = null;
   sortOrder = null;
-  itemPerPage = '';
+  itemPerPage = "";
 
   constructor(
     private formBuilder: FormBuilder,
@@ -157,7 +165,6 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     this.loadTypesAndConcepts();
     this.loadBusinessFilter();
     this.detectFilterAndPaginatorChanges();
-    this.test();
     this.loadDataInForm();
     this.loadRoleData();
     // this.loadBusinessData();
@@ -166,17 +173,17 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   }
 
   buildFilterForm() {
-    const startOfMonth = moment().startOf('month');
-    const endOfMonth = moment().endOf('day');
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment().endOf("day");
     this.minEndDate = startOfMonth;
     this.maxEndDate = endOfMonth;
     // Reactive Form
     this.filterForm = this.formBuilder.group({
       initDate: [startOfMonth],
       endDate: [endOfMonth],
-      terminalId: [''],
-      terminalUserId: [''],
-      terminalUsername: [''],
+      terminalId: [""],
+      terminalUserId: [""],
+      terminalUsername: [""],
       transactionType: [null],
       transactionConcept: [null]
     });
@@ -187,24 +194,18 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   }
 
   compareIds(business1: any, business2: any): boolean {
-    return business1 && business2 ? business1._id === business2._id : business1 === business2;
-}
+    return business1 && business2
+      ? business1._id === business2._id
+      : business1 === business2;
+  }
 
-// compareTypes(type1: any, type2: any): boolean {
-//   console.log('compare types',type1, type2);
-//   return type1 && type2 ? type1.type === type2.type : false;
-// }
+  compareTypes(type1: any, type2: any): boolean {
+    return type1 && type2 ? type1.type === type2.type : type1 === type2;
+  }
 
-displayFn(business) {
-  return (business || {}).name;
-}
-
-test(){
-  this.transactionHistoryService.filterAndPaginator$
-  .subscribe(filterAndPaginator => {
-    console.log(`*************** COPY filterAndPaginator => ${JSON.stringify(filterAndPaginator)}`);
-  });
-}
+  displayFn(business) {
+    return (business || {}).name;
+  }
 
   loadDataInForm() {
     Rx.Observable.combineLatest(
@@ -213,40 +214,27 @@ test(){
     )
       .pipe(take(1))
       .subscribe(([filterAndPaginator, selectedBusiness]) => {
-        console.log(`filterAndPaginator => ${JSON.stringify(filterAndPaginator)}`);
-        console.log('selectedBusiness ==>>> ', selectedBusiness);
+        // console.log(`filterAndPaginator => ${JSON.stringify(filterAndPaginator)}`);
+        // console.log('selectedBusiness ==>>> ', selectedBusiness);
         if (filterAndPaginator) {
-          if (filterAndPaginator.filter){
+          if (filterAndPaginator.filter) {
             const filterData: any = filterAndPaginator.filter;
             const terminal: any = filterAndPaginator.filter.terminal || {};
-
-            let types: any;
-            if (filterAndPaginator.filter.transactionType){
-              console.log('typeof filterAndPaginator.filter.transactionType  => ', typeof filterAndPaginator.filter.transactionType );
-              if (typeof filterAndPaginator.filter.transactionType === 'string'){
-                types = this.typesAndConceptsList.find(e => e.type.toUpperCase() === filterAndPaginator.filter.transactionType);
-              }else{
-                // types = this.typesAndConceptsList.find(e => e.type.toUpperCase() === filterAndPaginator.filter.transactionType.type);
-                types = filterAndPaginator.filter.transactionType;
-              }
-            }
-
 
             this.filterForm.patchValue({
               initDate: filterData.initDate,
               endDate: filterData.endDate,
-              terminalId:  terminal.id,
+              terminalId: terminal.id,
               terminalUserId: terminal.userId,
               terminalUsername: terminal.username,
-              transactionType: types,
+              transactionType: filterData.transactionTypeData,
               transactionConcept: filterData.transactionConcept
             });
-            console.log('filter.transactionType123 => ', filterData.transactionType);
           }
 
-          if (filterAndPaginator.pagination){
-            this.page = filterAndPaginator.pagination.page,
-            this.count = filterAndPaginator.pagination.count;
+          if (filterAndPaginator.pagination) {
+            (this.page = filterAndPaginator.pagination.page),
+              (this.count = filterAndPaginator.pagination.count);
           }
         }
 
@@ -254,7 +242,7 @@ test(){
           this.selectedBusinessData = selectedBusiness;
           this.businessFilterCtrl.setValue(this.selectedBusinessData);
         }
-        this.filterForm.enable({emitEvent: true});
+        this.filterForm.enable({ emitEvent: true });
       });
   }
 
@@ -262,35 +250,48 @@ test(){
    * Paginator of the table
    */
   getPaginator$() {
-    return this.paginator.page
-    .pipe(startWith({ pageIndex: 0, pageSize: 10 }));
+    return this.paginator.page.pipe(startWith({ pageIndex: 0, pageSize: 10 }));
   }
 
   /**
    * Changes the internationalization of the dateTimePicker component
    */
-  onLangChange(){
+  onLangChange() {
     this.translate.onLangChange
-    .pipe(
-      startWith({lang: this.translate.currentLang}),
-      takeUntil(this.ngUnsubscribe)
-    )
-    .subscribe(event => {
-      if (event){
-        this.adapter.setLocale(event.lang);
-      }
-    });
+      .pipe(
+        startWith({ lang: this.translate.currentLang }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(event => {
+        if (event) {
+          this.adapter.setLocale(event.lang);
+        }
+      });
   }
 
   loadTypesAndConcepts() {
-    this.transactionHistoryService.getTypesAndConcepts$()
+    this.transactionHistoryService
+      .getTypesAndConcepts$()
+      .pipe(
+        map(result => result.data.typeAndConcepts),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(data => {
+        this.typesAndConceptsList = data;
+      });
+  }
+
+  /**
+   * Subscribes to wallet subscription
+   */
+  subscribeWalletUpdated(){
+    this.transactionHistoryService.selectedBusinessEvent$
     .pipe(
-      map(result => result.data.typeAndConcepts),
-      takeUntil(this.ngUnsubscribe)
-    )
-    .subscribe(data => {
-      this.typesAndConceptsList = data;
-    });
+      filter(selectedBusiness => selectedBusiness != null),
+      mergeMap((selectedBusiness: any) =>
+        this.walletService.getWalletUpdatedSubscription$(selectedBusiness._id)
+      )
+    );
   }
 
   /**
@@ -300,19 +301,22 @@ test(){
     this.transactionHistoryService.selectedBusinessEvent$
       .pipe(
         filter(selectedBusiness => selectedBusiness != null),
-        mergeMap((selectedBusiness: any) =>
+        mergeMap((selectedBusiness: any) => concat(
           this.walletService.getWallet$(selectedBusiness._id)
-        ),
-        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0),
-        map(result => result.data.getWallet),
+          .pipe(
+            mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+            filter((resp: any) => !resp.errors || resp.errors.length === 0),
+            map(result => result.data.getWallet)
+          ),
+          this.walletService.getWalletUpdatedSubscription$(selectedBusiness._id)
+        )),
         map(wallet => {
           let credit = 0;
-          if(wallet.pockets.main < 0){
+          if (wallet.pockets.main < 0) {
             credit += wallet.pockets.main;
           }
 
-          if(wallet.pockets.bonus < 0){
+          if (wallet.pockets.bonus < 0) {
             credit += wallet.pockets.bonus;
           }
           const walletCopy = {
@@ -320,7 +324,7 @@ test(){
             pockets: {
               main: wallet.pockets.main < 0 ? 0 : wallet.pockets.main,
               bonus: wallet.pockets.bonus < 0 ? 0 : wallet.pockets.bonus,
-              credit: credit,
+              credit: credit
             }
           };
           return walletCopy;
@@ -328,6 +332,7 @@ test(){
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(wallet => {
+        console.log('new Wallet => ', wallet);
         this.walletData = wallet;
       });
   }
@@ -339,37 +344,41 @@ test(){
   getFormChanges$() {
     return this.filterForm.valueChanges.pipe(
       debounceTime(500),
-      distinctUntilChanged(),
-      //tap(val => console.log('getFormChanges$'))
-      // startWith({ initDate: this.filterForm.get('initDate').value, endDate: this.filterForm.get('endDate').value })
+      distinctUntilChanged()
     );
   }
 
   onInitDateChange() {
-    const start = this.filterForm.get('initDate').value;
-    const end = this.filterForm.get('endDate').value;
+    const start = this.filterForm.get("initDate").value;
+    const end = this.filterForm.get("endDate").value;
 
     const startMonth = start.month();
     const startYear = start.year();
-    const startMonthYear = startMonth+'-'+startYear;
+    const startMonthYear = startMonth + "-" + startYear;
 
     const endMonth = end.month();
     const endYear = end.year();
-    const endMonthYear = endMonth+'-'+endYear;
+    const endMonthYear = endMonth + "-" + endYear;
 
     this.minEndDate = moment(start);
-    if(startMonthYear != endMonthYear){
-      console.log('Select last day of month or current date');
+    if (startMonthYear != endMonthYear) {
+      console.log("Select last day of month or current date");
       this.filterForm.patchValue({
         endDate: start.endOf("month")
       });
       this.maxEndDate = start.endOf("month");
-    }else{
-      console.log('Same month');
+    } else {
+      console.log("Same month");
     }
 
-    console.log('minEndDate => ', this.minEndDate.format('MMMM Do YYYY, h:mm:ss a'));
-    console.log('maxEndDate => ', this.maxEndDate.format('MMMM Do YYYY, h:mm:ss a'));
+    console.log(
+      "minEndDate => ",
+      this.minEndDate.format("MMMM Do YYYY, h:mm:ss a")
+    );
+    console.log(
+      "maxEndDate => ",
+      this.maxEndDate.format("MMMM Do YYYY, h:mm:ss a")
+    );
   }
 
   onEndDateChange() {
@@ -383,8 +392,8 @@ test(){
     this.page = 0;
     this.count = 10;
 
-    const startOfMonth = moment().startOf('month');
-    const endOfMonth = moment().endOf('month');
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment().endOf("month");
     this.filterForm.patchValue({
       initDate: startOfMonth,
       endDate: endOfMonth
@@ -394,41 +403,17 @@ test(){
   detectFilterAndPaginatorChanges() {
     Rx.Observable.combineLatest(this.getFormChanges$(), this.getPaginator$())
       .pipe(
-        tap(data => console.log('detectFilterAndPaginatorChanges1 => ', data)),
         filter(data => {
           return this.filterForm.enabled;
         }),
         map(([formChanges, paginator]) => {
-          console.log('detectFilterAndPaginatorChanges2 => ', formChanges);
-          let types = undefined;
-          if(formChanges.transactionType){
-            console.log('detectFilterAndPaginatorChanges3 => ', formChanges.transactionType.type);
-
-            // types = {
-            //   type: formChanges.transactionType.type,
-            //   concepts: formChanges.transactionType.concepts
-            // }
-
-            if(typeof formChanges.transactionType === 'string'){
-              types = this.typesAndConceptsList.find(e => e.type.toUpperCase() === formChanges.transactionType);
-            }else{
-              types = this.typesAndConceptsList.find(e => e.type.toUpperCase() === formChanges.transactionType.type);
-            }
-
-
-
-            console.log('Types => ',types);
-            // types = {
-            //   type: formChanges.transactionType.type,
-            //   concepts: formChanges.transactionType.concepts
-            // };
-          }
+          console.log("detectFilterAndPaginatorChanges2 => ", formChanges);
 
           const data = {
             filter: {
               initDate: formChanges.initDate,
               endDate: formChanges.endDate,
-              //transactionType: {type: 'SALE', concepts: ['ADIOS']},
+              // transactionType: {type: 'SALE', concepts: ['ADIOS']},
               transactionConcept: formChanges.transactionConcept,
               terminal: {
                 id: formChanges.terminalId,
@@ -443,20 +428,15 @@ test(){
             }
           };
 
-          data.filter['transactionType'] = types;
-          console.log(`antes enviar => ${JSON.stringify(data)}`);
+          data.filter["transactionTypeData"] = formChanges.transactionType;
           return data;
-        }),
-        tap(filterAndPagination1 =>{
-          console.log(`ENVIAR => ${JSON.stringify(filterAndPagination1)}`);
-          this.transactionHistoryService.addFilterAndPaginatorData(
-            filterAndPagination1
-          );
         }),
         takeUntil(this.ngUnsubscribe)
       )
-      .subscribe(data => {
-        //console.log('TEST$ => ', data);
+      .subscribe(filterAndPagination => {
+        this.transactionHistoryService.addFilterAndPaginatorData(
+          filterAndPagination
+        );
       });
   }
 
@@ -469,50 +449,46 @@ test(){
       this.transactionHistoryService.selectedBusinessEvent$
     )
       .pipe(
-        filter(([filterAndPagination, selectedBusiness]) =>{
-          //console.log('refreshTable => ', ([filterAndPagination, selectedBusiness]));
+        filter(([filterAndPagination, selectedBusiness]) => {
+          // console.log('refreshTable => ', ([filterAndPagination, selectedBusiness]));
           return filterAndPagination != null && selectedBusiness != null;
         }),
         map(([filterAndPagination, selectedBusiness]) => {
-          const filterInput: any = filterAndPagination.filter;
-          filterInput.initDate = filterInput.initDate
-            ? filterInput.initDate.valueOf()
-            : null;
-          filterInput.endDate = filterInput.endDate
-            ? filterInput.endDate.valueOf()
-            : null;
-          filterInput.businessId = selectedBusiness._id;
-
-          filterInput.transactionType = filterInput.transactionType ? filterInput.transactionType.type : undefined;
+          const filterInput: any = {
+            businessId: selectedBusiness._id,
+            initDate: filterAndPagination.filter.initDate
+              ? filterAndPagination.filter.initDate.valueOf()
+              : null,
+            endDate: filterAndPagination.filter.endDate
+              ? filterAndPagination.filter.endDate.valueOf()
+              : null,
+            transactionType: filterAndPagination.filter.transactionTypeData
+              ? filterAndPagination.filter.transactionTypeData.type
+              : undefined,
+            transactionConcept: filterAndPagination.filter.transactionConcept,
+            terminal: filterAndPagination.filter.terminal
+          };
 
           const paginationInput = filterAndPagination.pagination;
-          //console.log('filterInput => ', filterInput);
           return [filterInput, paginationInput];
-          // return this.transactionHistoryService.getTransactionsHistory$(
-          //   filterInput,
-          //   paginationInput
-          // );
         }),
         mergeMap(([filterInput, paginationInput]) => {
           return forkJoin(
-            this.transactionHistoryService.getTransactionsHistory$(filterInput,paginationInput)
-            .pipe(
-              mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp))
-            ),
-            this.transactionHistoryService.getTransactionsHistoryAmount$(filterInput)
-            .pipe(
-              mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp))
-            ),
+            this.transactionHistoryService
+              .getTransactionsHistory$(filterInput, paginationInput)
+              .pipe(mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp))),
+            this.transactionHistoryService
+              .getTransactionsHistoryAmount$(filterInput)
+              .pipe(mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)))
           );
         }),
-        // filter((resp: any) => !resp.errors || resp.errors.length === 0),
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(([transactionsHistory, transactionsHistoryAmount]) => {
-        //console.log('transactionsHistoryAmount => ', transactionsHistoryAmount);
         this.dataSource.data =
           transactionsHistory.data.getWalletTransactionsHistory;
-          this.tableSize = transactionsHistoryAmount.data.getWalletTransactionsHistoryAmount;
+        this.tableSize =
+          transactionsHistoryAmount.data.getWalletTransactionsHistoryAmount;
       });
   }
 
@@ -546,78 +522,43 @@ test(){
     );
   }
 
-  /**
-   * Loads business data
-   */
-  // loadBusinessData() {
-  //   return this.checkIfUserIsAdmin$()
-  //     .pipe(
-  //       mergeMap(hasSysAdminRole => {
-  //         return forkJoin(
-  //           of(hasSysAdminRole),
-  //           this.getBusiness$()
-  //         );
-  //       }),
-  //       takeUntil(this.ngUnsubscribe)
-  //     )
-  //     .subscribe(([hasSysAdminRole, myBusiness]) => {
-  //       console.log('hasSysAdminRole => ', hasSysAdminRole);
-  //       console.log('myBusiness => ', myBusiness);
-  //       this.myBusiness = myBusiness;
-
-  //       // If the user is not SYSADMIN, he will be only able to see info about its business, therefore the business is selected automatically.
-  //       if (!hasSysAdminRole && this.myBusiness) {
-  //         this.onSelectBusinessEvent(this.myBusiness);
-  //       }
-  //     });
-  // }
-
-  loadBusinessFilter(){
-    this.businessQueryFiltered$ =
-      this.checkIfUserIsAdmin$()
-      .pipe(
-        mergeMap(isAdmin => {
-          console.log('loadBusinessFilter1 => ', isAdmin);
-          if (isAdmin){
-            return this.businessFilterCtrl.valueChanges
-            .pipe(
-              startWith(undefined),
-              debounceTime(500),
-              distinctUntilChanged(),
-              mergeMap((filterText:String) => {
-                return this.getBusinessFiltered(filterText, 10);
-              })
-            );
-          }else {
-            return this.getBusiness$()
-            .pipe(
-              tap(business => {
-                // this.myBusiness = business;
-                this.selectedBusinessData = business;
-                // this.businessFilterCtrl.setValue(this.selectedBusinessData);
-                //console.log('this.selectedBusinessData => ', this.selectedBusinessData);
-                //this.businessFilterCtrl.enable();
-                this.selectedBusinessName = this.selectedBusinessData.name;
-                this.onSelectBusinessEvent(this.selectedBusinessData);
-              }),
-              filter(business => business != null),
-              toArray()
-            )
-          }
-        }),
-        //tap(data => console.log('loadBusinessFilter2 => ', data))
-      );
+  loadBusinessFilter() {
+    this.businessQueryFiltered$ = this.checkIfUserIsAdmin$().pipe(
+      mergeMap(isAdmin => {
+        console.log("loadBusinessFilter1 => ", isAdmin);
+        if (isAdmin) {
+          return this.businessFilterCtrl.valueChanges.pipe(
+            startWith(undefined),
+            debounceTime(500),
+            distinctUntilChanged(),
+            mergeMap((filterText: String) => {
+              return this.getBusinessFiltered(filterText, 10);
+            })
+          );
+        } else {
+          return this.getBusiness$().pipe(
+            tap(business => {
+              // this.myBusiness = business;
+              this.selectedBusinessData = business;
+              this.selectedBusinessName = this.selectedBusinessData.name;
+              this.onSelectBusinessEvent(this.selectedBusinessData);
+            }),
+            filter(business => business != null),
+            toArray()
+          );
+        }
+      })
+      // tap(data => console.log('loadBusinessFilter2 => ', data))
+    );
   }
 
   getBusinessFiltered(filterText: String, limit: number): Observable<any[]> {
-    return this.walletService
-      .getBusinessByFilter(filterText, limit)
-      .pipe(
-        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter(resp => !resp.errors),
-        mergeMap(result => Observable.from(result.data.getBusinessByFilter)),
-        toArray()
-      );
+    return this.walletService.getBusinessByFilter(filterText, limit).pipe(
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      filter(resp => !resp.errors),
+      mergeMap(result => Observable.from(result.data.getBusinessByFilter)),
+      toArray()
+    );
   }
 
   /**
@@ -678,7 +619,7 @@ test(){
    * @param response
    */
   showSnackBarError(response) {
-    //console.log('showSnackBarError => ', response);
+    // console.log('showSnackBarError => ', response);
     if (response.errors) {
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {
@@ -687,8 +628,8 @@ test(){
               this.showMessageSnackbar("ERRORS." + errorDetail.message.code);
             });
           } else {
-            response.errors.forEach(error => {
-              this.showMessageSnackbar("ERRORS." + error.message.code);
+            response.errors.forEach(errorData => {
+              this.showMessageSnackbar("ERRORS." + errorData.message.code);
             });
           }
         });

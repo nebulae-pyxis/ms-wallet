@@ -263,7 +263,7 @@ type Mutation {
 }
 
 type Subscription {
-  "This events is triggered when a wallet is created or updated"
-  walletUpdated: Wallet
+  "Subscription fires when a wallet is updated"
+  walletUpdated(businessId: String!): Wallet
 }
 

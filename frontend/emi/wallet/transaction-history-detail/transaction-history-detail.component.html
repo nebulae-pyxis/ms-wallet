@@ -1,5 +1,5 @@
 <div id="user" class="page-layout carded fullwidth" fusePerfectScrollbar>
-  
+
   <!-- TOP BACKGROUND -->
   <div class="top-bg mat-accent-bg"></div>
   <!-- / TOP BACKGROUND -->
@@ -108,7 +108,9 @@
                     <div class="h2 secondary-text">{{'WALLET.ASSOCIATED_TRANSACTIONS' | translate}}</div>
                 </div>
 
-                <mat-table id="associated-transactions-history-table" class="item-table p-24 mr-24 mb-24"  #table [dataSource]="dataSource">
+                <mat-table id="associated-transactions-history-table"
+                class="item-table p-24 mr-24 mb-24"
+                #table [dataSource]="dataSource">
 
                     <!-- Timestamp Column -->
                     <ng-container cdkColumnDef="timestamp">

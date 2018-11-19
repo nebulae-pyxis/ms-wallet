@@ -47,7 +47,7 @@ class WalletCQRS {
       "WALLET",
       "getWallet",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner"]
+      ["SYSADMIN", "business-owner", "POS"]
     ).pipe(
       mergeMap(roles => {
         const isSysAdmin = roles.SYSADMIN;
@@ -172,7 +172,7 @@ class WalletCQRS {
         return WalletTransactionDA.getTransactionHistoryById$(businessId, args.id);
       }),
       mergeMap(transactionHistory => {
-        console.log('getAssociatedTransactionsHistoryByTransactionHistoryId1 => ', transactionHistory);
+        //console.log('getAssociatedTransactionsHistoryByTransactionHistoryId1 => ', transactionHistory);
         transactionHistory.associatedTransactionIds = [transactionHistory._id];
         if(transactionHistory && transactionHistory.associatedTransactionIds && transactionHistory.associatedTransactionIds.length > 0){
           return WalletTransactionDA.getTransactionsHistoryByIds$(args.id, transactionHistory.associatedTransactionIds, transactionHistory.businessId)

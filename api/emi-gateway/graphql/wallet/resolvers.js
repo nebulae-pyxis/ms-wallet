@@ -139,14 +139,13 @@ module.exports = {
         .toPromise();
     },
       getWallet(root, args, context) {
-        console.log('getWallet *** ', args);
         return RoleValidator.checkPermissions$(
           context.authToken.realm_access.roles,
           CONTEXT_NAME,
           "getWallet",
           PERMISSION_DENIED_ERROR_CODE,
           "Permission denied",
-          ["SYSADMIN", "business-owner"]
+          ["SYSADMIN", "business-owner", "POS"]
         )
           .mergeMap(response => {
             return broker.forwardAndGetReply$(
@@ -347,16 +346,17 @@ module.exports = {
           //Checks the roles of the user, if the user does not have at least one of the required roles, an error will be thrown
           RoleValidator.checkAndThrowError(
             context.authToken.realm_access.roles, 
-            ["SYSADMIN", "business-owner"], 
-            contextName, 
+            ["SYSADMIN", "business-owner", "POS"], 
+            CONTEXT_NAME, 
             "walletUpdated", 
             PERMISSION_DENIED_ERROR_CODE, 
             "Permission denied");
 
           return pubsub.asyncIterator("walletUpdated");  
         },
-        (payload, variables, context, info) => {         
-          return true;
+        (payload, variables, context, info) => {
+          console.log('payload => ', payload, variables.businessId, (payload.businessId == variables.businessId));
+          return payload.walletUpdated.businessId == variables.businessId;
         }
       )
     }
@@ -386,6 +386,7 @@ eventDescriptors.forEach(descriptor => {
         .getMaterializedViewsUpdates$([descriptor.backendEventName])
         .subscribe(
             evt => {
+              console.log('getMaterializedViewsUpdates => ', descriptor.backendEventName);
                 if (descriptor.onEvent) {
                     descriptor.onEvent(evt, descriptor);
                 }

@@ -7,7 +7,7 @@ import {
   getWallet,
   getWalletBusinessById,
   getBusinessByFilter,
-  walletHelloWorldSubscription
+  walletUpdated
 } from "./gql/wallet";
 
 @Injectable()
@@ -90,13 +90,20 @@ export class WalletService {
   }
 
   /**
-   * Hello World subscription sample, please remove
+   * Receives an event with the last wallet state when a wallet has been updated.
+   * @param businessId 
    */
-  getEventSourcingMonitorHelloWorldSubscription$(): Observable<any> {
+  getWalletUpdatedSubscription$(businessId): Observable<any> {
     return this.gateway.apollo
       .subscribe({
-        query: walletHelloWorldSubscription
+        query: walletUpdated,
+        variables: {
+          businessId: businessId
+        },
       })
-      .map(resp => resp.data.walletHelloWorldSubscription.sn);
+      .map(resp => {
+        console.log('resp.data.walletUpdated => ', resp);
+        return resp.data.walletUpdated;
+      });
   }
 }
