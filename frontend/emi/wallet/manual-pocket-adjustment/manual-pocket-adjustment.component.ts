@@ -8,7 +8,7 @@ import { Subject, BehaviorSubject } from 'rxjs';
 
 ////////// ANGULAR //////////
 import { Component, OnInit, OnDestroy} from "@angular/core";
-import { FormBuilder, FormGroup, FormControl, Validators } from "@angular/forms";
+import { FormBuilder, FormGroup, FormControl, Validators, FormGroupDirective } from "@angular/forms";
 
 //////////// ANGULAR MATERIAL ///////////
 import {
@@ -87,7 +87,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
       console.log('loadWalletData => ', wallet);
 
       this.wallet = wallet;
-    })
+    });
   }
 
   /**
@@ -110,13 +110,13 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
   }
 
   /**
-   * Gets the wallet info associated with the business 
+   * Gets the wallet info associated with the business
    * @param business Business to query the info
    */
   getWallet$(business){
     return this.walletService.getWallet$(business._id)
     .pipe(
-      map((wallet: any)=> {
+      map((wallet: any) => {
         return {
           businessId: '4312432',
           pocket: {
@@ -126,9 +126,9 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
           },
           state: '',
           _id: ''
-        }
+        };
       })
-    )
+    );
   }
 
     /**
@@ -137,20 +137,18 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
   createManualBalanceAdjustmentForm() {
     return this.formBuilder.group({
       value: new FormControl(null, [Validators.required, Validators.min(1)]),
-      notes: new FormControl(null, [Validators.required, , Validators.min(20000000)]),
+      notes: new FormControl(null, [Validators.minLength(20), Validators.maxLength(200), Validators.required]),
       business: new FormControl(null, Validators.required),
-      //adjustmentDate: new FormControl(null, Validators.required)
     });
   }
 
-
   /**
-   * 
+   *
    * @param adjustmentType Indicates if the adjustment type is 'ACCREDIT' or 'DEBIT'
    */
-  makeManualBalanceAdjustment(adjustmentType: String){
+  makeManualBalanceAdjustment(adjustmentType: String, formDirective: FormGroupDirective){
     this.dialog
-    //Opens confirm dialog
+    // Opens confirm dialog
     .open(DialogComponent, {
       data: {
         dialogMessage: "WALLET.MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE",
@@ -174,17 +172,19 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter((resp: any) => !resp.errors || resp.errors.length === 0)
     ).subscribe(res => {
-      this.snackBar.open(this.translationLoader.getTranslate().instant('WALLET.EXECUTED_OPERATION'), 
+      formDirective.resetForm();
+      this.manualBalanceAdjustmentsForm.reset();
+      this.snackBar.open(this.translationLoader.getTranslate().instant('WALLET.EXECUTED_OPERATION'),
       this.translationLoader.getTranslate().instant('WALLET.CLOSE'), {
         duration: 2000
       });
     },
     error => {
-      console.log("Error realizando operación ==> ", error);
-    })
+      console.log('Error realizando operación ==> ', error);
+    });
 
 
-    
+
 
     // this.manualPocketAdjustmentService.makeManualBalanceAdjustment$(manualBalanceAdjustment)
     // .pipe(
@@ -192,7 +192,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
     //   filter((resp: any) => !resp.errors || resp.errors.length === 0)
     // )
     // .subscribe(res => {
-    //   this.snackBar.open(this.translationLoader.getTranslate().instant('WALLET.EXECUTED_OPERATION'), 
+    //   this.snackBar.open(this.translationLoader.getTranslate().instant('WALLET.EXECUTED_OPERATION'),
     //   this.translationLoader.getTranslate().instant('WALLET.CLOSE'), {
     //     duration: 2000
     //   });
@@ -234,11 +234,11 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
         response.errors.forEach(error => {
           if (Array.isArray(error)) {
             error.forEach(errorDetail => {
-              this.showMessageSnackbar("ERRORS." + errorDetail.message.code);
+              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
             });
           } else {
             response.errors.forEach(err => {
-              this.showMessageSnackbar("ERRORS." + err.message.code);
+              this.showMessageSnackbar('ERRORS.' + err.message.code);
             });
           }
         });

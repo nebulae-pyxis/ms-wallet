@@ -100,7 +100,7 @@ class WalletHelper {
         // console.log('checkWalletSpendingAlarms => ', JSON.stringify([wallet, spendingRule]));
         const debt = (wallet.pockets.main || 0) + (wallet.pockets.bonus || 0);
 
-        if (debt < spendingRule.minOperationAmount && wallet.spendingState == 'ALLOWED') {
+        if (debt <= spendingRule.minOperationAmount && wallet.spendingState == 'ALLOWED') {
           return this.changeWalletSpendingState$(wallet.businessId, 'FORBIDDEN');
         } else if (debt > spendingRule.minOperationAmount && wallet.spendingState == 'FORBIDDEN') {
           return this.changeWalletSpendingState$(wallet.businessId, 'ALLOWED');

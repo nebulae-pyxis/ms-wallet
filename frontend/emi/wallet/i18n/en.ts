@@ -8,7 +8,7 @@ export const locale = {
       NOTES: 'Notes',
       WITHDRAWAL: 'Withdrawal',
       DEPOSIT: 'Deposit',
-      SELECT_AGENT: 'Select business:',
+      SELECT_AGENT: 'Select business unit:',
       MAX_CHARACTER_NOTES: 'Max 200 characters',
       MIN_VALUE_REQUIRED: 'The value must be a value greater than zero.',
       MAX_VALUE_REQUIRED: 'The value should not exceed 20,000,000.',
@@ -17,7 +17,7 @@ export const locale = {
       BUSINESS_REQUIRED: 'You should select the agent to which you want to make a manual balance adjustment.',
       TRANSACTION_HISTORY: 'Transaction history',
       BUSINESS: 'Agent:',
-      SELECT_BUSINESS: 'Select an business',
+      SELECT_BUSINESS: 'Select a business unit',
       FILTER: 'Filter',
       INIT_DATE: 'Init date',
       END_DATE: 'End date',
@@ -68,7 +68,8 @@ export const locale = {
       MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE: "Are you sure you want to perform the operation?",
       MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE: "Manual balance adjustment",
       OK: 'Accept',
-      CANCEL: 'Cancel'
+      CANCEL: 'Cancel',
+      NOTES_MINLENGTH: 'Mínima cantidad de caracteres permitidos: 20',
     },
     ERRORS: {
       19001: 'Internal server error',

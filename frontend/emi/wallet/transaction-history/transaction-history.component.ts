@@ -92,7 +92,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
 
   transactionTypes: any = [];
   transactionConcepts: any = [];
-  typesAndConceptsList: any = null;
+  typesAndConceptsList: any = [];
 
   myBusiness: any = null;
   allBusiness: any = [];
@@ -154,12 +154,11 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.buildFilterForm();
     this.onLangChange();
-    this.test();
     this.loadTypesAndConcepts();
     this.loadBusinessFilter();
     this.detectFilterAndPaginatorChanges();
-    
-    this.loadDataInForm();    
+    this.test();
+    this.loadDataInForm();
     this.loadRoleData();
     // this.loadBusinessData();
     this.loadWalletData();
@@ -167,17 +166,17 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   }
 
   buildFilterForm() {
-    const startOfMonth = moment().startOf("month");
-    const endOfMonth = moment();
+    const startOfMonth = moment().startOf('month');
+    const endOfMonth = moment().endOf('day');
     this.minEndDate = startOfMonth;
     this.maxEndDate = endOfMonth;
     // Reactive Form
     this.filterForm = this.formBuilder.group({
       initDate: [startOfMonth],
       endDate: [endOfMonth],
-      terminalId: [""],
-      terminalUserId: [""],
-      terminalUsername: [""],
+      terminalId: [''],
+      terminalUserId: [''],
+      terminalUsername: [''],
       transactionType: [null],
       transactionConcept: [null]
     });
@@ -191,10 +190,10 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     return business1 && business2 ? business1._id === business2._id : business1 === business2;
 }
 
-compareTypes(type1: any, type2: any): boolean {
-  console.log('compare types',type1, type2);
-  return type1 && type2 ? type1.type === type2.type : type1 === type2;
-}
+// compareTypes(type1: any, type2: any): boolean {
+//   console.log('compare types',type1, type2);
+//   return type1 && type2 ? type1.type === type2.type : false;
+// }
 
 displayFn(business) {
   return (business || {}).name;
@@ -203,11 +202,9 @@ displayFn(business) {
 test(){
   this.transactionHistoryService.filterAndPaginator$
   .subscribe(filterAndPaginator => {
-    //console.log('*************** filterAndPaginator => ', filterAndPaginator);
-    //console.log('filter.transactionType => ', filterAndPaginator.filter.transactionType);
-  })
+    console.log(`*************** COPY filterAndPaginator => ${JSON.stringify(filterAndPaginator)}`);
+  });
 }
-
 
   loadDataInForm() {
     Rx.Observable.combineLatest(
@@ -216,22 +213,35 @@ test(){
     )
       .pipe(take(1))
       .subscribe(([filterAndPaginator, selectedBusiness]) => {
-        console.log('filterAndPaginator ==>>> ', filterAndPaginator);
+        console.log(`filterAndPaginator => ${JSON.stringify(filterAndPaginator)}`);
         console.log('selectedBusiness ==>>> ', selectedBusiness);
         if (filterAndPaginator) {
           if (filterAndPaginator.filter){
-            const filter: any = filterAndPaginator.filter;
-            const terminal:any = filterAndPaginator.filter.terminal || {};
+            const filterData: any = filterAndPaginator.filter;
+            const terminal: any = filterAndPaginator.filter.terminal || {};
+
+            let types: any;
+            if (filterAndPaginator.filter.transactionType){
+              console.log('typeof filterAndPaginator.filter.transactionType  => ', typeof filterAndPaginator.filter.transactionType );
+              if (typeof filterAndPaginator.filter.transactionType === 'string'){
+                types = this.typesAndConceptsList.find(e => e.type.toUpperCase() === filterAndPaginator.filter.transactionType);
+              }else{
+                // types = this.typesAndConceptsList.find(e => e.type.toUpperCase() === filterAndPaginator.filter.transactionType.type);
+                types = filterAndPaginator.filter.transactionType;
+              }
+            }
+
+
             this.filterForm.patchValue({
-              initDate: filter.initDate,
-              endDate: filter.endDate,
+              initDate: filterData.initDate,
+              endDate: filterData.endDate,
               terminalId:  terminal.id,
               terminalUserId: terminal.userId,
               terminalUsername: terminal.username,
-              transactionType: filter.transactionType,
-              transactionConcept: filter.transactionConcept
-            });    
-            console.log('filter.transactionType123 => ', filter.transactionType);        
+              transactionType: types,
+              transactionConcept: filterData.transactionConcept
+            });
+            console.log('filter.transactionType123 => ', filterData.transactionType);
           }
 
           if (filterAndPaginator.pagination){
@@ -245,10 +255,6 @@ test(){
           this.businessFilterCtrl.setValue(this.selectedBusinessData);
         }
         this.filterForm.enable({emitEvent: true});
-        // this.filterForm.patchValue({
-        //   terminalId:  'test',
-        // }, {emitEvent: true});
-        // this.filterForm.updateValueAndValidity({ onlySelf: false, emitEvent: true});
       });
   }
 
@@ -388,25 +394,41 @@ test(){
   detectFilterAndPaginatorChanges() {
     Rx.Observable.combineLatest(this.getFormChanges$(), this.getPaginator$())
       .pipe(
-        tap(data => console.log('detectFilterAndPaginatorChanges => ', data)),
+        tap(data => console.log('detectFilterAndPaginatorChanges1 => ', data)),
         filter(data => {
           return this.filterForm.enabled;
         }),
         map(([formChanges, paginator]) => {
-
+          console.log('detectFilterAndPaginatorChanges2 => ', formChanges);
           let types = undefined;
           if(formChanges.transactionType){
-            types = {
-              type: formChanges.transactionType.type,
-              concepts: formChanges.transactionType.concepts
-            };
+            console.log('detectFilterAndPaginatorChanges3 => ', formChanges.transactionType.type);
+
+            // types = {
+            //   type: formChanges.transactionType.type,
+            //   concepts: formChanges.transactionType.concepts
+            // }
+
+            if(typeof formChanges.transactionType === 'string'){
+              types = this.typesAndConceptsList.find(e => e.type.toUpperCase() === formChanges.transactionType);
+            }else{
+              types = this.typesAndConceptsList.find(e => e.type.toUpperCase() === formChanges.transactionType.type);
+            }
+
+
+
+            console.log('Types => ',types);
+            // types = {
+            //   type: formChanges.transactionType.type,
+            //   concepts: formChanges.transactionType.concepts
+            // };
           }
 
           const data = {
             filter: {
               initDate: formChanges.initDate,
               endDate: formChanges.endDate,
-              //transactionType: types,
+              //transactionType: {type: 'SALE', concepts: ['ADIOS']},
               transactionConcept: formChanges.transactionConcept,
               terminal: {
                 id: formChanges.terminalId,
@@ -420,14 +442,13 @@ test(){
               sort: -1
             }
           };
-          
+
           data.filter['transactionType'] = types;
-          console.log('antes enviar => ', data);
+          console.log(`antes enviar => ${JSON.stringify(data)}`);
           return data;
         }),
         tap(filterAndPagination1 =>{
-
-          console.log('ENVIAR ==> ', filterAndPagination1);
+          console.log(`ENVIAR => ${JSON.stringify(filterAndPagination1)}`);
           this.transactionHistoryService.addFilterAndPaginatorData(
             filterAndPagination1
           );
@@ -571,8 +592,8 @@ test(){
             return this.getBusiness$()
             .pipe(
               tap(business => {
-                // this.myBusiness = business;                
-                this.selectedBusinessData = business;                
+                // this.myBusiness = business;
+                this.selectedBusinessData = business;
                 // this.businessFilterCtrl.setValue(this.selectedBusinessData);
                 //console.log('this.selectedBusinessData => ', this.selectedBusinessData);
                 //this.businessFilterCtrl.enable();
@@ -582,7 +603,7 @@ test(){
               filter(business => business != null),
               toArray()
             )
-          }        
+          }
         }),
         //tap(data => console.log('loadBusinessFilter2 => ', data))
       );
