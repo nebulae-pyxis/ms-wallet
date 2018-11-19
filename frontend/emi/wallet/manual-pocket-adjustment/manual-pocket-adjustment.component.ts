@@ -65,9 +65,6 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
       filter((resp: any) => !resp.errors || resp.errors.length === 0),
       takeUntil(this.ngUnsubscribe)
     ).subscribe(businessData => {
-
-      console.log('loadBusinessData => ', businessData);
-
       this.allBusiness = businessData;
     });
 

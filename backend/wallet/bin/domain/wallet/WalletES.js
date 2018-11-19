@@ -49,7 +49,6 @@ class WalletES {
     .pipe(
       mergeMap(business => WalletDA.getWallet$(business._id)),
       mergeMap(wallet => {
-        //console.log('MATERIALIZED_VIEW_TOPIC => ', wallet);
         return broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletUpdated', wallet)        ;
       })
     );
