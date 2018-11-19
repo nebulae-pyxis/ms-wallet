@@ -11,7 +11,7 @@ export class CurrencyAndPercentagePipe implements PipeTransform {
   constructor() {
     // TODO comes from configuration settings
     this.DECIMAL_SEPARATOR = '.';
-    this.THOUSANDS_SEPARATOR = '\'';
+    this.THOUSANDS_SEPARATOR = ',';
   }
 
   transform(value: number | string, fractionSize: number = 2, type: string): string {
