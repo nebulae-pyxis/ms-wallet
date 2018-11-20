@@ -1,6 +1,6 @@
 const Rx = require("rxjs");
 const broker = require("../../tools/broker/BrokerFactory")();
-const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
+const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 const RoleValidator = require("../../tools/RoleValidator");
 const { CustomError, DefaultError } = require("../../tools/customError");
 const {

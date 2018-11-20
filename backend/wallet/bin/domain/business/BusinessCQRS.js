@@ -1,7 +1,7 @@
 const { mergeMap, catchError, map, toArray } = require('rxjs/operators');
 const { of } = require('rxjs');
 const broker = require("../../tools/broker/BrokerFactory")();
-const MATERIALIZED_VIEW_TOPIC = "emi-materialized-view-updates";
+const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 const BusinessHelper = require("./BusinessHelper");
 const BusinessDA = require("../../data/BusinessDA");
 const RoleValidator = require("../../tools/RoleValidator");
