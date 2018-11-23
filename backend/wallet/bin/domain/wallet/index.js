@@ -3,6 +3,5 @@ const cqrs = require('./WalletCQRS')();
 
 module.exports = {
     eventSourcing,
-    cqrs,
-    "getWallet$": cqrs.getWallet$
+    cqrs
 };
