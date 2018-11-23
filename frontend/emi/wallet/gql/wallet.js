@@ -145,6 +145,23 @@ export const getTypesAndConcepts = gql`
   }
 `;
 
+export const getWalletErrors = gql`
+  query getWalletErrors($page: Int!, $count: Int!, $errorType: String){
+    getWalletErrors(page: $page, count: $count, errorType: $errorType){
+      timestamp
+      error
+      type
+      event
+    }
+  }
+`;
+
+export const getWalletErrorsCount = gql`
+  query getWalletErrorsCount($errorType: String){
+    getWalletErrorsCount(errorType: $errorType)
+  }
+`;
+
 // MUTATIONS
 export const makeManualBalanceAdjustment = gql`
   mutation makeManualBalanceAdjustment($input: ManualBalanceAdjustmentInput) {

@@ -43,6 +43,21 @@
                 "priority": 1000,
                 "roles" : ["SYSADMIN"],
                 "default" : false
+            },
+            {
+                "groupId": "WALLET",
+                "id": "wallet-errors",
+                "icon": "error",
+                "translate": {
+                    "es": "Errores",
+                    "en": "Errors"
+                },
+                "navURL": "/wallet/wallet-errors",
+                "path": "wallet-errors",
+                "loadChildren": "./main/content/wallet/wallet.module#WalletModule",
+                "priority": 1000,
+                "roles" : ["SYSADMIN"],
+                "default" : false
             }            
         ],
         "preBuildCommands": [],

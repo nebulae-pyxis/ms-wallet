@@ -296,9 +296,47 @@ module.exports = {
           )
           .mergeMap(response => getResponseFromBackEnd$(response))
           .toPromise();
-      }
-      
-      
+      },
+      getWalletErrors(root, args, context) {
+        return RoleValidator.checkPermissions$(
+          context.authToken.realm_access.roles,
+          "Wallet",
+          "getWalletErrors",
+          PERMISSION_DENIED_ERROR_CODE,
+          "Permission denied",
+          ["SYSADMIN"]
+        ).mergeMap(response => {
+            return broker.forwardAndGetReply$(
+              "WalletError",
+              "emigateway.graphql.query.getWalletErrors",
+              { root, args, jwt: context.encodedToken },
+              2000
+            );
+          })
+          .catch(err => handleError$(err, "getWalletErrors"))
+          .mergeMap(response => getResponseFromBackEnd$(response))
+          .toPromise();
+      },
+      getWalletErrorsCount(root, args, context) {
+        return RoleValidator.checkPermissions$(
+          context.authToken.realm_access.roles,
+          "Wallet",
+          "getWalletErrorsCount",
+          PERMISSION_DENIED_ERROR_CODE,
+          "Permission denied",
+          ["SYSADMIN"]
+        ).mergeMap(response => {
+            return broker.forwardAndGetReply$(
+              "WalletError",
+              "emigateway.graphql.query.getWalletErrorsCount",
+              { root, args, jwt: context.encodedToken },
+              2000
+            );
+          })
+          .catch(err => handleError$(err, "getWalletErrorsCount"))
+          .mergeMap(response => getResponseFromBackEnd$(response))
+          .toPromise();
+      }      
   },
   //// MUTATIONS ///////
   Mutation: {

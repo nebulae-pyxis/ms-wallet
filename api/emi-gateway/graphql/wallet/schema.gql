@@ -214,9 +214,23 @@ input WalletSpendingRuleInput {
   autoPocketSelectionRules: [WalletPocketSelectionRuleInput]
 }
 
-type TypeVsConcepts{
+type TypeVsConcepts {
   type: String
   concepts: [String]
+}
+
+"Error info"
+type Error {
+  "Error ID"
+  _id: ID!
+  "Timestamp"
+  timestamp: BigInt
+  "Error type"
+  type: String
+  "Error"
+  error: String!
+  "Event"
+  event: String!
 }
 
 
@@ -253,6 +267,10 @@ type Query {
   typeAndConcepts: [TypeVsConcepts]
   "Get the quantity of spending rules"
   WalletSpendingRuleQuantity: Int
+  "Gets errors ocurred while the transactions were being processed"
+  getWalletErrors(page: Int!, count: Int!, errorType: String): [Error]
+  "Gets amount of errors ocurred while the transactions were being processed"
+  getWalletErrorsCount(errorType: String): Int!
 }
 
 

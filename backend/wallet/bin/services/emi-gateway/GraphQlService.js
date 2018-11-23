@@ -6,6 +6,7 @@ const jsonwebtoken = require("jsonwebtoken");
 const { map, mergeMap, catchError, tap } = require('rxjs/operators');
 const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, "\n");
 const spendingRules = require('../../domain/spending-rules');
+const logError = require('../../domain/log-error');
 const business = require("../../domain/business/");
 const wallet = require("../../domain/wallet/");
 
@@ -205,8 +206,15 @@ class GraphQlService {
       {
         aggregateType: "Wallet",
         messageType: "emigateway.graphql.query.getWalletSpendingRuleQuantity",        
-      }
-
+      },
+      {
+        aggregateType: "WalletError",
+        messageType: "emigateway.graphql.query.getWalletErrors"
+      },
+      {
+        aggregateType: "WalletError",
+        messageType: "emigateway.graphql.query.getWalletErrorsCount"
+      },
     ];
   }
 
@@ -275,7 +283,15 @@ class GraphQlService {
       "emigateway.graphql.query.getWalletSpendingRuleQuantity":{
         fn: spendingRules.cqrs.getWalletSpendingRuleQuantity$,
         obj: spendingRules.cqrs
-      }
+      },
+      'emigateway.graphql.query.getWalletErrors': {
+        fn: logError.cqrs.getWalletErrors$,
+        obj: logError.cqrs
+      },
+      'emigateway.graphql.query.getWalletErrorsCount': {
+        fn: logError.cqrs.getWalletErrorsCount$,
+        obj: logError.cqrs
+      },
     };
   }
 }

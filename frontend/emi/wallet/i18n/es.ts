@@ -70,6 +70,12 @@ export const locale = {
       OK: 'Aceptar',
       CANCEL: 'Cancelar',
       NOTES_MINLENGTH: 'Mínima cantidad de caracteres permitidos: 20',
+      WALLET_ERRORS: 'Errores',
+      GENERAL_ERRORS: 'Errores generales',
+      DATE: 'Fecha',
+      ERROR: 'Error',
+      EVENT: 'Evento',
+      TYPE: 'Tipo error'
     },
     ERRORS: {
       19001: 'Error interno de servidor',

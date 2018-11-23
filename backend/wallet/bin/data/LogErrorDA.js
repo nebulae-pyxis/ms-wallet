@@ -29,9 +29,13 @@ class LogErrorDA {
    */
   static getLogError$(page, count, type) {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
+    const query = {};
+    if (type){
+      query['type'] = type;
+    }
     return defer(() =>
       collection
-        .find({ type: type })
+        .find(query)
         .sort({ timestamp: -1 })
         .skip(count * page)
         .limit(count)
@@ -42,9 +46,11 @@ class LogErrorDA {
       }),
       map(log => {
         return {
+          _id: log._id,
           error: log.error,
           timestamp: log.timestamp,
-          event: JSON.stringify(log.event)
+          event: JSON.stringify(log.event),
+          type: log.type
         };
       }),
       toArray()
@@ -56,8 +62,12 @@ class LogErrorDA {
    * @param {*} type error type
    */
   static getLogErrorCount$(type) {
+    const query = {};
+    if (type){
+      query['type'] = type;
+    }
     const collection = mongoDB.db.collection(COLLECTION_NAME);
-    return defer(() => collection.countDocuments({ type: type }));
+    return defer(() => collection.count(query));
   }
 
   /**

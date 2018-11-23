@@ -60,7 +60,7 @@ export const locale = {
       USER_ID: 'User ID:',
       USERNAME: 'Username:',
       NONE: 'None',
-      ASSOCIATED_TRANSACTIONS: 'Assocated transactions',
+      ASSOCIATED_TRANSACTIONS: 'Associated transactions',
       TRANSACTION: 'Transaction ',
       WALLET: 'Pockets',
       EXECUTED_OPERATION: 'The operation was executed correctly.',
@@ -70,6 +70,12 @@ export const locale = {
       OK: 'Accept',
       CANCEL: 'Cancel',
       NOTES_MINLENGTH: 'Mínima cantidad de caracteres permitidos: 20',
+      WALLET_ERRORS: 'Errors',
+      GENERAL_ERRORS: 'General errors',
+      DATE: 'Date',
+      ERROR: 'Error',
+      EVENT: 'Event',
+      TYPE: 'Error type'
     },
     ERRORS: {
       19001: 'Internal server error',
