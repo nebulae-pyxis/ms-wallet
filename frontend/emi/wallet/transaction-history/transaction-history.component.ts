@@ -485,8 +485,15 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(([transactionsHistory, transactionsHistoryAmount]) => {
-        this.dataSource.data =
-          transactionsHistory.data.getWalletTransactionsHistory;
+        if(transactionsHistory.data.getWalletTransactionsHistory){
+          transactionsHistory.data.getWalletTransactionsHistory
+          .sort(function (transactionsHistory1, transactionsHistory2) {   
+            return transactionsHistory2.timestamp - transactionsHistory1.timestamp || (transactionsHistory2.pocket < transactionsHistory1.pocket ? -1: 1);
+          });
+        }
+
+        
+        this.dataSource.data = transactionsHistory.data.getWalletTransactionsHistory;
         this.tableSize =
           transactionsHistoryAmount.data.getWalletTransactionsHistoryAmount;
       });
