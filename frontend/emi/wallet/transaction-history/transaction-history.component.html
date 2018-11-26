@@ -36,17 +36,22 @@
           >
         </div>
 
-        <div
-          class="account"
-          fxLayout="column"
-          *fuseIfOnDom
-          [@animate]="{ value: '*', params: { delay: '300ms' } }"
-        >
+        <div class="account" fxFlex fxFill fxLayout="row" fxLayoutAlign="space-between end">
+          <span
+            class="mat-title"
+            *fuseIfOnDom
+            [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }"
+            >{{ "WALLET.WALLET" | translate }}
+          </span>
 
-          <span class="mat-title my-20">
-              {{'WALLET.WALLET' | translate}}
-            </span>
+          <button mat-mini-fab class="mb-8"
+          [ngClass]="{'blink-button': outdatedData}" (click)="resetFilter()"
+          matTooltip="{{ 'WALLET.TRANSACTION_HISTORY_REFRESH' | translate }}">
+            <mat-icon aria-label="Icon with a refresh icon">refresh</mat-icon>
+          </button>    
+
         </div>
+
       </div>
       <!-- / SIDENAV HEADER -->
 
