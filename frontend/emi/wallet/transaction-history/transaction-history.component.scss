@@ -138,4 +138,24 @@
     height: 84px;
 }
 
+  // Extract the palettes you need from the theme definition.
+  
+
+.blink-button {
+  background-color:mat-color($accent);
+  animation:blink-button 2.5s linear infinite alternate 2.5s;
+}
+
+@keyframes blink-button {
+  0%,80% {
+    background-color:mat-color($accent);
+  }
+  90% {
+    background-color:mat-color($primary, A400);
+  }
+  100% {
+    background-color:mat-color($accent);
+  }
+}
+
 

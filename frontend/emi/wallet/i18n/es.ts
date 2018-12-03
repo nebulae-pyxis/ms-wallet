@@ -75,7 +75,8 @@ export const locale = {
       DATE: 'Fecha',
       ERROR: 'Error',
       EVENT: 'Evento',
-      TYPE: 'Tipo error'
+      TYPE: 'Tipo error',
+      TRANSACTION_HISTORY_REFRESH: 'Refrescar información'
     },
     ERRORS: {
       19001: 'Error interno de servidor',

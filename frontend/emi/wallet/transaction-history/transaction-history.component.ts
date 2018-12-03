@@ -21,6 +21,7 @@ import * as Rx from "rxjs/Rx";
 import {
   map,
   mergeMap,
+  switchMap,
   toArray,
   filter,
   tap,
@@ -142,6 +143,9 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   sortColumn = null;
   sortOrder = null;
   itemPerPage = "";
+  //Indicates if there are new transactions 
+  outdatedData = false;
+
 
   constructor(
     private formBuilder: FormBuilder,
@@ -243,6 +247,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
           this.businessFilterCtrl.setValue(this.selectedBusinessData);
         }
         this.filterForm.enable({ emitEvent: true });
+        this.outdatedData = false;
       });
   }
 
@@ -288,7 +293,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     this.transactionHistoryService.selectedBusinessEvent$
     .pipe(
       filter(selectedBusiness => selectedBusiness != null),
-      mergeMap((selectedBusiness: any) =>
+      switchMap((selectedBusiness: any) =>
         this.walletService.getWalletUpdatedSubscription$(selectedBusiness._id)
       )
     );
@@ -301,7 +306,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     this.transactionHistoryService.selectedBusinessEvent$
       .pipe(
         filter(selectedBusiness => selectedBusiness != null),
-        mergeMap((selectedBusiness: any) => concat(
+        switchMap((selectedBusiness: any) => concat(
           this.walletService.getWallet$(selectedBusiness._id)
           .pipe(
             mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
@@ -309,6 +314,9 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
             map(result => result.data.getWallet)
           ),
           this.walletService.getWalletUpdatedSubscription$(selectedBusiness._id)
+          .pipe(
+            tap(wallet => this.outdatedData = true)
+          )
         )),
         map(wallet => {
           let credit = 0;
@@ -393,11 +401,12 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     this.count = 10;
 
     const startOfMonth = moment().startOf("month");
-    const endOfMonth = moment().endOf("month");
+    const endOfMonth = moment().endOf("day");
     this.filterForm.patchValue({
       initDate: startOfMonth,
       endDate: endOfMonth
     });
+    this.outdatedData = false;
   }
 
   detectFilterAndPaginatorChanges() {
@@ -485,6 +494,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(([transactionsHistory, transactionsHistoryAmount]) => {
+        this.outdatedData = false;
         if(transactionsHistory.data.getWalletTransactionsHistory){
           transactionsHistory.data.getWalletTransactionsHistory
           .sort(function (transactionsHistory1, transactionsHistory2) {   

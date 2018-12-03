@@ -94,7 +94,7 @@ class WalletES {
   }
   
   handleWalletSpendingCommited$(evt){
-    // console.log("handleWalletSpendingCommited$", evt);
+    console.log("handleWalletSpendingCommited$", evt);
     return of(evt.data)
     .pipe(
       mergeMap(eventData => forkJoin(

@@ -84,13 +84,17 @@
               <div class="mt-16" fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="5px">
             
                 <button mat-raised-button color="warn" (click)="makeManualBalanceAdjustment('WITHDRAWAL', formDirective)"
-                  [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.WITHDRAWAL'
-                  | translate}}</button>
-            
-                <button mat-raised-button color="primary" (click)="makeManualBalanceAdjustment('DEPOSIT', formDirective)"
-                  [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">{{'WALLET.DEPOSIT'
-                  | translate}}</button>
-            
+                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">
+                <mat-icon>arrow_downward</mat-icon>
+                {{'WALLET.WITHDRAWAL' | translate}}
+                </button>
+
+                <button mat-raised-button (click)="makeManualBalanceAdjustment('DEPOSIT', formDirective)"
+                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">
+                <mat-icon>arrow_upward</mat-icon>
+                {{'WALLET.DEPOSIT' | translate}}
+                </button>
+                
               </div>
             
             </form>
