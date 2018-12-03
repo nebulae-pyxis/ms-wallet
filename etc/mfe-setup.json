@@ -4,18 +4,31 @@
         "src": "frontend/emi/wallet",
         "groups": [
             {
-              "id": "WALLET",
-              "icon": "attach_money",
-              "translate": {
-                "en": "Wallet",
-                "es": "Billetera"
-              },
-              "priority": 1000
+            "id": "BUSINESS_UNIT_MANAGER",
+            "icon": "location_searching",
+            "translate": {
+                "en": "Business unit manager",
+                "es": "Administración unidad de negocio"
+            },
+            "priority": 200
             }
           ],
+        "subgroups": [
+            {
+                "groupId": "BUSINESS_UNIT_MANAGER",
+                "id": "WALLET",
+                "icon": "account_balance_wallet",
+                "translate": {
+                    "en": "Wallet",
+                    "es": "Billetera"
+                },
+                "priority": 2000
+            }
+        ],
         "contents": [
             {
-                "groupId": "WALLET",
+                "groupId": "BUSINESS_UNIT_MANAGER",
+                "subgroupId": "WALLET",
                 "id": "historical-transaction-wallet",
                 "icon": "history",
                 "translate": {
@@ -25,12 +38,13 @@
                 "navURL": "/wallet/transaction-history",
                 "path": "wallet",
                 "loadChildren": "./main/content/wallet/wallet.module#WalletModule",
-                "priority": 1000,
+                "priority": 4000,
                 "roles" : ["SYSADMIN", "business-owner"],
                 "default" : false
             },
             {
-                "groupId": "WALLET",
+                "groupId": "BUSINESS_UNIT_MANAGER",
+                "subgroupId": "WALLET",
                 "id": "manual-wallet-adjustments",
                 "icon": "adjust",
                 "translate": {
@@ -40,12 +54,13 @@
                 "navURL": "/wallet/manual-pocket-adjustment",
                 "path": "wallet",
                 "loadChildren": "./main/content/wallet/wallet.module#WalletModule",
-                "priority": 1000,
+                "priority": 3000,
                 "roles" : ["SYSADMIN"],
                 "default" : false
             },
             {
-                "groupId": "WALLET",
+                "groupId": "BUSINESS_UNIT_MANAGER",
+                "subgroupId": "WALLET",
                 "id": "wallet-errors",
                 "icon": "error",
                 "translate": {
@@ -69,18 +84,31 @@
         "src": "frontend/emi/wallet-spending-rules",
         "groups": [
             {
-                "id": "BUSINESS_UNIT_MANAGER",
-                "icon": "location_searching",
-                "translate": {
-                    "en": "Business unit manager",
-                    "es": "Administración unidad de negocio"
-                },
-                "priority": 200
+            "id": "BUSINESS_UNIT_MANAGER",
+            "icon": "location_searching",
+            "translate": {
+                "en": "Business unit manager",
+                "es": "Administración unidad de negocio"
+            },
+            "priority": 200
             }
           ],
+          "subgroups": [
+            {
+                "groupId": "BUSINESS_UNIT_MANAGER",
+                "id": "WALLET",
+                "icon": "account_balance_wallet",
+                "translate": {
+                    "en": "Wallet",
+                    "es": "Billetera"
+                },
+                "priority": 2000
+            }
+        ],
         "contents": [
             {
                 "groupId": "BUSINESS_UNIT_MANAGER",
+                "subgroupId": "WALLET",
                 "id": "wallet-spending-rules",
                 "icon": "dashboard",
                 "translate": {
