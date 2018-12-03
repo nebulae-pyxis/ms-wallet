@@ -112,8 +112,8 @@
                 "id": "wallet-spending-rules",
                 "icon": "dashboard",
                 "translate": {
-                    "es": "Reglas de billetera",
-                    "en": "Wallet spending rules"
+                    "es": "Reglas",
+                    "en": "Rules"
                 },
                 "navURL": "/wallet-spending-rules",
                 "path": "wallet-spending-rules",
