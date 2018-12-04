@@ -59,7 +59,7 @@ module.exports = {
         "getWalletTransactionsHistory",
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
@@ -80,7 +80,7 @@ module.exports = {
         "getWalletTransactionsHistoryAmount",
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
@@ -102,7 +102,7 @@ module.exports = {
         "getWalletTransactionsHistoryById",
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
@@ -124,7 +124,7 @@ module.exports = {
         "getAssociatedTransactionsHistoryByTransactionHistoryId",
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
@@ -145,7 +145,7 @@ module.exports = {
           "getWallet",
           PERMISSION_DENIED_ERROR_CODE,
           "Permission denied",
-          ["SYSADMIN", "business-owner", "POS"]
+          ["PLATFORM-ADMIN", "BUSINESS-OWNER", "POS"]
         )
           .mergeMap(response => {
             return broker.forwardAndGetReply$(
@@ -166,7 +166,7 @@ module.exports = {
           "getBusinessByFilter",
           PERMISSION_DENIED_ERROR_CODE,
           "Permission denied",
-          ["SYSADMIN"]
+          ["PLATFORM-ADMIN"]
         )
           .mergeMap(response => {
             return broker.forwardAndGetReply$(
@@ -187,7 +187,7 @@ module.exports = {
               "getWalletBusiness",
               PERMISSION_DENIED_ERROR_CODE,
               "Permission denied",
-              ["SYSADMIN", "business-owner"]
+              ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
             )
               .mergeMap(response => {
                 return broker.forwardAndGetReply$(
@@ -208,7 +208,7 @@ module.exports = {
               "getWalletBusinesses",
               PERMISSION_DENIED_ERROR_CODE,
               "Permission denied",
-              ["SYSADMIN"]
+              ["PLATFORM-ADMIN"]
             )
               .mergeMap(response => {
                 return broker.forwardAndGetReply$(
@@ -229,7 +229,7 @@ module.exports = {
             "getWalletBusinessById",
             PERMISSION_DENIED_ERROR_CODE,
             "Permission denied",
-            ["SYSADMIN", "business-owner"]
+            ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
           )
             .mergeMap(response => {
               return broker.forwardAndGetReply$(
@@ -250,7 +250,7 @@ module.exports = {
         "getWalletSpendingRule",
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN"]
+        ["PLATFORM-ADMIN"]
       )
         .mergeMap(response => broker
           .forwardAndGetReply$(
@@ -304,7 +304,7 @@ module.exports = {
           "getWalletErrors",
           PERMISSION_DENIED_ERROR_CODE,
           "Permission denied",
-          ["SYSADMIN"]
+          ["PLATFORM-ADMIN"]
         ).mergeMap(response => {
             return broker.forwardAndGetReply$(
               "WalletError",
@@ -324,7 +324,7 @@ module.exports = {
           "getWalletErrorsCount",
           PERMISSION_DENIED_ERROR_CODE,
           "Permission denied",
-          ["SYSADMIN"]
+          ["PLATFORM-ADMIN"]
         ).mergeMap(response => {
             return broker.forwardAndGetReply$(
               "WalletError",
@@ -347,7 +347,7 @@ module.exports = {
         "makeManualBalanceAdjustment",
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN"]
+        ["PLATFORM-ADMIN"]
       )
         .mergeMap(roles => {
           return context.broker.forwardAndGetReply$(
@@ -384,7 +384,7 @@ module.exports = {
           //Checks the roles of the user, if the user does not have at least one of the required roles, an error will be thrown
           RoleValidator.checkAndThrowError(
             context.authToken.realm_access.roles, 
-            ["SYSADMIN", "business-owner", "POS"], 
+            ["PLATFORM-ADMIN", "BUSINESS-OWNER", "POS"], 
             CONTEXT_NAME, 
             "walletUpdated", 
             PERMISSION_DENIED_ERROR_CODE, 

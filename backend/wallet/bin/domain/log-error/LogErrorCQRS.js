@@ -41,7 +41,7 @@ class LogErrorCQRS {
       "WalletError",
       "getWalletErrorsCount$()",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN"]
+      ["PLATFORM-ADMIN"]
     ).pipe(
       mergeMap(roles => {
         return LogErrorDA.getLogError$(args.page, args.count, args.errorType)
@@ -67,7 +67,7 @@ class LogErrorCQRS {
       "WalletError",
       "getWalletErrorsCount$()",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN"]
+      ["PLATFORM-ADMIN"]
     ).pipe(
       mergeMap(roles => {
         return LogErrorDA.getLogErrorCount$(args.page, args.count, args.errorType)

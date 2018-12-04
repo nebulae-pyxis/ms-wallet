@@ -47,12 +47,12 @@ class WalletCQRS {
       "WALLET",
       "getWallet",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner", "POS"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "POS"]
     ).pipe(
       mergeMap(roles => {
-        const isSysAdmin = roles.SYSADMIN;
+        const isPlatformAdmin = roles["PLATFORM-ADMIN"];
         //If a user does not have the role to get info of a wallet from other business, we must return an error
-          if (!isSysAdmin && authToken.businessId != args.businessId) {
+          if (!isPlatformAdmin && authToken.businessId != args.businessId) {
             return this.createCustomError$(
               PERMISSION_DENIED_ERROR,
               'getWallet'
@@ -77,12 +77,12 @@ class WalletCQRS {
       "WALLET",
       "getWalletTransactionHistory",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     ).pipe(
       mergeMap(roles => {
-        const isSysAdmin = roles.SYSADMIN;
+        const isPlatformAdmin = roles["PLATFORM-ADMIN"];
         //If an user does not have the role to get the transaction history from other business, we must return an error
-          if (!isSysAdmin && authToken.businessId != args.filterInput.businessId) {
+          if (!isPlatformAdmin && authToken.businessId != args.filterInput.businessId) {
             return this.createCustomError$(
               PERMISSION_DENIED_ERROR,
               'getWalletTransactionHistory'
@@ -108,12 +108,12 @@ class WalletCQRS {
       "WALLET",
       "getWalletTransactionHistory",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     ).pipe(
       mergeMap(roles => {
-        const isSysAdmin = roles.SYSADMIN;
+        const isPlatformAdmin = roles["PLATFORM-ADMIN"];
         //If an user does not have the role to get the transaction history from other business, we must return an error
-          if (!isSysAdmin && authToken.businessId != args.filterInput.businessId) {
+          if (!isPlatformAdmin && authToken.businessId != args.filterInput.businessId) {
             return this.createCustomError$(
               PERMISSION_DENIED_ERROR,
               'getWalletTransactionsHistoryAmount'
@@ -139,12 +139,12 @@ class WalletCQRS {
       "WALLET",
       "getWalletTransactionHistoryById",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     ).pipe(
       mergeMap(roles => {
-        const isSysAdmin = roles.SYSADMIN;
+        const isPlatformAdmin = roles["PLATFORM-ADMIN"];
         //If an user does not have the role to get the transaction history from other business, the query must be filtered with the businessId of the user
-        const businessId = !isSysAdmin? (authToken.businessId || ''): null;
+        const businessId = !isPlatformAdmin? (authToken.businessId || ''): null;
         return WalletTransactionDA.getTransactionHistoryById$(businessId, args.id);
       }),
       mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
@@ -163,12 +163,12 @@ class WalletCQRS {
       "WALLET",
       "getAssociatedTransactionsHistoryByTransactionHistoryId",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     ).pipe(
       mergeMap(roles => {
-        const isSysAdmin = roles.SYSADMIN;
+        const isPlatformAdmin = roles["PLATFORM-ADMIN"];
         //If an user does not have the role to get the transaction history from other business, the query must be filtered with the businessId of the user
-        const businessId = !isSysAdmin? (authToken.businessId || ''): null;
+        const businessId = !isPlatformAdmin? (authToken.businessId || ''): null;
         return WalletTransactionDA.getTransactionHistoryById$(businessId, args.id);
       }),
       mergeMap(transactionHistory => {
@@ -201,7 +201,7 @@ class WalletCQRS {
       "wallet",
       "makeManualBalanceAdjustment",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN"]
+      ["PLATFORM-ADMIN"]
     ).pipe(
       mergeMap(roles => {              
         return eventSourcing.eventStore.emitEvent$(
