@@ -359,6 +359,7 @@ describe("E2E - Simple transaction", function() {
           }
         );
     });
+    
   });
 
   /**
