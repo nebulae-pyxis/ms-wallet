@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
     require('dotenv').load();
 }
 
+
 const mongoDB = require('./data/MongoDB').singleton();
 const Rx = require('rxjs');
 
