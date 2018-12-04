@@ -95,7 +95,6 @@ module.exports = {
         .toPromise();
     },
     getWalletTransactionsHistoryById(root, args, context) {
-      console.log('getWalletTransactionsHistoryById *** ', args);
       return RoleValidator.checkPermissions$(
         context.authToken.realm_access.roles,
         CONTEXT_NAME,
@@ -117,7 +116,6 @@ module.exports = {
         .toPromise();
     },
     getAssociatedTransactionsHistoryByTransactionHistoryId(root, args, context) {
-      console.log('getAssociatedTransactionsHistoryByTransactionHistoryId *** ', args);
       return RoleValidator.checkPermissions$(
         context.authToken.realm_access.roles,
         CONTEXT_NAME,
@@ -264,8 +262,16 @@ module.exports = {
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
     },
-    WalletGetSpendingRules(root, args, context) {     
-        return broker
+    WalletGetSpendingRules(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        CONTEXT_NAME,
+        "WalletGetSpendingRules",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["PLATFORM-ADMIN"]
+      )
+        .mergeMap(() => broker
           .forwardAndGetReply$(
             "SpendingRule",
             "emigateway.graphql.query.getSpendingRules",
@@ -273,10 +279,19 @@ module.exports = {
             2000
           )
           .mergeMap(response => getResponseFromBackEnd$(response))
-          .toPromise();
-      },
-      typeAndConcepts(root, args, context) {     
-        return broker
+          .toPromise());
+
+    },
+    typeAndConcepts(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        CONTEXT_NAME,
+        "typeAndConcepts",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
+      )
+        .mergeMap(() => broker
           .forwardAndGetReply$(
             "Wallet",
             "emigateway.graphql.query.getTypeAndConcepts",
@@ -284,19 +299,34 @@ module.exports = {
             2000
           )
           .mergeMap(response => getResponseFromBackEnd$(response))
-          .toPromise();
-      },
-      WalletSpendingRuleQuantity(root, args, context) { 
-        return broker
-          .forwardAndGetReply$(
-            "Wallet",
-            "emigateway.graphql.query.getWalletSpendingRuleQuantity",
-            { root, args, jwt: context.encodedToken },
-            2000
+          .toPromise()
           )
-          .mergeMap(response => getResponseFromBackEnd$(response))
-          .toPromise();
-      },
+
+
+    },
+    WalletSpendingRuleQuantity(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        CONTEXT_NAME,
+        "WalletSpendingRuleQuantity",
+        PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
+      )
+        .mergeMap(() =>
+          broker
+            .forwardAndGetReply$(
+              "Wallet",
+              "emigateway.graphql.query.getWalletSpendingRuleQuantity",
+              { root, args, jwt: context.encodedToken },
+              2000
+            )
+            .mergeMap(response => getResponseFromBackEnd$(response))
+            .toPromise()
+
+        )
+
+    },
       getWalletErrors(root, args, context) {
         return RoleValidator.checkPermissions$(
           context.authToken.realm_access.roles,
