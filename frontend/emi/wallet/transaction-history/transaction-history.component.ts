@@ -225,6 +225,9 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
             const filterData: any = filterAndPaginator.filter;
             const terminal: any = filterAndPaginator.filter.terminal || {};
 
+            this.minEndDate = moment(filterData.initDate);
+            this.maxEndDate =  moment(filterData.initDate.valueOf()).endOf("month");
+
             this.filterForm.patchValue({
               initDate: filterData.initDate,
               endDate: filterData.endDate,
@@ -370,23 +373,20 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
 
     this.minEndDate = moment(start);
     if (startMonthYear != endMonthYear) {
-      console.log("Select last day of month or current date");
       this.filterForm.patchValue({
-        endDate: start.endOf("month")
+        endDate: moment(start.valueOf()).endOf("month")
       });
-      this.maxEndDate = start.endOf("month");
-    } else {
-      console.log("Same month");
+      this.maxEndDate =  moment(start.valueOf()).endOf("month");
     }
 
-    console.log(
-      "minEndDate => ",
-      this.minEndDate.format("MMMM Do YYYY, h:mm:ss a")
-    );
-    console.log(
-      "maxEndDate => ",
-      this.maxEndDate.format("MMMM Do YYYY, h:mm:ss a")
-    );
+    // console.log(
+    //   "minEndDate => ",
+    //   this.minEndDate.format("MMMM Do YYYY, h:mm:ss a")
+    // );
+    // console.log(
+    //   "maxEndDate => ",
+    //   this.maxEndDate.format("MMMM Do YYYY, h:mm:ss a")
+    // );
   }
 
   onEndDateChange() {
@@ -458,6 +458,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
       this.transactionHistoryService.selectedBusinessEvent$
     )
       .pipe(
+        debounceTime(500),
         filter(([filterAndPagination, selectedBusiness]) => {
           // console.log('refreshTable => ', ([filterAndPagination, selectedBusiness]));
           return filterAndPagination != null && selectedBusiness != null;
