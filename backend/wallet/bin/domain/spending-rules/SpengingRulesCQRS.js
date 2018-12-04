@@ -50,6 +50,7 @@ class BusinessCQRS {
       catchError(err => this.errorHandler$(err))
     );
   }
+  
 
   getSpendingRules$({ root, args, jwt }, authToken) {
     return RoleValidator.checkPermissions$(

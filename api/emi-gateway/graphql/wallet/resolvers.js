@@ -277,9 +277,11 @@ module.exports = {
             "emigateway.graphql.query.getSpendingRules",
             { root, args, jwt: context.encodedToken },
             2000
-          )
-          .mergeMap(response => getResponseFromBackEnd$(response))
-          .toPromise());
+          )          
+        )
+        .catch(err => handleError$(err, "WalletGetSpendingRules"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
 
     },
     typeAndConcepts(root, args, context) {
@@ -291,16 +293,16 @@ module.exports = {
         "Permission denied",
         ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
-        .mergeMap(() => broker
-          .forwardAndGetReply$(
-            "Wallet",
-            "emigateway.graphql.query.getTypeAndConcepts",
-            { root, args, jwt: context.encodedToken },
-            2000
-          )
-          .mergeMap(response => getResponseFromBackEnd$(response))
-          .toPromise()
-          )
+        .mergeMap(() =>  broker
+        .forwardAndGetReply$(
+          "Wallet",
+          "emigateway.graphql.query.getTypeAndConcepts",
+          { root, args, jwt: context.encodedToken },
+          2000
+        ))
+        .catch(err => handleError$(err, "typeAndConcepts"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
 
 
     },
@@ -321,10 +323,10 @@ module.exports = {
               { root, args, jwt: context.encodedToken },
               2000
             )
-            .mergeMap(response => getResponseFromBackEnd$(response))
-            .toPromise()
-
         )
+        .catch(err => handleError$(err, "WalletSpendingRuleQuantity"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
 
     },
       getWalletErrors(root, args, context) {
