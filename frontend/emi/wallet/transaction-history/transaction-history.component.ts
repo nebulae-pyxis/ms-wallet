@@ -460,7 +460,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
       .pipe(
         debounceTime(500),
         filter(([filterAndPagination, selectedBusiness]) => {
-          // console.log('refreshTable => ', ([filterAndPagination, selectedBusiness]));
+          //console.log('refreshTable => ', ([filterAndPagination, selectedBusiness]));
           return filterAndPagination != null && selectedBusiness != null;
         }),
         map(([filterAndPagination, selectedBusiness]) => {
