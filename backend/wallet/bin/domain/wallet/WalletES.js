@@ -7,7 +7,7 @@ const SpendingRulesDA = require('../../data/SpendingRulesDA');
 const { mergeMap, catchError, map, defaultIfEmpty, first, tap, filter, toArray, groupBy, debounceTime} = require('rxjs/operators');
 const  { forkJoin, of, interval, from, throwError, concat, Observable, Subject } = require('rxjs');
 const uuidv4 = require("uuid/v4");
-const [ MAIN_POCKET, BONUS_POCKET ]  = [ 'MAIN', 'BONUS' ];
+const [ MAIN_POCKET, BONUS_POCKET, CREDIT_POCKET ]  = [ 'MAIN', 'BONUS', "CREDIT" ];
 const Crosscutting = require("../../tools/Crosscutting");
 const eventSourcing = require("../../tools/EventSourcing")();
 const Event = require("@nebulae/event-store").Event;
@@ -162,7 +162,7 @@ class WalletES {
       .pipe(
         mergeMap(tx => forkJoin(
           of(tx),
-          this.calculateMainTransaction$(evt, result.selectedPocket, date ),
+          this.calculateMainTransaction$(evt, result, date ),
           this.calculateBonusTransaction$(evt, result, date)
         )),
         mergeMap(([basicObj, mainTx, bonusTx]) => {          
@@ -182,14 +182,14 @@ class WalletES {
   /**
    * 
    * @param {any} evt WalletSpendingCommited Event
-   * @param {String} selectedPocket Selected pocket to use in the transaction
+   * @param {String} result todo
    */
-  calculateMainTransaction$(evt, selectedPocket, now) {
+  calculateMainTransaction$(evt, result, now) {
     return of(Crosscutting.generateHistoricalUuid(now))
       .pipe(
         map(() => ({
           id: Crosscutting.generateHistoricalUuid(now),
-          pocket: selectedPocket,
+          pocket: result.selectedPocket,
           value: evt.data.value * -1,
           user: evt.user,
           location: evt.data.location,
@@ -197,7 +197,18 @@ class WalletES {
           terminal: evt.data.terminal,
           associatedTransactionIds: []
         })
-        )
+        ),
+        mergeMap(transaction => forkJoin(
+          of(transaction),
+          of(transaction.pocket)
+          .pipe(
+            map(selectedPocket => result.wallet[selectedPocket] == BONUS_POCKET
+              ? BONUS_POCKET
+              : result.wallet.main >= evt.data.value ? MAIN_POCKET : CREDIT_POCKET
+            )
+          )
+        )),
+        map(([transaction, pocketAlias]) => ({...transaction, pocketAlias: pocketAlias })  )
       )
   }
 
