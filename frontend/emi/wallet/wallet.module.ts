@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../../core/modules/shared.module';
 import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
-
+import { CurrencyMaskModule } from "ng2-currency-mask";
 import { TransactionHistoryService } from './transaction-history/transaction-history.service';
 import { ManualPocketAdjustmentService } from './manual-pocket-adjustment/manual-pocket-adjustment.service';
 import { TransactionHistoryDetailService } from './transaction-history-detail/transaction-history-detail.service';
@@ -42,7 +42,8 @@ const routes: Routes = [
   imports: [
     SharedModule,
     RouterModule.forChild(routes),
-    FuseWidgetModule
+    FuseWidgetModule,
+    CurrencyMaskModule
   ],
   declarations: [
     walletComponent,

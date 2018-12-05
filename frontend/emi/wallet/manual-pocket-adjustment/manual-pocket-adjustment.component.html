@@ -9,17 +9,17 @@
 
     <!-- HEADER -->
     <div class="header white-fg" fxLayout="row" fxLayoutAlign="space-between center">
-    
+
       <!-- APP TITLE -->
       <div fxLayout="row" fxLayoutAlign="start center">
-    
+
         <div fxLayout="column" fxLayoutAlign="start start" *fuseIfOnDom>
-    
+
           <div class="h2">
             {{'WALLET.MANUAL_BALANCE_ADJUSTMENT' | translate}}
           </div>
-    
-    
+
+
           <div class="subtitle secondary-text" *ngIf="false">
             <span>{{'USER.USER_DETAIL' | translate}}</span>
           </div>
@@ -38,9 +38,9 @@
 
             <form name="manualBalanceAdjustmentsForm" #formDirective="ngForm" [formGroup]="manualBalanceAdjustmentsForm" class="user w-100-p"
               fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
-            
+
               <mat-form-field class="w-100-p">
-                <input matInput name="value" [currencyFormatter]="'FIXED'" maxlength="12" formControlName="value" placeholder="{{'WALLET.VALUE' | translate}}">
+                <input class="input-value" matInput name="value" style="text-align: left !important" [(ngModel)]="value" currencyMask [options]="{ prefix: '$ ', thousands: ',', precision: '0' }" maxlength="12" formControlName="value" placeholder="{{'WALLET.VALUE' | translate}}">
                 <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('required', ['value'])">
                   {{'WALLET.VALUE_REQUIRED' | translate}}
                 </mat-error>
@@ -51,7 +51,7 @@
                   {{'WALLET.MAX_VALUE_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
-            
+
               <mat-form-field class="w-100-p" hintLabel="{{'WALLET.MAX_CHARACTER_NOTES' | translate}}">
                 <textarea matInput cdkTextareaAutosize name="notes" #input maxlength="200" formControlName="notes" placeholder="{{'WALLET.NOTES' | translate}}"></textarea>
                 <mat-hint align="end">{{input.value.length || 0}}/200</mat-hint>
@@ -64,39 +64,39 @@
                 <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('maxlength', ['notes'])">
                   {{'WALLET.NOTES_MAXLENGTH' | translate}}
                 </mat-error>
-            
+
               </mat-form-field>
-            
+
               <mat-form-field class="w-100-p">
                 <mat-select formControlName="business" placeholder="{{'WALLET.SELECT_AGENT' | translate}}" [(value)]="selectedBusinessData"
                   (selectionChange)="onSelectBusinessEvent($event.value)">
-            
+
                   <mat-option *ngFor="let business of allBusiness" [value]="business">
                     {{business.name}} - {{business._id}}
                   </mat-option>
-            
+
                 </mat-select>
                 <mat-error *ngIf="manualBalanceAdjustmentsForm.hasError('required', ['business'])">
                   {{'WALLET.BUSINESS_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
-            
+
               <div class="mt-16" fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="5px">
-            
-                <button mat-raised-button color="warn" (click)="makeManualBalanceAdjustment('WITHDRAWAL', formDirective)"
-                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">
-                <mat-icon>arrow_downward</mat-icon>
-                {{'WALLET.WITHDRAWAL' | translate}}
-                </button>
 
                 <button mat-raised-button (click)="makeManualBalanceAdjustment('DEPOSIT', formDirective)"
                 [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">
                 <mat-icon>arrow_upward</mat-icon>
                 {{'WALLET.DEPOSIT' | translate}}
                 </button>
-                
+
+                <button mat-raised-button color="warn" (click)="makeManualBalanceAdjustment('WITHDRAWAL', formDirective)"
+                [disabled]="manualBalanceAdjustmentsForm.invalid || manualBalanceAdjustmentsForm.pristine">
+                <mat-icon>arrow_downward</mat-icon>
+                {{'WALLET.WITHDRAWAL' | translate}}
+                </button>
+
               </div>
-            
+
             </form>
 
           </div>

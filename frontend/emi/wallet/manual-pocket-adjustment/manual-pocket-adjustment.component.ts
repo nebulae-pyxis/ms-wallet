@@ -2,28 +2,28 @@ import { ManualPocketAdjustmentService } from './manual-pocket-adjustment.servic
 import { WalletService } from '../wallet.service';
 ////////// RXJS ///////////
 // tslint:disable-next-line:import-blacklist
-import * as Rx from "rxjs/Rx";
-import {  mergeMap, takeUntil, tap, map, toArray, filter } from "rxjs/operators";
+import * as Rx from 'rxjs/Rx';
+import {  mergeMap, takeUntil, tap, map, toArray, filter } from 'rxjs/operators';
 import { Subject, BehaviorSubject } from 'rxjs';
 
 ////////// ANGULAR //////////
-import { Component, OnInit, OnDestroy} from "@angular/core";
-import { FormBuilder, FormGroup, FormControl, Validators, FormGroupDirective } from "@angular/forms";
+import { Component, OnInit, OnDestroy} from '@angular/core';
+import { FormBuilder, FormGroup, FormControl, Validators, FormGroupDirective } from '@angular/forms';
 
 //////////// ANGULAR MATERIAL ///////////
 import {
   MatDialog,
   MatSnackBar
-} from "@angular/material";
+} from '@angular/material';
 
 //////////// i18n ////////////
-import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
-import { TranslateService } from "@ngx-translate/core";
-import { locale as english } from "../i18n/en";
-import { locale as spanish } from "../i18n/es";
+import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
+import { TranslateService } from '@ngx-translate/core';
+import { locale as english } from '../i18n/en';
+import { locale as spanish } from '../i18n/es';
 
 ////////// COMPONENTS /////////
-import { DialogComponent } from "../dialog/dialog.component";
+import { DialogComponent } from '../dialog/dialog.component';
 
 @Component({
   selector: 'app-manual-pocket-adjustment',
@@ -36,6 +36,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
   selectedBusinessData: any = null;
   allBusiness: any = [];
   wallet: any = null;
+  value;
   private selectedBusinessSubject$ = new Subject();
 
   constructor(
@@ -148,8 +149,8 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
     // Opens confirm dialog
     .open(DialogComponent, {
       data: {
-        dialogMessage: "WALLET.MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE",
-        dialogTitle: "WALLET.MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE"
+        dialogMessage: 'WALLET.MAKE_MANUAL_BALANCE_ADJUSTMENT_MESSAGE',
+        dialogTitle: 'WALLET.MAKE_MANUAL_BALANCE_ADJUSTMENT_TITLE'
       }
     })
     .afterClosed()
@@ -160,7 +161,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
         const manualBalanceAdjustment = {
           adjustmentType,
           businessId: data.business._id,
-          value: data.value,
+          value: this.value,
           notes: data.notes
         };
         return manualBalanceAdjustment;
@@ -249,7 +250,7 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
    * @param detailMessageKey Key of the detail message to i18n
    */
   showMessageSnackbar(messageKey, detailMessageKey?) {
-    let translationData = [];
+    const translationData = [];
     if (messageKey) {
       translationData.push(messageKey);
     }
@@ -260,8 +261,8 @@ export class ManualPocketAdjustmentComponent implements OnInit, OnDestroy{
 
     this.translate.get(translationData).subscribe(data => {
       this.snackBar.open(
-        messageKey ? data[messageKey] : "",
-        detailMessageKey ? data[detailMessageKey] : "",
+        messageKey ? data[messageKey] : '',
+        detailMessageKey ? data[detailMessageKey] : '',
         {
           duration: 2000
         }

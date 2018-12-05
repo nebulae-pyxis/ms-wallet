@@ -29,7 +29,7 @@ class BusinessCQRS {
       "SpendingRule",
       "getSpendingRule$",
       PERMISSION_DENIED_ERROR,
-      ["developer"]
+      ["PLATFORM-ADMIN"]
     ).pipe(
       mergeMap(() => spendingRulesDA.getSpendingRule$(args.businessId)),
       mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
@@ -43,13 +43,14 @@ class BusinessCQRS {
       "SpendingRule",
       "getSpendingRule$",
       PERMISSION_DENIED_ERROR,
-      ["developer"]
+      ["PLATFORM-ADMIN"]
     ).pipe(
       mergeMap(() => spendingRulesDA.getDocumentsCount$() ),
       mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
       catchError(err => this.errorHandler$(err))
     );
   }
+  
 
   getSpendingRules$({ root, args, jwt }, authToken) {
     return RoleValidator.checkPermissions$(
@@ -57,7 +58,7 @@ class BusinessCQRS {
       "SpendingRule",
       "getSpendingRule$",
       PERMISSION_DENIED_ERROR,
-      ["developer"]
+      ["PLATFORM-ADMIN"]
     ).pipe(
       mergeMap(() =>
         spendingRulesDA.getSpendingRules$(
@@ -82,7 +83,7 @@ class BusinessCQRS {
       "SpendingRule",
       "getSpendingRule$",
       PERMISSION_DENIED_ERROR,
-      ["developer"]
+      ["PLATFORM-ADMIN"]
     ).pipe(
       mergeMap(() => eventSourcing.eventStore.emitEvent$(
         new Event({

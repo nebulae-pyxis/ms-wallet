@@ -5,14 +5,8 @@
 
   <mat-sidenav-container>
     <!-- SIDENAV -->
-    <mat-sidenav
-      class="sidenav"
-      align="start"
-      mode="side"
-      opened="true"
-      fuseMatSidenavHelper="carded-left-sidenav"
-      mat-is-locked-open="gt-md"
-    >
+    <mat-sidenav class="sidenav" align="start" mode="side" opened="true" fuseMatSidenavHelper="carded-left-sidenav"
+      mat-is-locked-open="gt-md">
       <!-- SIDENAV HEADER -->
       <div
         fxLayout="column"
@@ -305,12 +299,12 @@
             fxLayout="row"
             fxLayoutAlign="start center">
 
-            <mat-icon *ngIf="isSystemAdmin">search</mat-icon>
+            <mat-icon *ngIf="isPlatformAdmin">search</mat-icon>
 
-            <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" *ngIf="!isSystemAdmin"
+            <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" *ngIf="!isPlatformAdmin"
              [formControl]="businessFilterCtrl" [(value)]="selectedBusinessName" fxFlex readonly="true">
 
-              <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" [matAutocomplete]="auto" *ngIf="isSystemAdmin"
+              <input [placeholder]="'WALLET.SELECT_BUSINESS' | translate" aria-label="Business" [matAutocomplete]="auto" *ngIf="isPlatformAdmin"
               [(value)]="selectedBusinessData" [formControl]="businessFilterCtrl" fxFlex>
               <mat-autocomplete #auto="matAutocomplete" (optionSelected)='onSelectBusinessEvent($event.option.value)' [displayWith]="displayFn">
                 <mat-option *ngFor="let business of businessQueryFiltered$ | async"

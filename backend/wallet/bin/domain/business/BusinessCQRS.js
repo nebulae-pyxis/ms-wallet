@@ -29,7 +29,7 @@ class BusinessCQRS {
       "wallet",
       "getBusinessByFilter$",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN"]
+      ["PLATFORM-ADMIN"]
       ).pipe(
           mergeMap(roles => BusinessDA.getBusinessByFilter$(args.filterText, args.limit)),
           toArray(),
@@ -52,7 +52,7 @@ class BusinessCQRS {
       "wallet",
       "getWalletBusiness$",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       ).pipe(
           mergeMap(roles => {
             //console.log('authToken.businessId => ', authToken.businessId);
@@ -77,7 +77,7 @@ class BusinessCQRS {
       "wallet",
       "getWalletBusinesses$()",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     ).pipe(
       mergeMap(val => BusinessDA.getAllBusinesses$()),
       toArray(),
@@ -100,7 +100,7 @@ class BusinessCQRS {
       "wallet",
       "getWalletBusinessById$()",
       PERMISSION_DENIED_ERROR,
-      ["SYSADMIN", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     ).pipe(
       mergeMap(val => BusinessDA.getBusiness$(args.id)),
       mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),

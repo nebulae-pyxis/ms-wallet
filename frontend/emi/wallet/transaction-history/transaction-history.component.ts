@@ -108,7 +108,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   selectedBusinessData: any = null;
   selectedBusinessName: any = "";
   selectedTransactionHistory: any = null;
-  isSystemAdmin: Boolean = false;
+  isPlatformAdmin: Boolean = false;
 
   businessQueryFiltered$: Observable<any[]>;
 
@@ -517,7 +517,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     this.checkIfUserIsAdmin$()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(hasSysAdminRole => {
-        this.isSystemAdmin = hasSysAdminRole;
+        this.isPlatformAdmin = hasSysAdminRole;
       });
   }
 
@@ -529,13 +529,13 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Checks if the logged user has role SYSADMIN
+   * Checks if the logged user has role PLATFORM-ADMIN
    */
   checkIfUserIsAdmin$() {
     return Rx.Observable.of(this.keycloakService.getUserRoles(true)).pipe(
-      map(userRoles => userRoles.some(role => role === "SYSADMIN")),
+      map(userRoles => userRoles.some(role => role === "PLATFORM-ADMIN")),
       tap(isAdmin => {
-        this.isSystemAdmin = isAdmin;
+        this.isPlatformAdmin = isAdmin;
       })
     );
   }

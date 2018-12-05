@@ -39,7 +39,7 @@
                 "path": "wallet",
                 "loadChildren": "./main/content/wallet/wallet.module#WalletModule",
                 "priority": 4000,
-                "roles" : ["SYSADMIN", "business-owner"],
+                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER"],
                 "default" : false
             },
             {
@@ -55,7 +55,7 @@
                 "path": "wallet",
                 "loadChildren": "./main/content/wallet/wallet.module#WalletModule",
                 "priority": 3000,
-                "roles" : ["SYSADMIN"],
+                "roles" : ["PLATFORM-ADMIN"],
                 "default" : false
             },
             {
@@ -71,11 +71,13 @@
                 "path": "wallet-errors",
                 "loadChildren": "./main/content/wallet/wallet.module#WalletModule",
                 "priority": 1000,
-                "roles" : ["SYSADMIN"],
+                "roles" : ["PLATFORM-ADMIN"],
                 "default" : false
             }            
         ],
-        "preBuildCommands": [],
+        "preBuildCommands": [
+            "npm install ng2-currency-mask"
+        ],
         "environmentVars": {
         }
     },
@@ -119,7 +121,7 @@
                 "path": "wallet-spending-rules",
                 "loadChildren": "./main/content/wallet-spending-rules/wallet-spending-rules.module#WalletSpengingRulesModule",
                 "priority": 2000,
-                "roles" : ["SYSADMIN"],
+                "roles" : ["PLATFORM-ADMIN"],
                 "default" : false
             }            
         ],

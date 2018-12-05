@@ -57,7 +57,7 @@ export class TransactionHistoryDetailComponent implements OnInit, OnDestroy {
   ];
 
   userRoles: any;
-  isSystemAdmin: Boolean = false;
+  isPlatformAdmin: Boolean = false;
 
   selectedTransactionHistory: any = {
     terminal: {}
@@ -75,16 +75,16 @@ export class TransactionHistoryDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.checkIfUserIsSystemAdmin();
+    this.checkIfUserIsPlatformAdmin();
     this.loadTransactionHistory();
   }
 
   /**
    * Checks if the user is system admin
    */
-  async checkIfUserIsSystemAdmin() {
+  async checkIfUserIsPlatformAdmin() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
-    this.isSystemAdmin = this.userRoles.some(role => role === 'SYSADMIN');
+    this.isPlatformAdmin = this.userRoles.some(role => role === 'PLATFORM-ADMIN');
   }
 
   /**
