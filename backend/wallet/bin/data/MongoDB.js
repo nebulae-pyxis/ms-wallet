@@ -1,6 +1,8 @@
 'use strict'
 
-const Rx = require('rxjs');
+//const Rx = require('rxjs');
+const { Observable, defer, of} = require('rxjs');
+const { map, mergeMap } = require('rxjs/operators');
 const MongoClient = require('mongodb').MongoClient;
 const CollectionName = "Business";
 let instance = null;
@@ -19,11 +21,11 @@ class MongoDB {
 
     /**
      * Starts DB connections
-     * @returns {Rx.Observable} Obserable that resolve to the DB client
+     * @returns {Observable} Obserable that resolve to the DB client
      */
     start$() {
         console.log("MongoDB.start$()... ");
-        return Rx.bindNodeCallback(MongoClient.connect)(this.url).pipe(
+        return Observable.bindNodeCallback(MongoClient.connect)(this.url).pipe(
             map(client => {
                 console.log(this.url);
                 this.client = client;
@@ -38,7 +40,7 @@ class MongoDB {
    * Returns an Obserable that resolve to a string log
    */
     stop$() {
-        return Rx.Observable.create((observer) => {
+        return Observable.create((observer) => {
             this.client.close();
             observer.next('Mongo DB Client closed');
             observer.complete();
@@ -50,7 +52,7 @@ class MongoDB {
      * Returns an Obserable that resolve to a string log
      */
     createIndexes$() {
-        return Rx.Observable.create(async (observer) => {
+        return Observable.create(async (observer) => {
             observer.next('Creating index for wallet.Wallet => ({ businessId: 1}, { unique: true })  ');
             await this.db.collection('Wallet').createIndex( { businessId: 1}, { unique: true }); 
 
@@ -67,17 +69,19 @@ class MongoDB {
      * @param {*} indexData 
      */
     createIndexBackground$(indexData){
-        return Rx.Observable.of(indexData)
-        .mergeMap(index => {
-            this.db.collection(index.collection).createIndex(index.fields, {background: true})
-        });
+        return of(indexData)
+        .pipe(
+            mergeMap(index => {
+                return this.db.collection(index.collection).createIndex(index.fields, {background: true})
+            })
+        );
     }
 
     /**
    * Drop current DB
    */
   dropDB$() {
-    return Rx.Observable.create(async observer => {
+    return Observable.create(async observer => {
       await this.db.dropDatabase();
       observer.next(`Database ${this.dbName} dropped`);
       observer.complete();
@@ -90,7 +94,7 @@ class MongoDB {
    * @param {*} cursor 
    */
   static extractAllFromMongoCursor$(cursor) {
-    return Rx.Observable.create(async observer => {
+    return Observable.create(async observer => {
       let obj = await MongoDB.extractNextFromMongoCursor(cursor);
       while (obj) {
         observer.next(obj);
