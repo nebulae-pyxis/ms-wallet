@@ -1,7 +1,7 @@
 'use strict'
 
 //const Rx = require('rxjs');
-const { Observable, defer, of} = require('rxjs');
+const { Observable, defer, of, bindNodeCallback} = require('rxjs');
 const { map, mergeMap } = require('rxjs/operators');
 const MongoClient = require('mongodb').MongoClient;
 const CollectionName = "Business";
@@ -24,7 +24,7 @@ class MongoDB {
      */
     start$() {
         console.log("MongoDB.start$()... ");
-        return Observable.bindNodeCallback(MongoClient.connect)(this.url).pipe(
+        return bindNodeCallback(MongoClient.connect)(this.url).pipe(
             map(client => {
                 console.log(this.url);
                 this.client = client;
