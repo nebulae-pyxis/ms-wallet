@@ -6,7 +6,6 @@ const { map, mergeMap } = require('rxjs/operators');
 const MongoClient = require('mongodb').MongoClient;
 const CollectionName = "Business";
 let instance = null;
-const { map } = require('rxjs/operators');
 
 class MongoDB {
 
