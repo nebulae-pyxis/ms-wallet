@@ -55,7 +55,7 @@ class WalletES {
   // }
 
     /**
-   * Sends an event with the wallet info associated with the indicated business 
+   * Sends an event with the wallet info associated with the indicated business.
    * @param {*} business 
    */
   sendUpdatedWalletEvent$(business){
