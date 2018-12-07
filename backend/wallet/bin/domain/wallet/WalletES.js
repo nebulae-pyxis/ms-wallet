@@ -55,7 +55,7 @@ class WalletES {
           mergeMap(res => {
             return eventSourcing.eventStore.emitEvent$(
               new Event({
-                eventType: 'walletPocketUpdated',
+                eventType: 'WalletPocketUpdated',
                 eventTypeVersion: 1,
                 aggregateType: "Wallet",
                 aggregateId: wallet._id,
