@@ -297,7 +297,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
     .pipe(
       filter(selectedBusiness => selectedBusiness != null),
       switchMap((selectedBusiness: any) =>
-        this.walletService.getWalletUpdatedSubscription$(selectedBusiness._id)
+        this.walletService.getWalletPocketUpdatedSubscription$(selectedBusiness._id)
       )
     );
   }
@@ -316,7 +316,7 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
             filter((resp: any) => !resp.errors || resp.errors.length === 0),
             map(result => result.data.getWallet)
           ),
-          this.walletService.getWalletUpdatedSubscription$(selectedBusiness._id)
+          this.walletService.getWalletPocketUpdatedSubscription$(selectedBusiness._id)
           .pipe(
             tap(wallet => this.outdatedData = true)
           )

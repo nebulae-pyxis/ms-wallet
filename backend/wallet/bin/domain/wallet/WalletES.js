@@ -19,7 +19,7 @@ let instance;
 
 class WalletES {
   constructor() {
-    this.materializedViewsEventEmitted$ = new Subject();
+    this.walletPocketUpdatedEventEmitter$ = new Subject();
     this.buildWalletEmissor();
   }
 
@@ -27,11 +27,11 @@ class WalletES {
    * Defines when a wallet event must be emitted
    */
   buildWalletEmissor(){
-    this.materializedViewsEventEmitted$
+    this.walletPocketUpdatedEventEmitter$
     .pipe(
       groupBy(business => business._id),
       mergeMap(group$ => group$.pipe(debounceTime(5000))),
-      mergeMap(business => this.sendUpdatedWalletEvent$(business))
+      mergeMap(business => this.sendWalletPocketUpdatedEvent$(business))
     )
     .subscribe(
       (result) => {},
@@ -40,36 +40,22 @@ class WalletES {
     );
   }
 
-  // /**
-  //  * Sends an event with the wallet info associated with the indicated business 
-  //  * @param {*} business 
-  //  */
-  // sendUpdatedWalletEvent$(business){
-  //   return of(business)
-  //   .pipe(
-  //     mergeMap(business => WalletDA.getWallet$(business._id)),
-  //     mergeMap(wallet => {
-  //       return broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletUpdated', wallet)        ;
-  //     })
-  //   );
-  // }
-
     /**
    * Sends an event with the wallet info associated with the indicated business.
    * @param {*} business 
    */
-  sendUpdatedWalletEvent$(business){
+  sendWalletPocketUpdatedEvent$(business){
     return of(business)
     .pipe(
       mergeMap(business => WalletDA.getWallet$(business._id)),
       mergeMap(wallet => {
         return of(wallet)
         .pipe(
-          mergeMap(wallet => broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletUpdated', wallet)),
+          mergeMap(wallet => broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletPocketUpdated', wallet)),
           mergeMap(res => {
             return eventSourcing.eventStore.emitEvent$(
               new Event({
-                eventType: 'WalletUpdated',
+                eventType: 'walletPocketUpdated',
                 eventTypeVersion: 1,
                 aggregateType: "Wallet",
                 aggregateId: wallet._id,
@@ -471,7 +457,7 @@ class WalletES {
       toArray(),
       tap(res => {
         //console.log('handleWalletTransactionExecuted => ', res[0])
-        this.materializedViewsEventEmitted$.next(res[0])
+        this.walletPocketUpdatedEventEmitter$.next(res[0])
       }),
       catchError(error => {
         console.log(`An error was generated while a walletTransactionExecuted was being processed: ${error.stack}`);

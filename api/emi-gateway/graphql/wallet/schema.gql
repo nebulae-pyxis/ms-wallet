@@ -22,6 +22,8 @@ type Wallet {
   pockets: Pocket!
   "Wallet state"
   spendingState: SpendingStateEnum
+  "Minimum amount operation"
+  minAmountOperation: Int
   "Business ID"
   businessId: String
 }
@@ -281,7 +283,9 @@ type Mutation {
 }
 
 type Subscription {
-  "Subscription fires when a wallet is updated."
-  walletUpdated(businessId: String!): Wallet
+  "Subscription fires when the pockets of a wallet are updated."
+  walletPocketUpdated(businessId: String!): Wallet
+  "Subscriptions fires when the spending rules of a wallet are updated."
+  walletSpendingRuleUpdated(businessId: String!): Wallet
 }
 

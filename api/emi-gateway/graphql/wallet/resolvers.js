@@ -411,7 +411,7 @@ module.exports = {
 
   //// SUBSCRIPTIONS ///////
   Subscription: {
-    walletUpdated: {
+    walletPocketUpdated: {
       subscribe: withFilter(
         (payload, variables, context, info) => {
           //Checks the roles of the user, if the user does not have at least one of the required roles, an error will be thrown
@@ -419,15 +419,15 @@ module.exports = {
             context.authToken.realm_access.roles, 
             ["PLATFORM-ADMIN", "BUSINESS-OWNER", "POS"], 
             CONTEXT_NAME, 
-            "walletUpdated", 
+            "walletPocketUpdated", 
             PERMISSION_DENIED_ERROR_CODE, 
             "Permission denied");
 
-          return pubsub.asyncIterator("walletUpdated");  
+          return pubsub.asyncIterator("walletPocketUpdated");  
         },
         (payload, variables, context, info) => {
-          console.log('payload => ', payload, variables.businessId, (payload.businessId == variables.businessId));
-          return payload.walletUpdated.businessId == variables.businessId;
+          //console.log('payload => ', payload, variables.businessId, (payload.businessId == variables.businessId));
+          return payload.walletPocketUpdated.businessId == variables.businessId;
         }
       )
     }
@@ -440,8 +440,8 @@ module.exports = {
 
 const eventDescriptors = [
     {
-        backendEventName: 'walletUpdated',
-        gqlSubscriptionName: 'walletUpdated',
+        backendEventName: 'walletPocketUpdated',
+        gqlSubscriptionName: 'walletPocketUpdated',
         dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
         onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
         onEvent: (evt, descriptor) => {} // console.log(`Event of type  ${descriptor.backendEventName} arraived`),// OPTIONAL, only use if needed
