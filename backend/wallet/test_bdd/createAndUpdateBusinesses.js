@@ -200,44 +200,44 @@ describe("E2E - Simple transaction", function() {
   * DE-PREAPARE
   */
 
-  // describe("de-prepare test DB", function() {
-  //   it("delete mongoDB", function(done) {
-  //     this.timeout(8000);
-  //     of({})
-  //     .pipe(
-  //         delay(5000),
-  //         mergeMap(() => mongoDB.dropDB$())
-  //     )
-  //     .subscribe(
-  //       evt => console.log(`${evt}`),
-  //       error => {
-  //         console.error(`Mongo DropDB failed: ${error}`);
-  //         return done(error);
-  //       },
-  //       () => {
-  //         return done();
-  //       }
-  //     );      
-  //   });
-  //   it("stop mongo", function(done) {
-  //     this.timeout(4000);
-  //     of({})
-  //     .pipe(
-  //       delay(1000),
-  //       mergeMap(() => mongoDB.stop$() )
-  //     )
-  //     .subscribe(
-  //       evt => console.log(`Mongo Stop: ${evt}`),
-  //       error => {
-  //         console.error(`Mongo Stop failed: ${error}`);
-  //         return done(error);
-  //       },
-  //       () => {
-  //         return done();
-  //       }
-  //     );       
-  //   });
-  // });
+  describe("de-prepare test DB", function() {
+    it("delete mongoDB", function(done) {
+      this.timeout(8000);
+      of({})
+      .pipe(
+          delay(5000),
+          mergeMap(() => mongoDB.dropDB$())
+      )
+      .subscribe(
+        evt => console.log(`${evt}`),
+        error => {
+          console.error(`Mongo DropDB failed: ${error}`);
+          return done(error);
+        },
+        () => {
+          return done();
+        }
+      );      
+    });
+    it("stop mongo", function(done) {
+      this.timeout(4000);
+      of({})
+      .pipe(
+        delay(1000),
+        mergeMap(() => mongoDB.stop$() )
+      )
+      .subscribe(
+        evt => console.log(`Mongo Stop: ${evt}`),
+        error => {
+          console.error(`Mongo Stop failed: ${error}`);
+          return done(error);
+        },
+        () => {
+          return done();
+        }
+      );       
+    });
+  });
 
 
 });

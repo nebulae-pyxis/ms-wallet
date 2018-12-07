@@ -185,6 +185,7 @@ class WalletCQRS {
     );
   }
 
+  
   /**
    * Makes manual balance adjustment
    *

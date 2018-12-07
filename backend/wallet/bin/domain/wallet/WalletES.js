@@ -215,12 +215,12 @@ class WalletES {
         ),
         mergeMap(transaction => forkJoin(
           of(transaction),
-          of(transaction.pocket)
+          of(transaction.pocket.toString().toLowerCase())
           .pipe(
-            map(selectedPocket => result.wallet[selectedPocket] == BONUS_POCKET
-              ? BONUS_POCKET
-              : result.wallet.main >= evt.data.value ? MAIN_POCKET : CREDIT_POCKET
-            )
+            map(selectedPocket => selectedPocket == BONUS_POCKET.toLowerCase()
+            ? BONUS_POCKET
+            : result.wallet.pockets.main >= evt.data.value ? MAIN_POCKET : CREDIT_POCKET
+            )             
           )
         )),
         map(([transaction, pocketAlias]) => ({...transaction, pocketAlias: pocketAlias })  )
