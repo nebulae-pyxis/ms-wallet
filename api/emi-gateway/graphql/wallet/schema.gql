@@ -269,7 +269,7 @@ type Query {
   typeAndConcepts: [TypeVsConcepts]
   "Get the quantity of spending rules"
   WalletSpendingRuleQuantity: Int
-  "Gets errors ocurred while the transactions were being processed"
+  "Gets errors ocurred while the transactions were being processed."
   getWalletErrors(page: Int!, count: Int!, errorType: String): [Error]
   "Gets amount of errors ocurred while the transactions were being processed"
   getWalletErrorsCount(errorType: String): Int!

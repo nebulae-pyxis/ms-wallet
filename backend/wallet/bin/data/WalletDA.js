@@ -23,7 +23,7 @@ class WalletDA {
   }
 
   /**
-   * get the wallet info by business ID
+   * get the wallet info by business ID.
    * @param {string} businessId Business unit related
    */
   static getWallet$(businessId) {

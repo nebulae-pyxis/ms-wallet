@@ -127,7 +127,7 @@ export class WalletErrorsService {
 
   /**
    * Receives an event with the last wallet state when a wallet has been updated.
-   * @param businessId
+   * @param businessId Id of the business
    */
   getWalletPocketUpdatedSubscription$(businessId): Observable<any> {
     return this.gateway.apollo
