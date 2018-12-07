@@ -40,8 +40,22 @@ class WalletES {
     );
   }
 
-  /**
-   * Sends an event with the wallet info associated with the indicated business 
+  // /**
+  //  * Sends an event with the wallet info associated with the indicated business 
+  //  * @param {*} business 
+  //  */
+  // sendUpdatedWalletEvent$(business){
+  //   return of(business)
+  //   .pipe(
+  //     mergeMap(business => WalletDA.getWallet$(business._id)),
+  //     mergeMap(wallet => {
+  //       return broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletUpdated', wallet)        ;
+  //     })
+  //   );
+  // }
+
+    /**
+   * Sends an event with the wallet info associated with the indicated business.
    * @param {*} business 
    */
   sendUpdatedWalletEvent$(business){
@@ -49,7 +63,22 @@ class WalletES {
     .pipe(
       mergeMap(business => WalletDA.getWallet$(business._id)),
       mergeMap(wallet => {
-        return broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletUpdated', wallet)        ;
+        return of(wallet)
+        .pipe(
+          mergeMap(wallet => broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletUpdated', wallet)),
+          mergeMap(res => {
+            return eventSourcing.eventStore.emitEvent$(
+              new Event({
+                eventType: 'WalletUpdated',
+                eventTypeVersion: 1,
+                aggregateType: "Wallet",
+                aggregateId: wallet._id,
+                data: wallet,
+                user: 'SYSTEM'
+              })
+            );
+          })
+        )
       })
     );
   }
