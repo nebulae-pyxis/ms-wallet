@@ -319,13 +319,27 @@ class WalletES {
             let condition = false;
 
             switch (pocketSelectionRule.condition.comparator) {
-              case 'GT':     condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] > pocketSelectionRule.condition.value
-              case 'GTE':    condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] >= pocketSelectionRule.condition.value
-              case 'LT':     condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] < pocketSelectionRule.condition.value
-              case 'LTE':    condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] <= pocketSelectionRule.condition.value
-              case 'ENOUGH': condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] > transactionAmount
-              case 'INS':    condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] < transactionAmount
-              default:       throwError('Invalid comparator');
+              case 'GT':     
+                condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] > pocketSelectionRule.condition.value;
+                break;
+              case 'GTE':    
+                condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] >= pocketSelectionRule.condition.value;
+                break;
+              case 'LT':     
+                condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] < pocketSelectionRule.condition.value;
+                break;
+              case 'LTE':    
+                condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] <= pocketSelectionRule.condition.value
+                break;
+              case 'ENOUGH': 
+                condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] > transactionAmount;
+                break;
+              //INSUFICIENT
+              case 'INS':    
+                condition = wallet.pockets[pocketSelectionRule.condition.pocket.toLowerCase()] < transactionAmount;
+                break;
+              default:       
+                throw new Error('Invalid comparator');
             }
 
             return (condition && wallet.pockets[pocketSelectionRule.pocketToUse.toLowerCase()] >= transactionAmount);
@@ -336,10 +350,9 @@ class WalletES {
           )  
         ),
         map(({pocketToUse}) =>  pocketToUse),
-        map(selectedPocket => {          
+        map(selectedPocket => {
           return (
-            ( wallet.pockets[selectedPocket.toLowerCase()] >= transactionAmount )
-            )
+            (wallet.pockets[selectedPocket.toLowerCase()] >= transactionAmount))
             ? selectedPocket
             : (selectedPocket == MAIN_POCKET && wallet.pockets.main < transactionAmount && wallet.pockets.bonus >= transactionAmount )
               ? BONUS_POCKET
