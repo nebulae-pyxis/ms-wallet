@@ -52,7 +52,6 @@ function handleError$(err, methodName) {
 }
 
 module.exports = {
-  //// QUERY ///////
   Query: {
     Wallet(root, args, context){
       return Rx.Observable.of({})

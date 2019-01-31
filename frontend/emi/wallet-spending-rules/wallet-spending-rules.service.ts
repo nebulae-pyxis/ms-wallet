@@ -17,7 +17,6 @@ export class WalletSpendingRuleService {
   typesVsConcepts: { type: string, concepts: string[] }[];
 
   constructor(private gateway: GatewayService) {
-
   }
 
   getSpendingRulesQuantity$() {

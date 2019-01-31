@@ -41,6 +41,3 @@ const start = () => {
 };
 
 start();
-
-
-
