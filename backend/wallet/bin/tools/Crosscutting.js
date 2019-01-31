@@ -31,7 +31,7 @@ class Crosscutting{
      * @param {*} date 
      */
     static getMonthYear(date){
-        let month = date.getMonth()+1;
+        let month = ""+date.getMonth()+1;
         let year = date.getFullYear() + '';
         month = (month.length == 1 ? '0': '') + month;
         year = year.substr(year.length - 2)
