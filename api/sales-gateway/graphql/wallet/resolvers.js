@@ -3,97 +3,80 @@ const RoleValidator  = require("../../tools/RoleValidator");
 const { CustomError } = require("../../tools/customError");
 const PubSub = require("graphql-subscriptions").PubSub;
 const pubsub = new PubSub();
-const Rx = require("rxjs");
 const broker = require("../../broker/BrokerFactory")();
 const contextName = "User-Management";
+
+const {handleError$} = require('../../tools/GraphqlResponseTools');
+const { of } = require('rxjs');
+const { map, mergeMap, catchError } = require('rxjs/operators');
 
 //Every single error code
 // please use the prefix assigned to this microservice
 const INTERNAL_SERVER_ERROR_CODE = 16001;
 const USERS_PERMISSION_DENIED_ERROR_CODE = 16002;
 
-function getResponseFromBackEnd$(response) {  
-  console.log(response);
-  return Rx.Observable.of(response).map(resp => {
-    if (resp.result.code != 200) {      
-      const err = new Error();
-      err.name = "Error";
-      err.message = resp.result.error;
-     // Error.captureStackTrace(err, "Error");
-      throw err;
-    }
-    return resp.data;
-  });
-}
-
-/**
- * Handles errors
- * @param {*} err
- * @param {*} operationName
- */
-function handleError$(err, methodName) {
-  return Rx.Observable.of(err).map(err => {
-    const exception = { data: null, result: {} };
-    const isCustomError = err instanceof CustomError;
-    if (!isCustomError) {
-      err = new CustomError(
-        err.name,
-        methodName,
-        INTERNAL_SERVER_ERROR_CODE,
-        err.message
-      );
-    }
-    exception.result = {
-      code: err.code,
-      error: { ...err.getContent() }
-    };
-    return exception;
-  });
+function getResponseFromBackEnd$(response) {
+  return of(response)
+  .pipe(
+      map(resp => {
+          if (resp.result.code != 200) {
+              const err = new Error();
+              err.name = 'Error';
+              err.message = resp.result.error;
+              Error.captureStackTrace(err, 'Error');
+              throw err;
+          }
+          return resp.data;
+      })
+  );
 }
 
 module.exports = {
   Query: {
     Wallet(root, args, context){
-      return Rx.Observable.of({})
-      .mergeMap(() =>
-        broker.forwardAndGetReply$(
-          "Wallet",
-          "salesgateway.graphql.query.getWallet",
-          { root, args, jwt: context.encodedToken },
-          2000
-        )
-      )
-      .catch(err => handleError$(err, "getWallet"))
-      .mergeMap(response => getResponseFromBackEnd$(response))      
-      .toPromise();
+      return of({})
+      .pipe(
+        mergeMap(() =>
+          broker.forwardAndGetReply$(
+            "Wallet",
+            "salesgateway.graphql.query.getWallet",
+            { root, args, jwt: context.encodedToken },
+            2000
+          )
+        ),
+        catchError(err => handleError$(err, "getWallet")),
+        mergeMap(response => getResponseFromBackEnd$(response))    
+      ).toPromise();
     },    
     WalletTransactionsHistoryById(root, args, context){
-      return Rx.Observable.of({})
-      .mergeMap(() =>
-        broker.forwardAndGetReply$(
-          "Wallet",
-          "salesgateway.graphql.query.getWalletTransaction",
-          { root, args, jwt: context.encodedToken },
-          2000
-        )
-      )
-      .catch(err => handleError$(err, "getWallet"))
-      .mergeMap(response => getResponseFromBackEnd$(response))
-      .toPromise();
+      return of({})
+      .pipe(
+        mergeMap(() =>
+          broker.forwardAndGetReply$(
+            "Wallet",
+            "salesgateway.graphql.query.getWalletTransaction",
+            { root, args, jwt: context.encodedToken },
+            2000
+          )
+        ),
+        catchError(err => handleError$(err, "getWallet")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
     WalletTransactionsHistory(root, args, context){
-      return Rx.Observable.of({})
-      .mergeMap(() =>
-        broker.forwardAndGetReply$(
-          "Wallet",
-          "salesgateway.graphql.query.getWalletTransaction",
-          { root, args, jwt: context.encodedToken },
-          2000
-        )
-      )
-      .catch(err => handleError$(err, "getWallet"))
-      .mergeMap(response => getResponseFromBackEnd$(response))
-      .toPromise();
+      return of({})
+      .pipe(
+        mergeMap(() =>
+          broker.forwardAndGetReply$(
+            "Wallet",
+            "salesgateway.graphql.query.getWalletTransaction",
+            { root, args, jwt: context.encodedToken },
+            2000
+          )
+        ),
+        catchError(err => handleError$(err, "getWallet")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     }    
     
   },

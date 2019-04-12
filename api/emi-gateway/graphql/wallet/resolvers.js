@@ -4,7 +4,10 @@ const pubsub = new PubSub();
 const Rx = require("rxjs");
 const broker = require("../../broker/BrokerFactory")();
 const RoleValidator = require('../../tools/RoleValidator');
-const { CustomError } = require("../../tools/customError");
+const {handleError$} = require('../../tools/GraphqlResponseTools');
+const { of } = require('rxjs');
+const { map, mergeMap, catchError } = require('rxjs/operators');
+
 //Every single error code
 // please use the prefix assigned to this microservice
 const INTERNAL_SERVER_ERROR_CODE = 19001;
@@ -13,40 +16,20 @@ const PERMISSION_DENIED_ERROR_CODE = 19002;
 const CONTEXT_NAME = "WALLET";
 
 function getResponseFromBackEnd$(response) {
-    return Rx.Observable.of(response)
-        .map(resp => {
-            if (resp.result.code != 200) {
-                const err = new Error();
-                err.name = 'Error';
-                err.message = resp.result.error;
-                // this[Symbol()] = resp.result.error;
-                Error.captureStackTrace(err, 'Error');
-                throw err;
-            }
-            return resp.data;
-        });
+  return of(response)
+  .pipe(
+      map(resp => {
+          if (resp.result.code != 200) {
+              const err = new Error();
+              err.name = 'Error';
+              err.message = resp.result.error;
+              Error.captureStackTrace(err, 'Error');
+              throw err;
+          }
+          return resp.data;
+      })
+  );
 }
-
-/**
- * Handles errors
- * @param {*} err
- * @param {*} operationName
- */
-function handleError$(err, methodName) {
-  return Rx.Observable.of(err).map(err => {
-    const exception = { data: null, result: {} };
-    const isCustomError = err instanceof CustomError;
-    if (!isCustomError) {
-      err = new CustomError(err.name, methodName, INTERNAL_SERVER_ERROR_CODE, err.message);
-    }
-    exception.result = {
-      code: err.code,
-      error: { ...err.getContent() }
-    };
-    return exception;
-  });
-}
-
 
 module.exports = {
   //// QUERY ///////
@@ -60,18 +43,19 @@ module.exports = {
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
         ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
-      )
-        .mergeMap(response => {
+      ).
+      pipe(
+        mergeMap(response => {
           return broker.forwardAndGetReply$(
             "Wallet",
             "emigateway.graphql.query.getWalletTransactionsHistory",
             { root, args, jwt: context.encodedToken },
             2000
           );
-        })
-        .catch(err => handleError$(err, "getWalletTransactionsHistory"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
+        }),
+        catchError(err => handleError$(err, "getWalletTransactionsHistory")),
+        mergeMap(response => getResponseFromBackEnd$(response)) 
+      ).toPromise();
     },
     getWalletTransactionsHistoryAmount(root, args, context) {
       return RoleValidator.checkPermissions$(
@@ -81,18 +65,18 @@ module.exports = {
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
         ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
-      )
-        .mergeMap(response => {
+      ).pipe(
+        mergeMap(response => {
           return broker.forwardAndGetReply$(
             "Wallet",
             "emigateway.graphql.query.getWalletTransactionsHistoryAmount",
             { root, args, jwt: context.encodedToken },
             2000
           );
-        })
-        .catch(err => handleError$(err, "getWalletTransactionsHistoryAmount"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
+        }),
+        catchError(err => handleError$(err, "getWalletTransactionsHistoryAmount")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
     getWalletTransactionsHistoryById(root, args, context) {
       return RoleValidator.checkPermissions$(
@@ -102,18 +86,18 @@ module.exports = {
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
         ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
-      )
-        .mergeMap(response => {
+      ).pipe(
+        mergeMap(response => {
           return broker.forwardAndGetReply$(
             "Wallet",
             "emigateway.graphql.query.getWalletTransactionsHistoryById",
             { root, args, jwt: context.encodedToken },
             2000
           );
-        })
-        .catch(err => handleError$(err, "getWalletTransactionsHistoryById"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
+        }),
+        catchError(err => handleError$(err, "getWalletTransactionsHistoryById")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
     getAssociatedTransactionsHistoryByTransactionHistoryId(root, args, context) {
       return RoleValidator.checkPermissions$(
@@ -123,18 +107,18 @@ module.exports = {
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
         ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
-      )
-        .mergeMap(response => {
+      ).pipe(
+        mergeMap(response => {
           return broker.forwardAndGetReply$(
             "Wallet",
             "emigateway.graphql.query.getAssociatedTransactionsHistoryByTransactionHistoryId",
             { root, args, jwt: context.encodedToken },
             2000
           );
-        })
-        .catch(err => handleError$(err, "getAssociatedTransactionsHistoryByTransactionHistoryId"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
+        }),
+        catchError(err => handleError$(err, "getAssociatedTransactionsHistoryByTransactionHistoryId")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
       getWallet(root, args, context) {
         return RoleValidator.checkPermissions$(
@@ -144,18 +128,18 @@ module.exports = {
           PERMISSION_DENIED_ERROR_CODE,
           "Permission denied",
           ["PLATFORM-ADMIN", "BUSINESS-OWNER", "POS"]
-        )
-          .mergeMap(response => {
+        ).pipe(
+          mergeMap(response => {
             return broker.forwardAndGetReply$(
               "Wallet",
               "emigateway.graphql.query.getWallet",
               { root, args, jwt: context.encodedToken },
               2000
             );
-          })
-          .catch(err => handleError$(err, "getWallet"))
-          .mergeMap(response => getResponseFromBackEnd$(response))
-          .toPromise();
+          }),
+          catchError(err => handleError$(err, "getWallet")),
+          mergeMap(response => getResponseFromBackEnd$(response))
+        ).toPromise();
       },
       getBusinessByFilter(root, args, context) {
         return RoleValidator.checkPermissions$(
@@ -165,18 +149,18 @@ module.exports = {
           PERMISSION_DENIED_ERROR_CODE,
           "Permission denied",
           ["PLATFORM-ADMIN"]
-        )
-          .mergeMap(response => {
+        ).pipe(
+          mergeMap(response => {
             return broker.forwardAndGetReply$(
               "Business",
               "emigateway.graphql.query.getBusinessByFilter",
               { root, args, jwt: context.encodedToken },
               2000
             );
-          })
-          .catch(err => handleError$(err, "getBusinessByFilter"))
-          .mergeMap(response => getResponseFromBackEnd$(response))
-          .toPromise();
+          }),
+          catchError(err => handleError$(err, "getBusinessByFilter")),
+          mergeMap(response => getResponseFromBackEnd$(response))
+        ).toPromise();
     },
       getWalletBusiness(root, args, context) {
             return RoleValidator.checkPermissions$(
@@ -186,18 +170,18 @@ module.exports = {
               PERMISSION_DENIED_ERROR_CODE,
               "Permission denied",
               ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
-            )
-              .mergeMap(response => {
+            ).pipe(
+              mergeMap(response => {
                 return broker.forwardAndGetReply$(
                   "Business",
                   "emigateway.graphql.query.getWalletBusiness",
                   { root, args, jwt: context.encodedToken },
                   2000
                 );
-              })
-              .catch(err => handleError$(err, "getWalletBusiness"))
-              .mergeMap(response => getResponseFromBackEnd$(response))
-              .toPromise();
+              }),
+              catchError(err => handleError$(err, "getWalletBusiness")),
+              mergeMap(response => getResponseFromBackEnd$(response))
+            ).toPromise();
         },
         getWalletBusinesses(root, args, context) {
             return RoleValidator.checkPermissions$(
@@ -207,18 +191,18 @@ module.exports = {
               PERMISSION_DENIED_ERROR_CODE,
               "Permission denied",
               ["PLATFORM-ADMIN"]
-            )
-              .mergeMap(response => {
+            ).pipe(
+              mergeMap(response => {
                 return broker.forwardAndGetReply$(
                   "Business",
                   "emigateway.graphql.query.getWalletBusinesses",
                   { root, args, jwt: context.encodedToken },
                   2000
                 );
-              })
-              .catch(err => handleError$(err, "getWalletBusinesses"))
-              .mergeMap(response => getResponseFromBackEnd$(response))
-              .toPromise();
+              }),
+              catchError(err => handleError$(err, "getWalletBusinesses")),
+              mergeMap(response => getResponseFromBackEnd$(response))
+            ).toPromise();
         },
         getWalletBusinessById(root, args, context) {
           return RoleValidator.checkPermissions$(
@@ -228,18 +212,18 @@ module.exports = {
             PERMISSION_DENIED_ERROR_CODE,
             "Permission denied",
             ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
-          )
-            .mergeMap(response => {
+          ).pipe(
+            mergeMap(response => {
               return broker.forwardAndGetReply$(
                 "Business",
                 "emigateway.graphql.query.getWalletBusinessById",
                 { root, args, jwt: context.encodedToken },
                 2000
               );
-            })
-            .catch(err => handleError$(err, "getWalletBusinessById"))
-            .mergeMap(response => getResponseFromBackEnd$(response))
-            .toPromise();
+            }),
+            catchError(err => handleError$(err, "getWalletBusinessById")),
+            mergeMap(response => getResponseFromBackEnd$(response))
+          ).toPromise();
       },
     WalletGetSpendingRule(root, args, context) {
       return RoleValidator.checkPermissions$(
@@ -249,18 +233,18 @@ module.exports = {
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
         ["PLATFORM-ADMIN"]
-      )
-        .mergeMap(response => broker
+      ).pipe(
+        mergeMap(response => broker
           .forwardAndGetReply$(
             "SpendingRule",
             "emigateway.graphql.query.getSpendingRule",
             { root, args, jwt: context.encodedToken },
             2000
           )
-        )
-        .catch(err => handleError$(err, "getWalletSpendingRule"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
+        ),
+        catchError(err => handleError$(err, "getWalletSpendingRule")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
     WalletGetSpendingRules(root, args, context) {
       return RoleValidator.checkPermissions$(
@@ -270,19 +254,18 @@ module.exports = {
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
         ["PLATFORM-ADMIN"]
-      )
-        .mergeMap(() => broker
+      ).pipe(
+        mergeMap(() => broker
           .forwardAndGetReply$(
             "SpendingRule",
             "emigateway.graphql.query.getSpendingRules",
             { root, args, jwt: context.encodedToken },
             2000
           )          
-        )
-        .catch(err => handleError$(err, "WalletGetSpendingRules"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
-
+        ),
+        catchError(err => handleError$(err, "WalletGetSpendingRules")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
     typeAndConcepts(root, args, context) {
       return RoleValidator.checkPermissions$(
@@ -292,19 +275,17 @@ module.exports = {
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
         ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
-      )
-        .mergeMap(() =>  broker
+      ).pipe(
+        mergeMap(() =>  broker
         .forwardAndGetReply$(
           "Wallet",
           "emigateway.graphql.query.getTypeAndConcepts",
           { root, args, jwt: context.encodedToken },
-          2000
-        ))
-        .catch(err => handleError$(err, "typeAndConcepts"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
-
-
+          20,00
+        )),
+        catchError(err => handleError$(err, "typeAndConcepts")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
     WalletSpendingRuleQuantity(root, args, context) {
       return RoleValidator.checkPermissions$(
@@ -314,8 +295,8 @@ module.exports = {
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
         ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
-      )
-        .mergeMap(() =>
+      ).pipe(
+        mergeMap(() =>
           broker
             .forwardAndGetReply$(
               "Wallet",
@@ -323,11 +304,10 @@ module.exports = {
               { root, args, jwt: context.encodedToken },
               2000
             )
-        )
-        .catch(err => handleError$(err, "WalletSpendingRuleQuantity"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
-
+        ),
+        catchError(err => handleError$(err, "WalletSpendingRuleQuantity")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
       getWalletErrors(root, args, context) {
         return RoleValidator.checkPermissions$(
@@ -337,17 +317,18 @@ module.exports = {
           PERMISSION_DENIED_ERROR_CODE,
           "Permission denied",
           ["PLATFORM-ADMIN"]
-        ).mergeMap(response => {
+        ).pipe(
+          mergeMap(response => {
             return broker.forwardAndGetReply$(
               "WalletError",
               "emigateway.graphql.query.getWalletErrors",
               { root, args, jwt: context.encodedToken },
               2000
             );
-          })
-          .catch(err => handleError$(err, "getWalletErrors"))
-          .mergeMap(response => getResponseFromBackEnd$(response))
-          .toPromise();
+          }),
+          catchError(err => handleError$(err, "getWalletErrors")),
+          mergeMap(response => getResponseFromBackEnd$(response))
+        ).toPromise();
       },
       getWalletErrorsCount(root, args, context) {
         return RoleValidator.checkPermissions$(
@@ -357,17 +338,18 @@ module.exports = {
           PERMISSION_DENIED_ERROR_CODE,
           "Permission denied",
           ["PLATFORM-ADMIN"]
-        ).mergeMap(response => {
+        ).pipe(
+          mergeMap(response => {
             return broker.forwardAndGetReply$(
               "WalletError",
               "emigateway.graphql.query.getWalletErrorsCount",
               { root, args, jwt: context.encodedToken },
               2000
             );
-          })
-          .catch(err => handleError$(err, "getWalletErrorsCount"))
-          .mergeMap(response => getResponseFromBackEnd$(response))
-          .toPromise();
+          }),
+          catchError(err => handleError$(err, "getWalletErrorsCount")),
+          mergeMap(response => getResponseFromBackEnd$(response))
+        ).toPromise();
       }      
   },
   //// MUTATIONS ///////
@@ -380,31 +362,29 @@ module.exports = {
         PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
         ["PLATFORM-ADMIN"]
-      )
-        .mergeMap(roles => {
+      ).pipe(
+        mergeMap(roles => {
           return context.broker.forwardAndGetReply$(
             "Wallet",
             "emigateway.graphql.mutation.makeManualBalanceAdjustment",
             { root, args, jwt: context.encodedToken },
             2000
           );
-        })
-        .catch(err => handleError$(err, "makeManualBalanceAdjustment"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
+        }),
+        catchError(err => handleError$(err, "makeManualBalanceAdjustment")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
     walletUpdateSpendingRule(root, args, context) {
-      console.log("LLEGA LA MUTACION");
-
       return broker.forwardAndGetReply$(
         "SpendingRule",
         "emigateway.graphql.mutation.updateSpendingRule",
         { root, args, jwt: context.encodedToken },
         2000
-      )
-        .catch(err => handleError$(err, "updateSpendingRule"))
-        .mergeMap(response => getResponseFromBackEnd$(response))
-        .toPromise();
+      ).pipe(
+        catchError(err => handleError$(err, "updateSpendingRule")),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
     },
   },
   
