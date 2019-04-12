@@ -122,7 +122,6 @@ class WalletCQRS {
           return of(roles);
       }),
       mergeMap(val => WalletTransactionDA.getTransactionsHistoryAmount$(args.filterInput)),
-      toArray(),
       mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse)),
       catchError(err => this.handleError$(err))
     );
