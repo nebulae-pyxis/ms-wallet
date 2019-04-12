@@ -549,8 +549,11 @@ export class TransactionHistoryComponent implements OnInit, OnDestroy {
             startWith(undefined),
             debounceTime(500),
             distinctUntilChanged(),
-            mergeMap((filterText: String) => {
-              return this.getBusinessFiltered(filterText, 10);
+            mergeMap((filterText: any) => {
+              if(typeof filterText === 'string'){
+                return this.getBusinessFiltered(filterText, 10);
+              }
+              return this.getBusinessFiltered(filterText._id, 10);
             })
           );
         } else {
