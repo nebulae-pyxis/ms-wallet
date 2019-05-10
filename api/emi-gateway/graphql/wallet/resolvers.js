@@ -281,7 +281,7 @@ module.exports = {
           "Wallet",
           "emigateway.graphql.query.getTypeAndConcepts",
           { root, args, jwt: context.encodedToken },
-          20,00
+          2000
         )),
         catchError(err => handleError$(err, "typeAndConcepts")),
         mergeMap(response => getResponseFromBackEnd$(response))
