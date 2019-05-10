@@ -273,7 +273,7 @@ module.exports = {
         CONTEXT_NAME,
         "typeAndConcepts",
         PERMISSION_DENIED_ERROR_CODE,
-        "Permission denied",
+        "Permission denied", 
         ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       ).pipe(
         mergeMap(() =>  broker
