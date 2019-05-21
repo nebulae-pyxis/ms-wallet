@@ -112,7 +112,7 @@ export class TransactionHistoryDetailComponent implements OnInit, OnDestroy {
 
           return this.transactionHistoryDetailService
             .getAssociatedTransactionsHistoryByTransactionHistoryId$(
-              transactionHistory.associatedTransactionIds
+              (transactionHistory.associatedTransactionIds || [''])[0]
             )
             .pipe(
               map(associatedTransactionHistory => [
