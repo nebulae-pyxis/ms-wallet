@@ -31,7 +31,7 @@ type Wallet {
 "Wallet transaction info"
 type WalletTransaction {
   "Wallet ID"
-  _id: ID!
+  _id: String
   "Timestamp where the transaction was created"
   timestamp: BigInt!
   "ID of the business associated with the transaction"
